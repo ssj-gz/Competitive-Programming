@@ -161,7 +161,15 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
                 if not node.config['is_descendent']:
                     show_non_descendents_up_to_height_anims.append(create_change_node_color_anim(node, RED))
         
-        self.play(*show_non_descendents_up_to_height_anims)
+        want_all_the_text = TexMobject(r'\text{Want all the }', color = BLACK, fill_color = BLACK)
+        want_all_the_text.align_on_border(LEFT)
+        want_all_the_text.shift(3 * DOWN)
+        red_text = TexMobject(r'\text{red }', color = BLACK, fill_color = RED)
+        red_text.next_to(want_all_the_text)
+        nodes_text = TexMobject(r'\text{nodes}', color = BLACK, fill_color = BLACK)
+        nodes_text.next_to(red_text)
+
+        self.play(*show_non_descendents_up_to_height_anims, Write(want_all_the_text), Write(red_text), Write(nodes_text))
 
         def create_polygon_around_nodes(node_layers, dist_from_node, colour):
             num_layers = len(node_layers)
@@ -220,15 +228,33 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
                 else:
                     split_red_anims.append(create_change_node_color_anim(node, BLUE))
 
+        a_text = TexMobject(r'A', color = BLACK, fill_color = A_COLOUR)
+        and_text = TexMobject(r'\text{ and }', color = BLACK, fill_color = BLACK)
+        blue_text = TexMobject(r'\text{ blue }', color = BLACK, fill_color = BLUE)
+        nodes_text_target = nodes_text.copy()
+
+        previous_mobject = want_all_the_text
+
+        new_text_objects = [want_all_the_text, a_text, and_text, blue_text, nodes_text_target]
+        for i in range(1, len(new_text_objects)):
+            new_text_objects[i].next_to(previous_mobject, RIGHT)
+            previous_mobject = new_text_objects[i]
+
+        self.wait(2)
+
         ARect = create_rectangle_around_nodes(nodes_at_height[0:node_to_reparent_height], 0.05, A_COLOUR)
         ALabel = TexMobject('A', color = BLACK, fill_color = A_COLOUR)
         ALabel.next_to(ARect, LEFT)
-        self.play(*split_red_anims, Write(ARect), Write(ALabel))
+
+        self.play(*split_red_anims, Write(ARect), Write(ALabel), Transform(red_text, a_text), Write(and_text), Write(blue_text), Transform(nodes_text, nodes_text_target))
+
+        self.wait(2)
 
         BRect = create_rectangle_around_nodes(nodes_at_height[node_to_reparent_height:up_to_height + 1], 0.2, B_COLOUR)
         BLabel = TexMobject('B', color = BLACK, fill_color = B_COLOUR)
         BLabel.next_to(BRect, LEFT)
         self.play(Write(BRect), Write(BLabel))
+
 
         BD = create_polygon_around_nodes(descendents[0:up_to_height - node_to_reparent_height + 2], 0.1, BD_COLOUR)
         BDLabel = TexMobject('BD', color = BLACK, fill_color = BD_COLOUR)
