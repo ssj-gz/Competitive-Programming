@@ -108,8 +108,8 @@ How do we compute this $\textit{findNumNonDescendantsUpToHeight}(\textit{nodeToR
 
 The set of nodes to which we can reparent consists of: 
 
-* those in section $A$ (for "**A**bove" $\textit{nodeToReparent}$ ‒ easily computed; see $\textit{numNodesUpToHeight}$ in the code), plus those in section $B$ (for "**B**etween $\textit{nodeToReparent}$ and height $h$") minus a set we'll call $\textit{BD}$: the nodes in $B$ that are descendents of $\textit{nodeToReparent}$
-* $\textit{BD}$ is equal to the set $D$ of all descendents of $\textit{nodeToReparent}$ minus the set that we'll call $\textit{DH}$: those nodes $x\in D$ with $x.\textit{height} > h$
+* those in section $A$ minus a set we'll call $\textit{AD}$: the nodes in $A$ that are descendents of $\textit{nodeToReparent}$
+* $\textit{AD}$ is equal to the set $D$ of all descendents of $\textit{nodeToReparent}$ minus the set that we'll call $\textit{DH}$: those nodes $x\in D$ with $x.\textit{height} > h$
 * From the schematic, $\textit{DH}$ is precisely the set of _proper descendents_ of all $y$ such that $y\in D$ and $y.\textit{height}=h$. 
 
 If we can compute this sum of proper descendents, we can compute $\textit{findNumNonDescendantsUpToHeight}$.
