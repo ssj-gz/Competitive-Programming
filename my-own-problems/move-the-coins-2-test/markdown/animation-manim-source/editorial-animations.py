@@ -44,6 +44,7 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
         GREEN = "#00ff00"
         YELLOW = "#ffff00"
         GREY = "#999999"
+        MAGENTA = "#aa00aa"
 
         A_COLOUR = PURPLE
         B_COLOUR = ORANGE
@@ -304,22 +305,36 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
         dh_text_2.next_to(bd_text_2, DOWN)
         dh_text_2.align_on_border(LEFT)
         equal_text_2 = TexMobject(r'=', color = BLACK, fill_color = BLACK)
-        descendents_of_text = TexMobject(r'\text{ descendents of }', color = BLACK, fill_color = BLACK)
+        dots_text = TexMobject(r'... ', color = BLACK, fill_color = BLACK)
+        descendents_of_text = TexMobject(r'\textit{ proper}\text{ descendents of }', color = BLACK, fill_color = BLACK)
 
         last_descendent_row_mobjects = []
         for node in descendents[up_to_height - node_to_reparent_height + 1]:
             last_descendent_row_mobjects.append(g.mobject_for_node[node])
+            self.bring_to_front(g.mobject_for_node[node])
 
         last_descendent_row_anims = []
         for node_mobject in last_descendent_row_mobjects:
-            last_descendent_row_anims.append(ApplyMethod(node_mobject.set_color, DH_COLOUR))
+            last_descendent_row_anims.append(WiggleOutThenIn(node_mobject, scale_value = 2))
 
-        new_text_objects = [dh_text_2, equal_text_2, descendents_of_text]
+        new_text_objects = [dh_text_2, equal_text_2, descendents_of_text, dots_text]
         for i in range(1, len(new_text_objects)):
             new_text_objects[i].next_to(new_text_objects[i - 1], RIGHT)
             previous_mobject = new_text_objects[i]
 
+        self.play(*map(Write, new_text_objects))
+        self.play(*last_descendent_row_anims, WiggleOutThenIn(dots_text, scale_value = 1.5))
 
-        self.play(*last_descendent_row_anims, *map(Write, new_text_objects))
+        last_descendent_row_anims = []
+        for node_mobject in last_descendent_row_mobjects:
+            node_copy = Circle(radius = node_radius, color = BLACK, fill_color = MAGENTA, fill_opacity = 1) 
+            node_copy.move_to(node_mobject.get_center())
+            last_descendent_row_anims.append(Transform(node_mobject, node_copy))
+
+        dots_target = Circle(radius = node_radius, color = BLACK, fill_color = MAGENTA, fill_opacity = 1) 
+        dots_target.move_to(dots_text.get_center())
+        dots_target.scale(descendents_of_text.get_height() / dots_target.get_height())
+
+        self.play(Transform(dots_text, dots_target), *last_descendent_row_anims)
 
         self.wait(2)
