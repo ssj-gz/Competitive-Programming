@@ -965,12 +965,25 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
         disttracker_title_display.align_on_border(LEFT)
         disttracker_title_display.set_y(disttracker_top_y - disttracker_title_display.get_height() / 2 - MED_LARGE_BUFF)
 
-        self.play(Write(disttracker_title_display))
+        # Grundy number display.
+        grundy_number_label = TexMobject(r'\textit{grundy number} =', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+        grundy_number_label.scale(disttracker_text_scale)
+        grundy_number_label.next_to(disttracker_title_display, 2 * DOWN)
+        grundy_number_label.set_x(0)
+
+        grundy_number_second_equals = None
+
+        grundy_value_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = BLUE)
+        grundy_value_mobject.scale(disttracker_text_scale)
+        grundy_value_mobject.next_to(grundy_number_label, DOWN)
+
+        self.play(Write(disttracker_title_display), Write(grundy_number_label), Write(grundy_value_mobject))
 
         enlarged_node_radius = node_radius * 2
         horizontal_gap_between_nodes = enlarged_node_radius
         vertical_gap_between_nodes = enlarged_node_radius
         branch_to_straighten_index = 2
+        # Iterate through the branches.
         for i in range(0, len(branch_roots)):
             print("branch_to_straighten_index:", branch_to_straighten_index)
 
