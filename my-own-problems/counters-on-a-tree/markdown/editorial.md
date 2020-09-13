@@ -172,7 +172,7 @@ We now return to optimising our $\textit{DistTracker}$.  It often helps to take 
 One pattern is clear: the $x^{\text{th}}$ bit is $0$ $2^x$ times in a row, then $1$ $2^x$ times in a row, and continues flipping every $2^x$ increments.  We can exploit this pattern in our $\textit{DistTracker}$ to maintain a count of the number of tracked distances that have their $x^{\text{th}}$ bit set: the animation below illustrates this approach with the original example.  Here:
 
 * each tracked distance is represented by a copy of the coin that led to that distance being inserted, one copy for each row (bit)
-* scrolling the coins to the right represents incrementing the corresponding tracked distance
+* scrolling the coins to the right represents incrementing the corresponding tracked distances
 * the $x^{\text{th}}$ bit of a tracked distance is one if and only if its corresponding coin is in a red zone (called "the red one zone") for the $x^{\text{th}}$ row, as a consequence of the pattern above
 
 Note that the $x^{\text{th}}$ bit of the grundy number is set if and only if the number of tracked distances with their $x^{\text{th}}$ bit set is _odd_, so _pairs_ of distances with their $x^{\text{th}}$ bit set contribute nothing to the grundy number and so are crossed out.  
