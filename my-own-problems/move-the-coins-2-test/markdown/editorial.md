@@ -132,7 +132,7 @@ How does this help? Imagine, in our precomputation step, for each $h$, we create
 
 **TODO - insert the Epic manim animation illustrating all this when I finally get it done!**
 
-Now, this doesn't help us to get the sorted _array_ of the first $l-1$ elements of $H$ or the last $r-1$ elements of $H$ but it does give us, in $\mathcal{O}(1)$, a pair of _trees_ representing these sorted elements.  We can now adapt the "Find the $k^{\text{th}}$ Element of Two Sorted Arrays" to work with AVL Trees instead of arrays to find the object of Phase Three, $\textit{newParent}$ (see $\textit{findKthFromPair}$).
+Now, this doesn't help us to get the sorted _array_ of the first $l-1$ elements of $H$ or the last $r-1$ elements of $H$ but it does give us, in $\mathcal{O}(1)$, a pair of _trees_ representing these sorted elements.  We can now adapt the "Find the $k^{\text{th}}$ Element of Two Sorted Arrays" to work with AVL Trees instead of arrays to find the object of Phase Three, $\textit{newParent}$ (see $\textit{findKthFromPair}$ in the code).
 
 And that's it!
 
