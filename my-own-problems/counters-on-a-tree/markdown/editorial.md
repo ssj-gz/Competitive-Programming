@@ -179,7 +179,7 @@ Note that the $x^{\text{th}}$ bit of the grundy number is set if and only if the
 
 **TODO - animation showing this**
 
-Note that the fourth row of the grid is omitted: since the graph only has 8 nodes, the max distance between two nodes is seven, and so a tracked distance can never enter the red-one-zone for a fourth row and change the grundy number.  Similar logic is used to reduce $\textit{m\_numBits}$ in the $\textit{DistTracker}$ implementation.
+Note that the fourth row of the grid is omitted: since the graph only has 8 nodes, the max distance between two nodes is seven, and so a tracked distance can never enter the red-one-zone for a fourth row and change the grundy number.  Similar logic is used to reduce $\textit{m\_numBits}$ in the $\textit{DistTracker}$ implementation.  In general, the number of bits/ rows is $\mathcal{O}(\log (\textit{max distance between nodes}))$.
 
 With this new $\textit{DistTracker}$, the computation of the grundy number (the xor of all the tracked distances) has been rolled into $\textit{addToAllDists()}$, so $\textit{grundyNumber}()$ has been reduced from $\mathcal{O}(N)$ to $\mathcal{O}(1)$, a substantial improvement; however, $\textit{addToAllDists}()$ remains $\mathcal{O}(N)$ as it must still move all coins on each call, so we don't appear to have gained much.
 
