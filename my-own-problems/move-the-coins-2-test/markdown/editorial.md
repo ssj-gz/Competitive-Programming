@@ -135,7 +135,9 @@ And that's it!
 **TODO** - complexity analysis of all stages (precomputation and Phases One to Three).
 
 # ALTERNATE EXPLANATION:
-**TODO** - figure out how the Tester's Phase Three implementation works!
+Most people solved Phases One and Two in the same way, and most people used some form of _persistence_ for Phase Three, but not many people used AVL Trees: instead, they opted for Persistent Segment Trees (see e.g. the Setter's solution).
+
+There were [one](https://www.codechef.com/viewsolution/37781202) or [two](https://www.codechef.com/viewsolution/37652718) solutions using [Wavelet Trees](https://en.wikipedia.org/wiki/Wavelet_Tree), and a [few](https://www.codechef.com/viewsolution/37738531) using [Merge Sort Trees](https://www.geeksforgeeks.org/merge-sort-tree-smaller-or-equal-elements-in-given-row-range/).
 
 # SOLUTIONS:
 
