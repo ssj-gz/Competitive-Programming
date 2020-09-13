@@ -875,13 +875,26 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
             return new_node
 
-
         centre_node = create_node(None, 1, 1, 7, GREEN)
+
+        def rotate_tree_90_degrees_counter_clockwise(graph):
+            center_x = centre_node.config['center_x']
+            center_y = centre_node.config['center_y']
+
+            for node in graph.nodes:
+                dx = node.config['center_x'] - center_x
+                dy = node.config['center_y'] - center_y
+
+                node.config['center_x'] = center_x - dy
+                node.config['center_y'] = center_y + dx
+
         b1 = create_node(centre_node, 0.2, -0.8, random.randint(0, 7), None)
         b1_nodeA = create_node(b1, 0.9, -0.9, random.randint(0, 7), ORANGE)
         b1_nodeB = create_node(b1, 0.1, -1.1, random.randint(0, 7), None)
         b1_nodeC = create_node(b1, -0.6, -0.8, random.randint(0, 7), None)
         b1_nodeD = create_node(b1_nodeA, -0.2, -0.7, random.randint(0, 7), None)
+
+        rotate_tree_90_degrees_counter_clockwise(g)
 
         self.play(g.create_animation())
 
