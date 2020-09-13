@@ -132,7 +132,12 @@ Now, this doesn't give us the sorted _array_ of the first $l-1$ elements of $H$ 
 
 And that's it!
 
-**TODO** - complexity analysis of all stages (precomputation and Phases One to Three).
+**Complexity Analysis**
+
+* Precomputation: for each $h$, $\textit{nodesAtHeightInDFSOrder}$, $\textit{numProperDescendantsForNodeAtHeightPrefixSum}$ and $\textit{numCanReparentToPrefixSum}$ are $\mathcal{O}(N)$ in total; $\textit{prefixesForHeight}$ and $\textit{suffixesForHeight}$ are $\mathcal{O}(\log N)$
+* Phase One - $\mathcal{O}(N)$
+* Phase Two - $\mathcal{O}(\log N)$ calls to $\textit{findNumNonDescendantsUpToHeight}$, each of which is $\mathcal{O}(\log N)$ due to the call to $\textit{descendantRangeFor}$
+* Phase Three - $\textit{findKthFromPair}$ would be $\mathcal{O}(\log N)$ if it were working with sorted arrays, but AVL Trees give it an extra $\mathcal{O}(\log N)$.
 
 # ALTERNATE EXPLANATION:
 Most people solved Phases One and Two in the same way, and most people used some form of _persistence_ for Phase Three, but not many people used AVL Trees: instead, they opted for Persistent Segment Trees (see e.g. the Setter's solution).
