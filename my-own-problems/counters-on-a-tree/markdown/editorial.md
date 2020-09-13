@@ -193,6 +193,11 @@ And that's it!
 
 **TODO - end less lamely, and do the complexity analysis, as well.  Should mention somewhere that reducing m_numBits gives _asymptotic_ gains i.e. without it, _creating_ a $\textit{DistTracker}$ for each Centroid $T_i$ would contribute $O(N^2)$ to the runtime**
 
+**Complexity Analysis**
+
+* The $\textit{DistTracker}$ functions $\textit{insertDist}$, $\textit{addToAllDists}$ are $\mathcal{O}(\log N)$; $\textit{grundyNumber}$ is $\mathcal{O}(1)$.  As an implementation note, my $\textit{DistTracker}$ does not have a $\textit{clear}$; I instead create a new $\textit{DistTracker}$ each time I need one (twice for each $T_i$ - one for each direction), which is $\mathcal{O}(|T_i|)$ and so from **C2** is $\mathcal{O}(N \log N)$ in total.
+* There are are $\mathcal{O}(1)$ calls to each of $\textit{insertDist}$ and $\textit{addToAllDists}$ for each node in each $T_i$, so again from the above and **C2**, this is $\mathcal{O}(N \log N \log N)$ in total.
+
 
 # ALTERNATE EXPLANATION:
 Could contain more or less short descriptions of possible other approaches.
