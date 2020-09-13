@@ -64,6 +64,10 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
         scene.play(g.create_animation(run_time = 2))
 
+        scene.play(RotateGraph(g, nodes[-1], -PI), run_time = 10)
+        scene.wait(2)
+        return
+
         coin_radius = node_radius / 2
 
         def create_coin_for_node(node, coin_colour):
@@ -738,6 +742,69 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                     if dist_tracker_implementation == 'optimised':
                         for bitNum in range(0, NUM_BITS):
                             partial_grid.position_for_new_coins[bitNum] = (partial_grid.position_for_new_coins[bitNum] + partial_grid.num_in_row[bitNum] - 1) % partial_grid.num_in_row[bitNum]
+
+class RotateGraph(Animation):
+    def __init__(self, graph, node_to_rotate_about, angle):
+        dummyMObject = Circle()
+        dummyMObject.set_opacity(0)
+        Animation.__init__(self, dummyMObject)
+
+        self.graph = graph
+        self.node_to_rotate_about = node_to_rotate_about
+        self.angle = angle
+
+        self.original_node_pos = {}
+
+        for node in graph.nodes:
+            self.original_node_pos[node] = [node.config['center_x'], node.config['center_y']]
+
+    def interpolate_mobject(self, alpha):
+        for node in self.graph.nodes:
+            if node == self.node_to_rotate_about:
+                continue
+            node_to_move = node
+            node_mobject_to_move = self.graph.mobject_for_node[node]
+            start_x = self.original_node_pos[node][0]
+            start_y = self.original_node_pos[node][1]
+
+            rotation_center_x = self.node_to_rotate_about.config['center_x']
+            rotation_center_y = self.node_to_rotate_about.config['center_y']
+
+            dx = start_x - rotation_center_x
+            dy = start_y - rotation_center_y
+
+            angle = self.angle * alpha
+            cos_angle = math.cos(angle)
+            sin_angle = math.sin(angle)
+
+            new_x = dx * cos_angle - dy * sin_angle + rotation_center_x
+            new_y = dx * sin_angle + dy * cos_angle + rotation_center_y
+
+            if node.node_id == 3:
+                print("node: ", node_to_move, " angle: ", angle, " start_x: ", start_x, " start_y: ", start_y, " rotation_center_x: ", rotation_center_x, " rotation_center_y: ", rotation_center_y, " new_x: ", new_x, " new_y: ", new_y)
+
+            node_to_move.config['center_x'] = new_x
+            node_to_move.config['center_y'] = new_y
+
+            #print("newx/y for node:", node_to_move.config['value'], new_x, new_y, " alpha:", alpha, " self: ", repr(self))
+            node_mobject_to_move.move_to([new_x, new_y, 0])
+            node_mobject_to_move.config['center_x'] = new_x
+            node_mobject_to_move.config['center_y'] = new_y
+            #print("Moved mobject ", repr(node_mobject_to_move), " for node:", node_to_move.config['value'], " to ", node_mobject_to_move.get_center())
+
+            for edge in self.graph.edges:
+                if edge.start_node == node_to_move or edge.end_node == node_to_move:
+                    start_and_end_point = edge.get_start_and_end_point(alpha)
+                    edge_object = self.graph.mobject_for_edge[edge]
+                    edge_object.set_start_and_end_attrs([start_and_end_point[0][0], start_and_end_point[0][1], 0], [start_and_end_point[1][0], start_and_end_point[1][1], 0])
+                    edge_object.generate_points()
+
+
+
+
+
+
+
 
 class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right_naive(SSJGZScene):
 
