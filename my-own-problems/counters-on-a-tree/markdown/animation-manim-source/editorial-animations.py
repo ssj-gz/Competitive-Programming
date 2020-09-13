@@ -52,7 +52,6 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
         g = Graph(scene, globals()["Node"], globals()["NodeMObject"])
         previous_node = None
         nodes = []
-        blah_node = None
         for i in range(0, num_nodes):
             newNode = g.create_node(node_left + node_radius, frame_height * proportion_of_frame_height_to_use / 2 - (arrow_total_length + arrow_dist_above_node), { 'radius' : node_radius})
             newNode.config['coin_mobject'] = None
@@ -62,31 +61,8 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             node_left = node_left + node_diameter + gap_between_nodes
             previous_node = newNode
             nodes.append(newNode)
-            if i == 2:
-                newNode.config['value'] = 3
-                blah_node = newNode
-
 
         scene.play(g.create_animation(run_time = 2))
-
-        # TODO - remove all this
-        #node_mobject = g.create_mobject_for_node(nodes[2])
-        node_mobject = g.mobject_for_node[blah_node]
-        print("node_mobject pos initial:", node_mobject.get_center())
-        circle = Circle(color=BLACK, fill_opacity = 1, fill_color = RED, radius = 0.2)
-        circle.move_to(node_mobject.get_center())
-        node_mobject.remove(node_mobject.value_mobject)
-        node_mobject.add(circle)
-        node_mobject.add(node_mobject.value_mobject)
-        node_mobject.move_to([blah_node.config['center_x'], blah_node.config['center_y'], 0])
-        #node_mobject.move_to([blah_node.config['center_x'], blah_node.config['center_y'], 0])
-        scene.bring_to_back(circle)
-        print("node_mobject pos after:", node_mobject.get_center())
-        scene.play(RotateGraph(g, nodes[-1], +PI / 4), run_time = 3)
-        scene.play(ApplyMethod(node_mobject.scale, 3))
-        scene.play(ApplyMethod(node_mobject.scale, 1 / 3))
-        scene.play(RotateGraph(g, nodes[-1], -PI / 4), run_time = 3)
-        return
 
         coin_radius = node_radius / 2
 
