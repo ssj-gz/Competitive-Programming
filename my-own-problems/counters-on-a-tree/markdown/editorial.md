@@ -183,7 +183,7 @@ Note that the fourth row of the grid is omitted: since the graph only has 8 node
 
 With this new $\textit{DistTracker}$, the computation of the grundy number (the xor of all the tracked distances) has been rolled into $\textit{addToAllDists()}$, so $\textit{grundyNumber}()$ has been reduced from $\mathcal{O}(N)$ to $\mathcal{O}(1)$, a substantial improvement; however, $\textit{addToAllDists}()$ remains $\mathcal{O}(N)$ as it must still move all coins on each call, so we don't appear to have gained much.
 
-However, what if, instead of moving all coins representing distances one cell to the right on a call to $\textit{addToAllDists}(1)$ and tracking whether they enter the red-one-zone for each bit number $x$, _we scrolled the $x$ red-one-zones by $1$ in the opposite direction_ and counted how many coins they hit or leave? Since $x$ is $\mathcal{O}(\log N)$, $\textit{addToAllDists}(1)$ is now $\mathcal{O}(\log N)$, so all operations on $\textit{DistTracker}$ are now $\mathcal{O}(\log N)$ in the worst case.
+However, what if, instead of moving all coins representing distances one cell to the right on a call to $\textit{addToAllDists}(1)$ and tracking whether they enter the red-one-zone for each bit number $x$, _we scrolled the $x^{\text{th}}$ red-one-zone by one to the left_ and counted how many coins they hit or leave? Since $x$ is $\mathcal{O}(\log N)$, $\textit{addToAllDists}(1)$ is now $\mathcal{O}(\log N)$, so all operations on $\textit{DistTracker}$ are now $\mathcal{O}(\log N)$ in the worst case.
 
 **TODO - animation showing this**
 
