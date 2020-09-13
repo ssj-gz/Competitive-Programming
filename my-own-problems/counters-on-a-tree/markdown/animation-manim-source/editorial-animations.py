@@ -1110,8 +1110,8 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                     digit_target.next_to(brace_target, UP)
                     anims.append(Transform(brace, brace_target))
                     anims.append(Transform(digit, digit_target))
-                    self.play(*anims)
-                    self.play(create_scroll_digit_to_animation(digit, digit.digitValue, digit.digitValue + 1, digitMObjectScale = digit.text_scale_factor))
+                    self.play(*anims, run_time = 0.5)
+                    self.play(create_scroll_digit_to_animation(digit, digit.digitValue, digit.digitValue + 1, digitMObjectScale = digit.text_scale_factor), run_time = 0.5)
                     digit.digitValue = digit.digitValue + 1 
 
                 nodes_with_coins = []
