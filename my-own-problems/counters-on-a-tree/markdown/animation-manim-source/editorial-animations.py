@@ -751,13 +751,13 @@ class MoveCoins2Editorial_2_collect_and_propagate_along_node_chain_right_to_left
         super().construct()
         do_collect_and_propagate_along_node_chain_naive(self, right_to_left = True)
 
-class MoveCoins2Editorial_3_collect_and_propagate_along_node_chain_left_to_right_partial_grid(SSJGZScene):
+class MoveCoins2Editorial_6_collect_and_propagate_along_node_chain_left_to_right_partial_grid(SSJGZScene):
 
     def construct(self):
         super().construct()
         do_collect_and_propagate_along_node_chain_naive(self, dist_tracker_implementation = 'partial_grid', right_to_left = False)
         
-class MoveCoins2Editorial_4_collect_and_propagate_along_node_chain_left_to_right_optimised(SSJGZScene):
+class MoveCoins2Editorial_7_collect_and_propagate_along_node_chain_left_to_right_optimised(SSJGZScene):
 
     def construct(self):
         super().construct()
