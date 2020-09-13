@@ -73,26 +73,26 @@ Let's consider for the moment the special case where $T$ is simply a long chain 
     public:
         insertDist(distance)
         {
-            allDistances.append(distance)
+            trackedDistances.append(distance)
         }
         addToAllDists(toAdd) 
         { 
-            for each distance in allDistances:
+            for each distance in trackedDistances:
                 distance += toAdd
         }
         grundyNumber() 
         { 
             result = 0
-            for each distance in allDistances:
+            for each distance in trackedDistances:
                 result = result ^ distance
             return result
         }
         clear()
         {
-            allDistances = []
+            trackedDistances = []
         }
     private:
-        allDistances = []
+        trackedDistances = []
     
 ```
 
