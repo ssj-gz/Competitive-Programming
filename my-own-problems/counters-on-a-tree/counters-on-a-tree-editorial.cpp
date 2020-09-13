@@ -256,6 +256,7 @@ void doCentroidDecomposition(Node* startNode)
     const auto numNodesInComponent = countDescendants(startNode, nullptr);
 
     {
+        // Collect and Propagate contributions from each branch to the next branches.
         DistTracker distTracker(numNodesInComponent);
         for (auto& child : centroid->neighbours)
         {
@@ -264,8 +265,9 @@ void doCentroidDecomposition(Node* startNode)
         }
     }
     {
+        // Do it again ... 
         DistTracker distTracker(numNodesInComponent);
-        // Do it again, this time backwards ...  
+        // ... this time with the branches processed in the opposite order ...
         reverse(centroid->neighbours.begin(), centroid->neighbours.end());
         // ... and also include the centre, this time.
         if (centroid->hasCoin)
