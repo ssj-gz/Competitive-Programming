@@ -966,16 +966,17 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
         disttracker_title_display.set_y(disttracker_top_y - disttracker_title_display.get_height() / 2 - MED_LARGE_BUFF)
 
         # Grundy number display.
-        grundy_number_label = TexMobject(r'\textit{grundy number} =', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
-        grundy_number_label.scale(disttracker_text_scale)
-        grundy_number_label.next_to(disttracker_title_display, 2 * DOWN)
-        grundy_number_label.set_x(0)
-
         grundy_number_second_equals = None
 
         grundy_value_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = BLUE)
         grundy_value_mobject.scale(disttracker_text_scale)
-        grundy_value_mobject.next_to(grundy_number_label, DOWN)
+        grundy_value_mobject.set_y(grundy_value_mobject.get_height() / 2 - self.camera.get_frame_height() / 2 + DEFAULT_MOBJECT_TO_EDGE_BUFFER)
+
+        grundy_number_label = TexMobject(r'\textit{grundy number} =', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+        grundy_number_label.scale(disttracker_text_scale)
+        grundy_number_label.set_x(0)
+        grundy_number_label.next_to(grundy_value_mobject, UP)
+
 
         grundy_xor_elements = [grundy_value_mobject]
 
