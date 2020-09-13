@@ -826,12 +826,17 @@ class NodeCoinMObject(VMobject):
         self.node_id = node_id
         self.config = config
 
+        border_colour = BLACK
+        if 'border_colour' in config:
+            border_colour = config['border_colour']
+
         circle_radius = config['radius']
-        circle = Circle(radius=circle_radius,color=BLACK,fill_opacity=1, fill_color=WHITE)
+        circle = Circle(radius=circle_radius,color=border_colour,fill_opacity=1, fill_color=WHITE)
         self.add(circle)
+
         if 'coin_colour' in config:
             coin_radius = config['coin_radius']
-            coin_mobject = Circle(color=BLACK, fill_opacity = 1, fill_color = config['coin_colour'], radius = coin_radius)
+            coin_mobject = Circle(color=border_colour, fill_opacity = 1, fill_color = config['coin_colour'], radius = coin_radius)
             self.coin_mobject = coin_mobject
             self.add(coin_mobject)
 
@@ -856,6 +861,12 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
         g = Graph(self, globals()["Node"], globals()["NodeCoinMObject"])
         node_radius = 0.3
 
+        MAGENTA = "#ff00ff"
+        RED = "#ff0000"
+        BROWN = "#8B4513"
+        PURPLE = "#800080"
+        ORANGE = "#FF8C00"
+
         grundy_node_tex_colour = "#2600ff"
 
         def create_node(parent, dx, dy, grundy_number, coin_colour):
@@ -876,6 +887,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
             return new_node
 
         centre_node = create_node(None, 1, 1, 7, None)
+        centre_node.config['border_colour'] = RED
 
         def rotate_tree_90_degrees_counter_clockwise(graph):
             center_x = centre_node.config['center_x']
@@ -887,12 +899,6 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
                 node.config['center_x'] = center_x - dy
                 node.config['center_y'] = center_y + dx
-
-        MAGENTA = "#ff00ff"
-        RED = "#ff0000"
-        BROWN = "#8B4513"
-        PURPLE = "#800080"
-        ORANGE = "#FF8C00"
 
         branch_roots = []
 
@@ -956,6 +962,11 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
         for i in range(0, len(branch_roots)):
             print("branch_to_straighten_index:", branch_to_straighten_index)
 
+            previous_graph_state = g.get_restorable_state()
+            # Move the center node out of the way of the nodes from the other branches
+            centre_node.config['center_x'] = centre_node.config['center_x'] + 2 * enlarged_node_radius
+            centre_node.config['radius'] = enlarged_node_radius
+
             branch_to_straighten = branch_roots[branch_to_straighten_index]
             rightmost_branch = branch_to_straighten
             other_branches = branch_roots.copy()
@@ -976,6 +987,23 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                     y = y - 2 * enlarged_node_radius - vertical_gap_between_nodes
                 x = x + 2 * enlarged_node_radius + horizontal_gap_between_nodes
 
+
+            self.play(g.create_animation())
+
+            dummyGroup1 = VGroup()
+            dummyGroup1.add(g.mobject_for_node[centre_node])
+            dummyGroup1.add(g.mobject_for_node[descendents_by_height[0][0]])
+            b1=Brace(dummyGroup1, color=BLACK, fill_color = BLACK)
+            self.play(Write(b1))
+
+            dummyGroup2 = VGroup()
+            dummyGroup2.add(g.mobject_for_node[centre_node])
+            dummyGroup2.add(g.mobject_for_node[descendents_by_height[1][0]])
+            b2=Brace(dummyGroup2, color=BLACK, fill_color = BLACK)
+            self.play(Transform(b1, b2))
+
+
+            g.restore_from_state(previous_graph_state)
 
             self.play(g.create_animation())
 
