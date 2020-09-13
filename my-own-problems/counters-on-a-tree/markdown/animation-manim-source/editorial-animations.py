@@ -921,6 +921,18 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
         self.play(g.create_animation())
 
+        b4_nodeB.config['radius'] = 1
+        b4_nodeB.config['center_y'] = b4_nodeB.config['center_y'] - 2
+        b4_nodeB.config['center_x'] = b4_nodeB.config['center_x'] - 4.5
+        blah_mobject = g.mobject_for_node[b4_nodeB]
+        print("Before radius change:", blah_mobject.get_width())
+
+        self.play(g.create_animation())
+
+        print("After radius change:", blah_mobject.get_width())
+        b4_nodeB.config['radius'] = node_radius
+        self.play(g.create_animation())
+
 
 
 class MoveCoins2Editorial_6_collect_and_propagate_along_node_chain_left_to_right_partial_grid(SSJGZScene):

@@ -55,9 +55,9 @@ class GraphNodeMoveAnim(Animation):
             if node in graph.mobject_for_node:
                 node_mobject = graph.mobject_for_node[node]
                 print("node pos:", node.config['center_x'], node.config['center_y'], " node_mobject pos:", node_mobject.config['center_x'], node_mobject.config['center_y'])
-                if node.config['center_x'] != node_mobject.config['center_x'] or node.config['center_y'] != node_mobject.config['center_y']:
+                if node.config['center_x'] != node_mobject.config['center_x'] or node.config['center_y'] != node_mobject.config['center_y'] or node.config['radius'] != node_mobject.config['radius']:
                        print("Appending: node with value: ", node.config['value'])
-                       self.nodes_move_items.append([node, node_mobject, [node.config['center_x'], node.config['center_y']], [node_mobject.config['center_x'], node_mobject.config['center_y']]])
+                       self.nodes_move_items.append([node, node_mobject, [node.config['center_x'], node.config['center_y'], node.config['radius']], [node_mobject.config['center_x'], node_mobject.config['center_y'], node_mobject.config['radius']]])
                        self.node_objects_to_move.append(node_mobject)
 
         Animation.__init__(self, dummyMObject)
@@ -70,19 +70,27 @@ class GraphNodeMoveAnim(Animation):
             node_mobject_to_move = node_move_item[1]
             start_x = node_move_item[2][0]
             start_y = node_move_item[2][1]
+            start_radius = node_move_item[2][2]
             end_x = node_move_item[3][0]
             end_y = node_move_item[3][1]
+            end_radius = node_move_item[3][2]
 
             new_x = start_x + (1 - alpha) * (end_x - start_x)
             new_y = start_y + (1 - alpha) * (end_y - start_y)
+            new_radius = start_radius + (1 - alpha) * (end_radius - start_radius)
 
             node_to_move.config['center_x'] = new_x
             node_to_move.config['center_y'] = new_y
+
+            node_mobject_to_move.scale(new_radius / node_mobject_to_move.config['radius'])
+
+            node_to_move.config['radius'] = new_radius
 
             print("newx/y for node:", node_to_move.config['value'], new_x, new_y, " alpha:", alpha, " self: ", repr(self))
             node_mobject_to_move.move_to([new_x, new_y, 0])
             node_mobject_to_move.config['center_x'] = new_x
             node_mobject_to_move.config['center_y'] = new_y
+            node_mobject_to_move.config['radius'] = new_radius
             print("Moved mobject ", repr(node_mobject_to_move), " for node:", node_to_move.config['value'], " to ", node_mobject_to_move.get_center())
 
             for edge in self.graph.edges:
