@@ -951,27 +951,27 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
         branch_to_straighten_index = 2
         for i in range(0, len(branch_roots)):
+            print("branch_to_straighten_index:", branch_to_straighten_index)
 
             branch_to_straighten = branch_roots[branch_to_straighten_index]
             rightmost_branch = branch_to_straighten
             other_branches = branch_roots.copy()
             other_branches.remove(branch_to_straighten)
 
-            blah = g.find_descendents_at_height(centre_node, ignore_node_list = other_branches)
-            for layer in blah:
+            descendents_by_height = g.find_descendents_at_height(centre_node, ignore_node_list = other_branches)
+            descendents_by_height.pop(0) # Ditch the root
+            for layer in descendents_by_height:
                 layer.sort(key = lambda m: -m.config['center_y'])
 
             x = centre_node.config['center_x']
-            for layer in blah:
+            for layer in descendents_by_height:
                 y = centre_node.config['center_y']
+                x = x + 1
                 for node in layer:
-                    if node == centre_node:
-                        continue
                     node.config['center_x'] = x
                     node.config['center_y'] = y
                     y = y - 1
 
-                x = x + 1
 
             self.play(g.create_animation())
 
