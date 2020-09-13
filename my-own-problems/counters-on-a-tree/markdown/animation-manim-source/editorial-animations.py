@@ -926,29 +926,40 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
         b4_nodeB = create_node(b4_nodeA, 0.1, -0.7, random.randint(0, 7), GREY)
         branch_roots.append(b4)
 
+
+        rotate_tree_90_degrees_counter_clockwise(g)
+        rotate_tree_90_degrees_counter_clockwise(g) 
         self.play(g.create_animation())
 
-        rightmost_branch = b3
-        other_branches = branch_roots.copy()
-        other_branches.remove(b3)
+        branch_to_straighten_index = 0
+        for i in range(0, len(branch_roots)):
 
-        blah = g.find_descendents_at_height(centre_node, ignore_node_list = other_branches)
-        for layer in blah:
-            layer.sort(key = lambda m: -m.config['center_y'])
+            branch_to_straighten = branch_roots[branch_to_straighten_index]
+            rightmost_branch = branch_to_straighten
+            other_branches = branch_roots.copy()
+            other_branches.remove(branch_to_straighten)
 
-        x = centre_node.config['center_x']
-        for layer in blah:
-            y = centre_node.config['center_y']
-            for node in layer:
-                if node == centre_node:
-                    continue
-                node.config['center_x'] = x
-                node.config['center_y'] = y
-                y = y - 1
+            blah = g.find_descendents_at_height(centre_node, ignore_node_list = other_branches)
+            for layer in blah:
+                layer.sort(key = lambda m: -m.config['center_y'])
 
-            x = x + 1
+            x = centre_node.config['center_x']
+            for layer in blah:
+                y = centre_node.config['center_y']
+                for node in layer:
+                    if node == centre_node:
+                        continue
+                    node.config['center_x'] = x
+                    node.config['center_y'] = y
+                    y = y - 1
 
-        self.play(g.create_animation())
+                x = x + 1
+
+            self.play(g.create_animation())
+
+            self.play(RotateGraph(g, centre_node, PI / 2))
+
+            branch_to_straighten_index = (branch_to_straighten_index + 1) % len(branch_roots)
 
 
         #b4_nodeB.config['radius'] = 1
