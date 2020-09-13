@@ -844,6 +844,10 @@ class NodeCoinMObject(VMobject):
     def copy(self):
         return self.deepcopy()
 
+class MoveCoins2Editorial_3_show_branches(SSJGZScene):
+    def construct(self):
+        super().construct()
+
 class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
     def construct(self):
         super().construct()
