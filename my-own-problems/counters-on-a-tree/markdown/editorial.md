@@ -152,7 +152,7 @@ A BFS would also work and would likely be slightly more efficient: here's an exa
 
 **TODO - animation - MOVCOIN2_ED_4_THUMB.png, linking to MOVCOIN2_ED_4_ANIM.gif**
 
-Then we $\textit{clear}$ our $\textit{DistTracker}$ and repeat, this time with $i=M,M-1,\dots,2,1$.
+Then we $\textit{clear}()$ our $\textit{DistTracker}$ and repeat, this time with $i=M,M-1,\dots,2,1$.
 
 **TODO - animation - MOVCOIN2_ED_5_THUMB.png, linking to MOVCOIN2_ED_5_ANIM.gif**
 [/details]
