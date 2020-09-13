@@ -38,7 +38,7 @@ Having sidestepped the issue of removing elements from $L$, the problem becomes 
 
 Anyway, onto the first sub-problem, **Phase One**: finding $u_i$ ($\textit{nodeToReparent}$ in the code) of the remapped $c_i$, $X_i$, in the original list $L$, without constructing $L$!
 
-There are no reparentings with $u=1$, so the first few elements of $L$ are taken up by the valid reparentings that reparent node $2$; then the next few are those that reparent node $3$, etc.  For a given $u$, the number of valid reparentings $(u,v)$ that reparent $u$ is simply the number of $v$ such that $v$ is not a descendent of $u$ i.e. $N-u.\textit{numDescendants}$.  We compute $u.\textit{numDescendants}$ for all $N$ $u$ in $\mathcal{O}(N)$ in a precomputation step, and then create a prefix sum array $\textit{numCanReparentToPrefixSum}$ such that $\textit{numCanReparentToPrefixSum}(u)$ is the total number of valid reparentings that reparent a node $x$ with $x \le u$.  
+There are no reparentings with $u=1$, so the first few elements of $L$ are taken up by the valid reparentings that reparent node $2$; then the next few are those that reparent node $3$, etc.  For a given $u$, the number of valid reparentings $(u,v)$ that reparent $u$ is simply the number of $v$ such that $v$ is not a descendent of $u$ i.e. $N-u.\textit{numDescendants}$.  We compute $u.\textit{numDescendants}$ for all $N$ $u$ in $\mathcal{O}(N)$ in a precomputation step, and then create a prefix sum array $\textit{CRPS}$ ($\textit{numCanReparentToPrefixSum}$ in the code) such that $\textit{CRPS}(u)$ is the total number of valid reparentings that reparent a node $x$ with $x \le u$.  
 
 As an example, here is the $L$ used in example test case 2 of the Problem, adjusted so that the indices are 0-relative:
 
@@ -82,9 +82,9 @@ As an example, here is the $L$ used in example test case 2 of the Problem, adjus
 |33.         | 7   | 4   | 2      |
 [/details]
 
-and here is the table of $\textit{numCanReparentToPrefixSum}(u)$ for each $u$ for this example, in order ($u=1$ is omitted):
+and here is the table of $\textit{CRPS}(u)$ for each $u$ for this example, in order ($u=1$ is omitted):
 
-| $u$ | $\textit{numCanReparentToPrefixSum}(u)$ |
+| $u$ | $\textit{CRPS}(u)$ |
 | :-: | :-------------------------------------: |
 |2    | 6                                       |
 |3    | 12                                      |
@@ -96,9 +96,9 @@ and here is the table of $\textit{numCanReparentToPrefixSum}(u)$ for each $u$ fo
 If we look at the $17^\text{th}$ (0-relative!) element in $L$, we see that it reparents the node $4$.  
 If we look at the $18^\text{th}$ element in $L$, we see that it reparents the node $5$.  
 If we look at the $28^\text{th}$ element in $L$, we see that it reparents the node $7$.  
-In general, hopefully the pattern is clear - _the node reparented by the $X_i^\text{th}$ element of $L$ is the first $u$ such that $\textit{numCanReparentToPrefixSum}(u) > X_i$._  Since $\textit{numCanReparentToPrefixSum}$ is non-increasing, we can easily find this $u$ using a binary search, and so find our $u_i$ in $\mathcal{O}(\log N)$, fulfilling Phase One.
+In general, hopefully the pattern is clear - _the node reparented by the $X_i^\text{th}$ element of $L$ is the first $u$ such that $\textit{CRPS}(u) > X_i$._  Since $\textit{CRPS}$ is non-increasing, we can easily find this $u$ using a binary search, and so find our $u_i$ in $\mathcal{O}(\log N)$, fulfilling Phase One.
 
-Now that we know $u_i$, we can restrict our attention to the sub-list of $L$ of reparentings that reparent $u_i$; our final desired parenting is at some index $Y_i$ in this sublist.  How do we find $Y_i$? In focussing on this sublist, we are ignoring all the first elements of $L$ that reparent a node $x < u_i$, so we must subtract this number from $X_i$.  By definition, this number is $\textit{numCanReparentToPrefixSum}(u_i - 1)$.  The index $Y_i$ is called $\textit{numOfReparentingThatReparentsNode}$ in the code; I'll be sticking with $Y_i$ here, for obvious reasons :)
+Now that we know $u_i$, we can restrict our attention to the sub-list of $L$ of reparentings that reparent $u_i$; our final desired parenting is at some index $Y_i$ in this sublist.  How do we find $Y_i$? In focussing on this sublist, we are ignoring all the first elements of $L$ that reparent a node $x < u_i$, so we must subtract this number from $X_i$.  By definition, this number is $\textit{CRPS}(u_i - 1)$.  The index $Y_i$ is called $\textit{numOfReparentingThatReparentsNode}$ in the code; I'll be sticking with $Y_i$ here, for obvious reasons :)
 
 So: for **Phase Two**, we need to find the height of $v$ ($\textit{newParentHeight}$ in the code) in the $Y_i^\textit{th}$ valid reparenting that reparents $u_i$. In Phase One, we made a tally of all valid reparentings that reparented a node less than or equal $x$, and found the first such $x$ such that this tally exceeded $X_i$; we do a similar trick here in finding the number of reparentings that reparent $u_i$ to a node with height $h$ ($\textit{findNumNonDescendantsUpToHeight}(u_i, h)$) and find the first $h$ such that this exceeds $Y_i$.
 
