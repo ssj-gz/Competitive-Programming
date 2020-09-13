@@ -949,6 +949,9 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
         self.play(g.create_animation())
 
+        enlarged_node_radius = node_radius * 2
+        horizontal_gap_between_nodes = enlarged_node_radius
+        vertical_gap_between_nodes = enlarged_node_radius
         branch_to_straighten_index = 2
         for i in range(0, len(branch_roots)):
             print("branch_to_straighten_index:", branch_to_straighten_index)
@@ -963,14 +966,15 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
             for layer in descendents_by_height:
                 layer.sort(key = lambda m: -m.config['center_y'])
 
-            x = centre_node.config['center_x']
+            x = centre_node.config['center_x'] + node_radius + horizontal_gap_between_nodes + enlarged_node_radius
             for layer in descendents_by_height:
                 y = centre_node.config['center_y']
-                x = x + 1
                 for node in layer:
                     node.config['center_x'] = x
                     node.config['center_y'] = y
-                    y = y - 1
+                    node.config['radius'] = enlarged_node_radius
+                    y = y - 2 * enlarged_node_radius - vertical_gap_between_nodes
+                x = x + 2 * enlarged_node_radius + horizontal_gap_between_nodes
 
 
             self.play(g.create_animation())
