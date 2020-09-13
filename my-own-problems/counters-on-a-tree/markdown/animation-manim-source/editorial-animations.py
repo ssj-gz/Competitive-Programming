@@ -930,12 +930,26 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
         b4_nodeB = create_node(b4_nodeA, 0.1, -0.7, random.randint(0, 7), GREY)
         branch_roots.append(b4)
 
+        furthest_point_from_centre = 0.0
+        for node in g.nodes:
+            dx = node.config['center_x'] - centre_node.config['center_x']
+            dy = node.config['center_y'] - centre_node.config['center_y']
+            furthest_point_from_centre = max(furthest_point_from_centre, math.sqrt(dx * dx + dy * dy))
 
-        rotate_tree_90_degrees_counter_clockwise(g)
-        rotate_tree_90_degrees_counter_clockwise(g) 
+        print("furthest_point_from_centre:", furthest_point_from_centre)
+
+        required_center_x = -self.camera.get_frame_width() / 2 +  DEFAULT_MOBJECT_TO_EDGE_BUFFER + furthest_point_from_centre
+        required_center_y = self.camera.get_frame_height() / 2 -  DEFAULT_MOBJECT_TO_EDGE_BUFFER - furthest_point_from_centre
+        dx = required_center_x - centre_node.config['center_x']
+        dy = required_center_y - centre_node.config['center_y']
+        print("dx: ", dx, " dy: ", dy)
+        for node in g.nodes:
+            node.config['center_x'] = node.config['center_x'] + dx
+            node.config['center_y'] = node.config['center_y'] + dy
+
         self.play(g.create_animation())
 
-        branch_to_straighten_index = 0
+        branch_to_straighten_index = 2
         for i in range(0, len(branch_roots)):
 
             branch_to_straighten = branch_roots[branch_to_straighten_index]
