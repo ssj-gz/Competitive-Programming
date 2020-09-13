@@ -195,7 +195,7 @@ And that's it!
 
 **Complexity Analysis**
 
-* The $\textit{DistTracker}$ functions $\textit{insertDist}$, $\textit{addToAllDists}$ are $\mathcal{O}(\log N)$; $\textit{grundyNumber}$ is $\mathcal{O}(1)$.  As an implementation note, my $\textit{DistTracker}$ does not have a $\textit{clear}$; I instead create a new $\textit{DistTracker}$ each time I need one (twice for each $T_i$ - one for each direction), which is $\mathcal{O}(|T_i|)$ and so from **C2** is $\mathcal{O}(N \log N)$ in total.
+* The $\textit{DistTracker}$ functions $\textit{insertDist}$, $\textit{addToAllDists}$ are $\mathcal{O}(\log N)$; $\textit{grundyNumber}$ is $\mathcal{O}(1)$.  As an implementation note, my $\textit{DistTracker}$ does not have a $\textit{clear}$; I instead create a new $\textit{DistTracker}$ each time I need one (twice for each $T_i$ ‒ one for each direction), which is $\mathcal{O}(|T_i|)$ and so from **C2** is $\mathcal{O}(N \log N)$ in total.
 * There are are $\mathcal{O}(1)$ calls to each of $\textit{insertDist}$ and $\textit{addToAllDists}$ for each node in each $T_i$, so again from the above and **C2**, this is $\mathcal{O}(N \log N \log N)$ in total.
 
 
