@@ -820,9 +820,42 @@ class MoveCoins2Editorial_2_collect_and_propagate_along_node_chain_right_to_left
         super().construct()
         do_collect_and_propagate_along_node_chain_naive(self, right_to_left = True)
 
+class NodeCoinMObject(VMobject):
+    def __init__(self, node_id, config):
+        VMobject.__init__(self)
+        self.node_id = node_id
+        self.config = config
+
+        circle_radius = config['radius']
+        circle = Circle(radius=circle_radius,color=BLACK,fill_opacity=1, fill_color=WHITE)
+        self.add(circle)
+        if 'value' in config:
+            self.value = config['value']
+            value_mobject = TexMobject(str(self.value))
+            value_mobject.set_color(BLACK)
+            self.value_mobject = value_mobject
+            self.add(value_mobject)
+
+        if 'coin_colour' in config:
+            coin_radius = config['coin_radius']
+            coin_mobject = Circle(color=BLACK, fill_opacity = 1, fill_color = config['coin_colour'], radius = coin_radius)
+            self.coin_mobject = coin_mobject
+            self.add(coin_mobject)
+
+    def copy(self):
+        return self.deepcopy()
+
 class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
     def construct(self):
         super().construct()
+
+        g = Graph(self, globals()["Node"], globals()["NodeCoinMObject"])
+        node_radius = 0.5
+        centre_node = g.create_node(1, 1, {'radius': node_radius, 'value' : 3, 'coin_colour': GREEN, 'coin_radius': node_radius / 2})
+
+        self.play(g.create_animation())
+
+
 
 class MoveCoins2Editorial_6_collect_and_propagate_along_node_chain_left_to_right_partial_grid(SSJGZScene):
 
