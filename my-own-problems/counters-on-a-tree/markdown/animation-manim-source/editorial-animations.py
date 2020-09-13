@@ -977,6 +977,8 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
         grundy_value_mobject.scale(disttracker_text_scale)
         grundy_value_mobject.next_to(grundy_number_label, DOWN)
 
+        grundy_xor_elements = [grundy_value_mobject]
+
         self.play(Write(disttracker_title_display), Write(grundy_number_label), Write(grundy_value_mobject))
 
         enlarged_node_radius = node_radius * 2
