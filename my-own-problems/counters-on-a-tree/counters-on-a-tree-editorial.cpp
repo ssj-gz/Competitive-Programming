@@ -77,7 +77,7 @@ class DistTracker
             }
         };
 
-        void adjustAllDists(int distDiff)
+        void addToAllDists(int distDiff)
         {
             m_pendingDistAdjustment += distDiff;
         }
@@ -180,7 +180,7 @@ template <typename NodeProcessor>
 void doDfs(Node* node, Node* parentNode, int depth, DistTracker& distTracker, DistTrackerAdjustment distTrackerAdjustment, NodeProcessor& processNode)
 {
     if (distTrackerAdjustment == AdjustWithDepth)
-        distTracker.adjustAllDists(1);
+        distTracker.addToAllDists(1);
 
     processNode(node, depth, distTracker);
 
@@ -192,7 +192,7 @@ void doDfs(Node* node, Node* parentNode, int depth, DistTracker& distTracker, Di
     }
 
     if (distTrackerAdjustment == AdjustWithDepth)
-        distTracker.adjustAllDists(-1);
+        distTracker.addToAllDists(-1);
 }
 
 int findCentroidAux(Node* currentNode, Node* parentNode, const int totalNodes, Node** centroid)
