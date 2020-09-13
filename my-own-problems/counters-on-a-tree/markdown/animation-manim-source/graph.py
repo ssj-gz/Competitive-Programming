@@ -269,10 +269,10 @@ class Graph:
 
     def find_descendents_at_height(self, root, ignore_node_list = []):
         nodes_at_height = []
-        nodes_at_height.append([root])
         ignore_node_list_copy = ignore_node_list.copy()
+        ignore_node_list.append(root)
 
-        self.find_descendents_at_height_aux(root, 1, nodes_at_height, ignore_node_list_copy)
+        self.find_descendents_at_height_aux(root, 0, nodes_at_height, ignore_node_list_copy)
         print("num layers:", len(nodes_at_height))
 
 
