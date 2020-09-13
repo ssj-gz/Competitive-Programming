@@ -100,16 +100,16 @@ In general, hopefully the pattern is clear - _the node reparented by the $X_i^\t
 
 Now that we know $u_i$, we can restrict our attention to the sub-list of $L$ of reparentings that reparent $u_i$; our final desired parenting is at some index $Y_i$ in this sublist.  How do we find $Y_i$? In focussing on this sublist, we are ignoring all the first elements of $L$ that reparent a node $x < \textit{u_i}$, so we must subtract this number from $X_i$.  By definition, this number is $\textit{numCanReparentToPrefixSum}(\textit{u_i} - 1)$.  The index $Y_i$ is called $\textit{numOfReparentingThatReparentsNode}$ in the code; I'll be sticking with $Y_i$ here, for obvious reasons :)
 
-So: for **Phase Two**, we need to find the height of $v$ ($\textit{newParentHeight}$) in the $Y_i^\textit{th}$ valid reparenting that reparents $\textit{nodeToReparent}$. In Phase One, we made a tally of all valid reparentings that reparented a node less than or equal $x$, and found the first such $x$ such that this tally exceeded $X_i$; we do a similar trick here in finding the number of reparentings that reparent $\textit{nodeToReparent}$ to a node with height $h$ ($\textit{findNumNonDescendantsUpToHeight}(\textit{nodeToReparent}, h)$) and find the first $h$ such that this exceeds $Y_i$.
+So: for **Phase Two**, we need to find the height of $v$ ($\textit{newParentHeight}$) in the $Y_i^\textit{th}$ valid reparenting that reparents $u_i$. In Phase One, we made a tally of all valid reparentings that reparented a node less than or equal $x$, and found the first such $x$ such that this tally exceeded $X_i$; we do a similar trick here in finding the number of reparentings that reparent $u_i$ to a node with height $h$ ($\textit{findNumNonDescendantsUpToHeight}(u_i, h)$) and find the first $h$ such that this exceeds $Y_i$.
 
-How do we compute this $\textit{findNumNonDescendantsUpToHeight}(\textit{nodeToReparent}, h)$? Consider the following schematic:
+How do we compute this $\textit{findNumNonDescendantsUpToHeight}(u_i, h)$? Consider the following schematic:
 
 **TODO - diagram here - tree consisting of loads of tiny nodes, colour-coded/ with lines drawn round them indicating the breakdown described below**
 
 The set of nodes to which we can reparent consists of: 
 
-* those in section $A$ minus a set we'll call $\textit{AD}$: the nodes in $A$ that are descendents of $\textit{nodeToReparent}$
-* $\textit{AD}$ is equal to the set $D$ of all descendents of $\textit{nodeToReparent}$ minus the set that we'll call $\textit{DH}$: those nodes $x\in D$ with $x.\textit{height} > h$
+* those in section $A$ minus a set we'll call $\textit{AD}$: the nodes in $A$ that are descendents of $u_i$
+* $\textit{AD}$ is equal to the set $D$ of all descendents of $u_i$ minus the set that we'll call $\textit{DH}$: those nodes $x\in D$ with $x.\textit{height} > h$
 * From the schematic, $\textit{DH}$ is precisely the set of _proper descendents_ of all $y$ such that $y\in D$ and $y.\textit{height}=h$. 
 
 If we can compute this sum of proper descendents, we can compute $\textit{findNumNonDescendantsUpToHeight}$.
