@@ -896,6 +896,16 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
         rotate_tree_90_degrees_counter_clockwise(g)
 
+        b2 = create_node(centre_node, -0.2, -0.7, random.randint(0, 7), None)
+        b2_nodeA = create_node(b2, 0.9, -0.9, random.randint(0, 7), YELLOW)
+        b2_nodeB = create_node(b2, 0.1, -1.1, random.randint(0, 7), None)
+        b2_nodeC = create_node(b2, -0.6, -0.8, random.randint(0, 7), None)
+        b2_nodeD = create_node(b2_nodeB, -0.2, -0.7, random.randint(0, 7), GREEN)
+        b2_nodeE = create_node(b2_nodeA, -0.2, -0.7, random.randint(0, 7), None)
+
+        rotate_tree_90_degrees_counter_clockwise(g)
+
+
         self.play(g.create_animation())
 
 
