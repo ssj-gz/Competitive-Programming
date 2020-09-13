@@ -108,7 +108,7 @@ So: for **Phase Two**, we need to find the height of $v$ ($\textit{newParentHeig
 * $\textit{AD}$ is equal to the set $D$ of all descendents of $u_i$ minus the set that we'll call $\textit{DH}$: those nodes $x\in D$ with $x.\textit{height} > h$
 * From the schematic, $\textit{DH}$ is precisely the set of _proper descendents_ of all $y$ such that $y\in D$ and $y.\textit{height}=h$. 
 
-If we can compute this sum of proper descendents, we can compute $\textit{NDUH}$.
+Thus, $\textit{NDUH}(u_i, h)=|A|-|AD|=|A|-|D|+|DH|$.  $|A|$ and $|D|$ are trivial to compute so it remains to compute this sum of proper descendents.
 
 Now, in the precomputation step, we perform a DFS and use the common technique of logging, for each node $x$, the "time" at which we first visit $x$ ($x.\textit{dfsBeginVisit}$) and the time at which we finish exploring $x$ ($x.\textit{dfsEndVisit}$). We then form a list, for each $h$, of all nodes $x$ with $x.\textit{height} = h$ ordered by their $\textit{dfsBeginVisit}$, $\textit{NHDFS}(h)$ (called $\textit{nodesAtHeightInDFSOrder}$ in the code). This list of lists will come in useful for Phase Three, too.
 
