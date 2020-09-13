@@ -38,7 +38,7 @@ Having sidestepped the issue of removing elements from $L$, the problem becomes 
 
 Anyway, onto the first sub-problem, **Phase One**: finding $u_i$ ($\textit{nodeToReparent}$ in the code) of the remapped $c_i$, $X_i$, in the original list $L$, without constructing $L$!
 
-There are no reparentings with $u=1$, so the first few elements of $L$ are taken up by the valid reparentings that reparent node $2$; then the next few are those that reparent node $3$, etc.  For a given $u$, the number of valid reparentings $(u,v)$ that reparent $u$ is simply the number of $v$ such that $v$ is not a descendent of $u$ i.e. $N-u.\textit{numDescendants}$.  We compute $u.\textit{numDescendants}$ for all $N$ $u$ in $\mathcal{O}(N)$ in a precomputation step, and then create a prefix sum array $\textit{CRPS}$ ($\textit{numCanReparentToPrefixSum}$ in the code) such that $\textit{CRPS}(u)$ is the total number of valid reparentings that reparent a node $x$ with $x \le u$.  
+There are no reparentings with $u=1$, so the first few elements of $L$ are taken up by the valid reparentings that reparent node $2$; then the next few are those that reparent node $3$, etc.  For a given $u$, the number of valid reparentings $(u,v)$ that reparent $u$ is simply the number of $v$ such that $v$ is not a descendent of $u$ i.e. $N-u.\textit{numDescendants}$.  We compute $u.\textit{numDescendants}$ for all $u$ in $\mathcal{O}(N)$ in a precomputation step, and then create a prefix sum array $\textit{CRPS}$ ($\textit{numCanReparentToPrefixSum}$ in the code) such that $\textit{CRPS}(u)$ is the total number of valid reparentings that reparent a node $x$ with $x \le u$.  
 
 As an example, here is the $L$ used in example test case 2 of the Problem, adjusted so that the indices are 0-relative:
 
