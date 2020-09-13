@@ -169,13 +169,19 @@ We now return to optimising our $\textit{DistTracker}$.  It often helps to take 
 | 7 | 0 | 0 | 0 | 1 | 1 | 1 | 
 | 8 | 0 | 0 | 1 | 0 | 0 | 0 | 
 
-One pattern is clear: the $x^{\text{th}}$ bit is $0$ $2^x$ times in a row, then $1$ $2^x$ times in a row, and continues flipping every $2^x$ increments. Using this fact, let's revisit the original example and track the set bits for each tracked distance (represented by the coin that led to it being added to the $\textit{DistTracker}$) by scrolling it through the partial grid, shown below: a distance has its $x^{\text{th}}$ bit set if and only if its coin on the $x^{\text{th}}$ row is in the red area (called the "red-one-zone").  Note that the $x^{\text{th}}$ bit of the grundy number is set if and only if the number of tracked distances with their $x^{\text{th}}$ bit set is _odd_, so _pairs_ of distances with their $x^{\text{th}}$ bit set contribute nothing to the grundy number and so are crossed out.  
+One pattern is clear: the $x^{\text{th}}$ bit is $0$ $2^x$ times in a row, then $1$ $2^x$ times in a row, and continues flipping every $2^x$ increments.  We can exploit this pattern in our $\textit{DistTracker}$ to maintain a count of the number of tracked distances that have their $x^{\text{th}}$ bit set: the animation below illustrates this approach with the original example.  Here:
+
+* each tracked distance is represented by a copy of the coin that led to that distance being inserted, one copy for each row (bit)
+* scrolling the coins to the right represents incrementing the corresponding tracked distance
+* the $x^{\text{th}}$ bit of a tracked distance is one if and only if its corresponding coin is in a red zone (called "the red one zone") for the $x^{\text{th}}$ row
+
+Note that the $x^{\text{th}}$ bit of the grundy number is set if and only if the number of tracked distances with their $x^{\text{th}}$ bit set is _odd_, so _pairs_ of distances with their $x^{\text{th}}$ bit set contribute nothing to the grundy number and so are crossed out.  
 
 **TODO - animation showing this**
 
 Note that the fourth row of the grid is omitted: since the graph only has 8 nodes, the max distance between two nodes is seven, and so a tracked distance can never enter the red-one-zone for a fourth row and change the grundy number.  Similar logic is used to reduce $\textit{m\_numBits}$ in the $\textit{DistTracker}$ implementation.
 
-The computation of the grundy number (the xor of all the tracked distances) has been rolled into $\textit{addToAllDists()}$, so $\textit{grundyNumber}()$ has been reduced from $\mathcal{O}(N)$ to $\mathcal{O}(1)$, a substantial improvement; however, $\textit{addToAllDists}()$ remains $\mathcal{O}(N)$ as it must still move all coins on each call, so we don't appear to have gained much.
+With this new $\textit{DistTracker}$, the computation of the grundy number (the xor of all the tracked distances) has been rolled into $\textit{addToAllDists()}$, so $\textit{grundyNumber}()$ has been reduced from $\mathcal{O}(N)$ to $\mathcal{O}(1)$, a substantial improvement; however, $\textit{addToAllDists}()$ remains $\mathcal{O}(N)$ as it must still move all coins on each call, so we don't appear to have gained much.
 
 However, what if, instead of moving all coins representing distances one cell to the right on a call to $\textit{addToAllDists}(1)$ and tracking whether they enter the red-one-zone for each bit number $x$, _we scrolled the $x$ red-one-zones by $1$ in the opposite direction_ and counted how many coins they hit or leave? Since $x$ is $\mathcal{O}(\log N)$, $\textit{addToAllDists}(1)$ is now $\mathcal{O}(\log N)$, so all operations on $\textit{DistTracker}$ are now $\mathcal{O}(\log N)$ in the worst case.
 
