@@ -144,7 +144,9 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
 
         self.play(Write(node_to_reparent_label), WiggleOutThenIn(node_to_reparent_mobject, scale_value = 2))
         self.play(Write(Cross(node_to_reparent_mobject)))
-        self.play(Write(height_label), FadeOut(node_to_reparent_label))
+        u_i_label = TexMobject(r'u_i', color = BLACK, fill_color = BLACK)
+        u_i_label.next_to(node_to_reparent_mobject, LEFT)
+        self.play(Write(height_label), Transform(node_to_reparent_label, u_i_label))
         self.play(WiggleOutThenIn(height_label, scale_value = 2))
 
         descendents = self.find_descendents_at_height(g, node_to_reparent, ignore_nodes = [node_to_reparent.config['parent']])
