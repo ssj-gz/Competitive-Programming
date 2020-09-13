@@ -1015,8 +1015,48 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                     y = y - 2 * enlarged_node_radius - vertical_gap_between_nodes
                 x = x + 2 * enlarged_node_radius + horizontal_gap_between_nodes
 
+            # Propagate.
+            propagate_text = TexMobject(r'\textit{Propagate}', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+            propagate_text.scale(disttracker_text_scale)
+            propagate_text.align_on_border(RIGHT)
+            propagate_text.set_y(disttracker_title_display.get_y())
 
-            self.play(g.create_animation())
+            self.play(g.create_animation(), FadeInFrom(propagate_text, DOWN))
+
+            def create_rectangle_around_nodes(nodes, gap_size):
+                rect_top = -1000
+                rect_bottom = +1000
+                rect_left = 1000
+                rect_right = -1000
+                for node in nodes:
+                    node_x = node.config['center_x']
+                    node_y = node.config['center_y']
+                    node_radius = node.config['radius']
+                    rect_left = min(rect_left, node_x - node_radius)
+                    rect_right = max(rect_right, node_x + node_radius)
+                    rect_top = max(rect_top, node_y + node_radius)
+                    rect_bottom = min(rect_bottom, node_y - node_radius)
+
+                rect_left = rect_left - gap_size
+                rect_right = rect_right + gap_size
+                rect_top = rect_top + gap_size
+                rect_bottom = rect_bottom - gap_size
+
+                rectangle = Rectangle(color=RED, width = rect_right - rect_left, height = rect_top - rect_bottom)
+                # Shift so that top-left is at origin.
+                rectangle.shift(rectangle.get_width() / 2 * RIGHT, rectangle.get_height() / 2 * DOWN)
+                # Shift to correct position.
+                rectangle.shift(rect_left * RIGHT + rect_top * UP)
+
+                return rectangle
+
+            nodes_at_current_dist_rect = create_rectangle_around_nodes([centre_node], gap_size = SMALL_BUFF)
+            self.play(Write(nodes_at_current_dist_rect))
+            for layer in descendents_by_height:
+                nodes_at_current_dist_rect_target = create_rectangle_around_nodes(layer, gap_size = SMALL_BUFF)
+                self.play(Transform(nodes_at_current_dist_rect, nodes_at_current_dist_rect_target))
+
+            self.play(FadeOutAndShift(propagate_text, UP), FadeOut(nodes_at_current_dist_rect))
 
             def create_brace_for_node_pair(nodeLeft, nodeRight, tex):
                 dummyLeftMObject = Circle(radius = 0)
