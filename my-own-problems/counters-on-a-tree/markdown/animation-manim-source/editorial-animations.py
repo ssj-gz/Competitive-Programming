@@ -839,6 +839,7 @@ class NodeCoinMObject(VMobject):
             coin_mobject = Circle(color=border_colour, fill_opacity = 1, fill_color = config['coin_colour'], radius = coin_radius)
             self.coin_mobject = coin_mobject
             self.add(coin_mobject)
+            print("added coin_mobject:", coin_mobject, " to ", repr(self))
 
         if 'value' in config:
             self.value = config['value']
@@ -1015,10 +1016,15 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                     y = y - 2 * enlarged_node_radius - vertical_gap_between_nodes
                 x = x + 2 * enlarged_node_radius + horizontal_gap_between_nodes
 
-            def align_objects_sequentially(mobjects, centre = False):
+            def align_objects_sequentially(mobjects, y, centre = False):
                 for i,mobject in enumerate(mobjects):
                     if i >= 1:
-                        mobject[i].next_to(mobject[i - 1], RIGHT)
+                        mobjects[i].next_to(mobjects[i - 1], RIGHT)
+                    mobjects[i].set_y(y)
+
+                print("after align_objects_sequentially:")
+                for i in mobjects:
+                    print(" ", i.get_center())
 
             # Propagate.
             propagate_text = TexMobject(r'\textit{Propagate}', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
@@ -1094,6 +1100,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
             brace = None
             digit = None
+            distance_from_center = 1
             for layer in descendents_by_height:
                 anims = []
 
@@ -1124,7 +1131,38 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                     self.play(Write(cross_out))
                     self.play(FadeOut(cross_out))
                 else:
-                    self.play(WiggleOutThenIn(collect_text))
+                    for node in nodes_with_coins:
+                        coin_colour = node.config['coin_colour']
+                        print("coin_colour:", coin_colour, " coin_mobject:", hasattr(node, 'coin_mobject'), " node: ", repr(node))
+                        is_first_coin = (len(grundy_xor_elements) == 1)
+                        new_objects = []
+                        coin_digit_mobject = TexMobject(str(distance_from_center), colour = BLACK, fill_opacity = 1, fill_color = coin_colour)
+                        coin_digit_mobject.scale(disttracker_text_scale)
+                        grundy_xor_elements_targets = []
+                        anims = []
+                        grundy_xor_y = grundy_xor_elements[-1].get_y()
+                        for i in grundy_xor_elements:
+                            target = i.copy()
+                            grundy_xor_elements_targets.append(target)
+                            anims.append(Transform(i, target))
+                        if is_first_coin:
+                            equal_symbol = TexMobject(r'=', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                            new_objects.append(equal_symbol)
+                            grundy_xor_elements_targets.insert(0, equal_symbol)
+                            grundy_xor_elements_targets.insert(0, coin_digit_mobject)
+                            grundy_xor_elements.insert(0, equal_symbol)
+                            grundy_xor_elements.insert(0, coin_digit_mobject)
+                        else:
+                            pass
+
+                        align_objects_sequentially(grundy_xor_elements_targets, grundy_xor_y)
+                        coin_copy = g.mobject_for_node[node].coin_mobject.copy()
+                        anims.append(Transform(coin_copy, coin_digit_mobject))
+                        for i in new_objects:
+                            anims.append(FadeIn(i))
+                        self.play(*anims)
+
+                distance_from_center = distance_from_center + 1
 
 
             g.restore_from_state(previous_graph_state)
