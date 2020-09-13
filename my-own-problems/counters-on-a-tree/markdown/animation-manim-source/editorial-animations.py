@@ -875,7 +875,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
             return new_node
 
-        centre_node = create_node(None, 1, 1, 7, GREEN)
+        centre_node = create_node(None, 1, 1, 7, None)
 
         def rotate_tree_90_degrees_counter_clockwise(graph):
             center_x = centre_node.config['center_x']
@@ -889,13 +889,17 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                 node.config['center_y'] = center_y + dx
 
         MAGENTA = "#ff00ff"
+        RED = "#ff0000"
+        BROWN = "#8B4513"
+        PURPLE = "#800080"
+        ORANGE = "#FF8C00"
 
         branch_roots = []
 
 
         b1 = create_node(centre_node, 0.2, -0.8, random.randint(0, 7), None)
         b1_nodeA = create_node(b1, 0.9, -0.9, random.randint(0, 7), ORANGE)
-        b1_nodeB = create_node(b1, 0.1, -1.1, random.randint(0, 7), None)
+        b1_nodeB = create_node(b1, 0.1, -1.1, random.randint(0, 7), BROWN)
         b1_nodeC = create_node(b1, -0.6, -0.8, random.randint(0, 7), None)
         b1_nodeD = create_node(b1_nodeA, -0.2, -0.7, random.randint(0, 7), None)
         branch_roots.append(b1)
@@ -915,8 +919,8 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
         b3 = create_node(centre_node, -0.2, -0.7, random.randint(0, 7), MAGENTA)
         b3_nodeA = create_node(b3, 0.6, -0.9, random.randint(0, 7), None)
         b3_nodeB = create_node(b3, -0.1, -1.1, random.randint(0, 7), None)
-        b3_nodeC = create_node(b3_nodeA, 0.1, -0.9, random.randint(0, 7), RED)
-        b4_nodeC = create_node(b3_nodeC, -0.9, 0.0, random.randint(0, 7), None)
+        b3_nodeC = create_node(b3_nodeA, 0.1, -0.9, random.randint(0, 7), None)
+        b4_nodeD = create_node(b3_nodeC, -0.9, 0.0, random.randint(0, 7), RED)
         branch_roots.append(b3)
 
         rotate_tree_90_degrees_counter_clockwise(g)
