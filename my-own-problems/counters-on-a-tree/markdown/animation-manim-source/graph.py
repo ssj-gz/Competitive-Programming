@@ -334,3 +334,18 @@ class Graph:
             animations.append(Animation(mobject, run_time = run_time))
 
         return AnimationGroup(*animations)
+    
+    def get_restorable_state(self):
+        config_for_node = {}
+        for node in self.nodes:
+            config_for_node[node] = node.config.copy()
+
+        return config_for_node
+
+    def restore_from_state(self, state):
+        config_for_node = state
+        for node in self.nodes:
+            node.config = config_for_node[node].copy()
+
+        return config_for_node
+
