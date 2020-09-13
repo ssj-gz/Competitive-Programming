@@ -1058,6 +1058,13 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
             self.play(FadeOutAndShift(propagate_text, UP), FadeOut(nodes_at_current_dist_rect))
 
+            # Collect
+            collect_text = TexMobject(r'\textit{Collect}', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+            collect_text.scale(disttracker_text_scale)
+            collect_text.align_on_border(RIGHT)
+            collect_text.set_y(disttracker_title_display.get_y())
+            self.play(FadeInFrom(collect_text, DOWN))
+
             def create_brace_for_node_pair(nodeLeft, nodeRight, tex):
                 dummyLeftMObject = Circle(radius = 0)
                 dummyLeftMObject.move_to(g.mobject_for_node[nodeLeft].get_center())
@@ -1102,7 +1109,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
             g.restore_from_state(previous_graph_state)
 
-            self.play(g.create_animation(), FadeOutAndShift(brace, UP), FadeOutAndShift(digit, UP))
+            self.play(g.create_animation(), FadeOutAndShift(brace, UP), FadeOutAndShift(digit, UP), FadeOutAndShift(collect_text, UP))
 
             self.play(RotateGraph(g, centre_node, PI / 2))
 
