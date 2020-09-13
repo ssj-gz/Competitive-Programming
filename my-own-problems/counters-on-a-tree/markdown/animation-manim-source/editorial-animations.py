@@ -1080,6 +1080,8 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
                 brace = Brace(dummyGroup, color = BLACK, fill_color = BLACK, direction = UP )
                 text = TexMobject(tex, color = BLACK, fill_opacity = 1, fill_color = BLACK)
+                text.text_scale_factor = 1.5
+                text.scale(text.text_scale_factor)
                 text.next_to(brace, UP)
                 brace.text = text
 
@@ -1103,7 +1105,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                     anims.append(Transform(brace, brace_target))
                     anims.append(Transform(digit, digit_target))
                     self.play(*anims)
-                    self.play(create_scroll_digit_to_animation(digit, digit.digitValue, digit.digitValue + 1))
+                    self.play(create_scroll_digit_to_animation(digit, digit.digitValue, digit.digitValue + 1, digitMObjectScale = digit.text_scale_factor))
                     digit.digitValue = digit.digitValue + 1 
 
 
