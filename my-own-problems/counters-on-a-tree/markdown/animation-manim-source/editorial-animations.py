@@ -829,18 +829,17 @@ class NodeCoinMObject(VMobject):
         circle_radius = config['radius']
         circle = Circle(radius=circle_radius,color=BLACK,fill_opacity=1, fill_color=WHITE)
         self.add(circle)
-        if 'value' in config:
-            self.value = config['value']
-            value_mobject = TexMobject(str(self.value))
-            value_mobject.set_color(BLACK)
-            self.value_mobject = value_mobject
-            self.add(value_mobject)
-
         if 'coin_colour' in config:
             coin_radius = config['coin_radius']
             coin_mobject = Circle(color=BLACK, fill_opacity = 1, fill_color = config['coin_colour'], radius = coin_radius)
             self.coin_mobject = coin_mobject
             self.add(coin_mobject)
+
+        if 'value' in config:
+            self.value = config['value']
+            value_mobject = TexMobject(str(self.value), colour = BLACK, fill_opacity = 1, fill_color = config['value_colour'])
+            self.value_mobject = value_mobject
+            self.add(value_mobject)
 
     def copy(self):
         return self.deepcopy()
@@ -851,7 +850,22 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
         g = Graph(self, globals()["Node"], globals()["NodeCoinMObject"])
         node_radius = 0.5
-        centre_node = g.create_node(1, 1, {'radius': node_radius, 'value' : 3, 'coin_colour': GREEN, 'coin_radius': node_radius / 2})
+
+        grundy_node_tex_colour = "#2600ff"
+
+        def create_node(parent, x, y, grundy_number, coin_colour):
+            config = {'radius': node_radius, 'value' : grundy_number, 'coin_colour': GREEN, 'coin_radius': node_radius * 3 / 5, 'value_colour': grundy_node_tex_colour}
+            if coin_colour:
+                config['coin_colour'] = coin_colour
+
+            new_node = g.create_node(x, y, config)
+            if parent:
+                g.create_edge(new_node, parent, {})
+
+            return new_node
+
+
+        centre_node = create_node(None, 1, 1, 7, GREEN)
 
         self.play(g.create_animation())
 
