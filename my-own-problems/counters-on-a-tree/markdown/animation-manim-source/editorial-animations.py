@@ -1016,15 +1016,20 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                     y = y - 2 * enlarged_node_radius - vertical_gap_between_nodes
                 x = x + 2 * enlarged_node_radius + horizontal_gap_between_nodes
 
-            def align_objects_sequentially(mobjects, y, centre = False):
+            def align_objects_sequentially(mobjects, y, centre_horizontally = False):
                 for i,mobject in enumerate(mobjects):
                     if i >= 1:
                         mobjects[i].next_to(mobjects[i - 1], RIGHT)
                     mobjects[i].set_y(y)
 
-                print("after align_objects_sequentially:")
-                for i in mobjects:
-                    print(" ", i.get_center())
+                if centre_horizontally:
+                    left_edge = mobjects[0].get_x() - mobjects[0].get_width() / 2
+                    total_width = (mobjects[-1].get_x() + mobjects[-1].get_width() / 2) - left_edge
+                    desired_left_edge = -total_width / 2
+                    for mobject in mobjects:
+                        mobject.set_x(mobject.get_x() + (desired_left_edge - left_edge))
+
+
 
             # Propagate.
             propagate_text = TexMobject(r'\textit{Propagate}', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
@@ -1141,6 +1146,9 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                         grundy_xor_elements_targets = []
                         anims = []
                         grundy_xor_y = grundy_xor_elements[-1].get_y()
+
+                        coin_copy = g.mobject_for_node[node].coin_mobject.copy()
+
                         for i in grundy_xor_elements:
                             target = i.copy()
                             grundy_xor_elements_targets.append(target)
@@ -1154,7 +1162,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                             grundy_xor_elements_targets.insert(0, equal_symbol)
                             grundy_xor_elements_targets.insert(0, coin_digit_mobject)
                             grundy_xor_elements.insert(0, equal_symbol)
-                            grundy_xor_elements.insert(0, coin_digit_mobject)
+                            grundy_xor_elements.insert(0, coin_copy)
                         else:
                             equals_index = -1
                             print("enumerating grundy_xor_elements:")
@@ -1170,12 +1178,11 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                             new_objects.append(xor_symbol)
                             grundy_xor_elements_targets.insert(equals_index, coin_digit_mobject)
                             grundy_xor_elements_targets.insert(equals_index, xor_symbol)
-                            grundy_xor_elements.insert(equals_index, coin_digit_mobject)
+                            grundy_xor_elements.insert(equals_index, coin_copy)
                             grundy_xor_elements.insert(equals_index, xor_symbol)
 
 
-                        align_objects_sequentially(grundy_xor_elements_targets, grundy_xor_y)
-                        coin_copy = g.mobject_for_node[node].coin_mobject.copy()
+                        align_objects_sequentially(grundy_xor_elements_targets, grundy_xor_y, centre_horizontally = True)
                         anims.append(Transform(coin_copy, coin_digit_mobject))
                         for i in new_objects:
                             anims.append(FadeIn(i))
