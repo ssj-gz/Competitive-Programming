@@ -50,7 +50,7 @@ As mentioned, this is the game of [Nim](https://en.wikipedia.org/wiki/Nim) in di
 * Choosing a coin $C$ from a node not in $R$ and moving it strictly towards $R$ corresponds to choosing a non-empty pile of stones and taking at least one stone from it
 * The losing state - where all coins are in $R$ - corresponds to the losing state in Nim where all piles are empty.
 
-The [Sprague-Grundy Theorem](https://en.wikipedia.org/wiki/Sprague-Grundy) makes a few interesting statements including the remarkable result that in the game of Nim, the second player wins if and only if the _Grundy Number_  for the game is $0$, where the grundy number is the xor-sum of all the pile sizes i.e. $p_1 \oplus p_2 \oplus \dots \oplus p_M$. Translating this into our game, we see that Bob wins if and only if the grundy number for the game $\textit{game}(T, R)$, $R.\textit{grundy}$ defined by:
+The [Sprague-Grundy Theorem](https://en.wikipedia.org/wiki/Sprague-Grundy) proves several interesting statements but the one we're interested in is the remarkable (and very unintuitive!) result that in the game of Nim, the second player wins if and only if the _Grundy Number_  for the game is $0$, where the grundy number is the xor-sum of all the pile sizes i.e. $p_1 \oplus p_2 \oplus \dots \oplus p_M$. Translating this into our game, we see that Bob wins if and only if the grundy number for the game $\textit{game}(T, R)$, $R.\textit{grundy}$ defined by:
 
 $$
 R.\textit{grundy}=\bigoplus_{c\in \textit{coins}}{\textit{dist}(R,v_c)}
