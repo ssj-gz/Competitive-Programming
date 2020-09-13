@@ -990,16 +990,25 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
             self.play(g.create_animation())
 
-            dummyGroup1 = VGroup()
-            dummyGroup1.add(g.mobject_for_node[centre_node])
-            dummyGroup1.add(g.mobject_for_node[descendents_by_height[0][0]])
-            b1=Brace(dummyGroup1, color=BLACK, fill_color = BLACK)
+            def create_brace_for_node_pair(nodeLeft, nodeRight):
+                dummyLeftMObject = Circle(radius = 0)
+                dummyLeftMObject.move_to(g.mobject_for_node[nodeLeft].get_center())
+                dummyLeftMObject.shift(nodeLeft.config['radius'] * DOWN)
+
+                dummyRightMObject = Circle(radius = 0)
+                dummyRightMObject.move_to(g.mobject_for_node[nodeRight].get_center())
+                dummyRightMObject.shift(nodeRight.config['radius'] * DOWN)
+
+                dummyGroup = VGroup()
+                dummyGroup.add(dummyLeftMObject)
+                dummyGroup.add(dummyRightMObject)
+
+                return Brace(dummyGroup, color = BLACK, fill_color = BLACK )
+
+            b1 = create_brace_for_node_pair(centre_node, descendents_by_height[0][0])
             self.play(Write(b1))
 
-            dummyGroup2 = VGroup()
-            dummyGroup2.add(g.mobject_for_node[centre_node])
-            dummyGroup2.add(g.mobject_for_node[descendents_by_height[1][0]])
-            b2=Brace(dummyGroup2, color=BLACK, fill_color = BLACK)
+            b2 = create_brace_for_node_pair(centre_node, descendents_by_height[1][0])
             self.play(Transform(b1, b2))
 
 
