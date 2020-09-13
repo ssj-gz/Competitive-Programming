@@ -267,6 +267,37 @@ class Graph:
         for child in children:
             self.set_node_positions(child, rootNode, x_offset_from_parent_for_node, gap_between_parent_and_child, ignore_node_list)
 
+    def find_descendents_at_height(self, root, ignore_node_list = []):
+        nodes_at_height = []
+        nodes_at_height.append([root])
+        ignore_node_list_copy = ignore_node_list.copy()
+
+        self.find_descendents_at_height_aux(root, 1, nodes_at_height, ignore_node_list_copy)
+        print("num layers:", len(nodes_at_height))
+
+
+        return nodes_at_height
+
+    def find_descendents_at_height_aux(self, root, height, nodes_at_height, ignore_node_list = []):
+        children = []
+        for edge in self.edges:
+            neighbour = None
+            if root == edge.start_node:
+                neighbour = edge.end_node
+            elif root == edge.end_node:
+                neighbour = edge.start_node
+            if neighbour and neighbour not in ignore_node_list:
+                children.append(neighbour)
+
+        if len(nodes_at_height) == height:
+            nodes_at_height.append([])
+        nodes_at_height[height].append(root)
+        print("Appending a node at height:", height)
+        ignore_node_list.append(root)
+        for child in children:
+            self.find_descendents_at_height_aux(child, height + 1, nodes_at_height, ignore_node_list)
+
+
     def create_animation(self, run_time = 1):
         animations = []
         mobjects_to_move = []
