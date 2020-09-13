@@ -955,6 +955,18 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
         self.play(g.create_animation())
 
+        # Graph is displayed; now the DistTracker.
+        graph_bottom = centre_node.config['center_y'] - furthest_point_from_centre
+
+        disttracker_top_y = graph_bottom
+        disttracker_text_scale = 1.5
+        disttracker_title_display = TexMobject(r'\textit{DistTracker}^\text{TM}', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+        disttracker_title_display.scale(disttracker_text_scale)
+        disttracker_title_display.align_on_border(LEFT)
+        disttracker_title_display.set_y(disttracker_top_y - disttracker_title_display.get_height() / 2 - MED_LARGE_BUFF)
+
+        self.play(Write(disttracker_title_display))
+
         enlarged_node_radius = node_radius * 2
         horizontal_gap_between_nodes = enlarged_node_radius
         vertical_gap_between_nodes = enlarged_node_radius
@@ -1009,9 +1021,6 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                 brace.text = text
 
                 return brace
-
-
-
 
             brace = None
             digit = None
