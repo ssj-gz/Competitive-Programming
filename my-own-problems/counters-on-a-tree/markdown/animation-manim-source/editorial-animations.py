@@ -1018,17 +1018,22 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
             for layer in descendents_by_height:
                 anims = []
                 if not brace:
-                    brace = create_brace_for_node_pair(centre_node, layer[0], 0)
+                    brace = create_brace_for_node_pair(centre_node, layer[0], 1)
                     digit = brace.text
+                    digit.digitValue = 1
                     anims.append(GrowFromCenter(brace))
                     anims.append(Write(digit))
+                    self.play(*anims)
                 else:
-                    brace_target = create_brace_for_node_pair(centre_node, layer[0], 0)
+                    brace_target = create_brace_for_node_pair(centre_node, layer[0], digit.digitValue)
                     digit_target = digit.copy()
                     digit_target.next_to(brace_target, UP)
                     anims.append(Transform(brace, brace_target))
                     anims.append(Transform(digit, digit_target))
-                self.play(*anims)
+                    self.play(*anims)
+                    self.play(create_scroll_digit_to_animation(digit, digit.digitValue, digit.digitValue + 1))
+                    digit.digitValue = digit.digitValue + 1 
+
 
             g.restore_from_state(previous_graph_state)
 
