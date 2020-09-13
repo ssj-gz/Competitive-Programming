@@ -171,7 +171,7 @@ We now return to optimising our $\textit{DistTracker}$.  It often helps to take 
 | 7 | 0 | 0 | 0 | 1 | 1 | 1 | 
 | 8 | 0 | 0 | 1 | 0 | 0 | 0 | 
 
-One pattern is clear: the $x^{\text{th}}$ bit is $0$ $2^x$ times in a row, then $1$ $2^x$ times in a row, and continues flipping every $2^x$ increments.  We can exploit this pattern in our $\textit{DistTracker}$ to maintain a count of the number of tracked distances that have their $x^{\text{th}}$ bit set: the animation below illustrates this approach with the original example.  Here:
+The pattern is clear: the $x^{\text{th}}$ bit is $0$ $2^x$ times in a row, then $1$ $2^x$ times in a row, and continues flipping every $2^x$ increments.  We can exploit this pattern in our $\textit{DistTracker}$ to maintain a count of the number of tracked distances that have their $x^{\text{th}}$ bit set: the animation below illustrates this approach with the original example.  Here:
 
 * each tracked distance is represented by copies of the coin that led to that distance being inserted, one copy for each row (bit)
 * scrolling the coins to the right represents incrementing the corresponding tracked distances
