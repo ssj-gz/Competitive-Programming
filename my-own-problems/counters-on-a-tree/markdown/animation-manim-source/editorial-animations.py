@@ -1015,6 +1015,11 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                     y = y - 2 * enlarged_node_radius - vertical_gap_between_nodes
                 x = x + 2 * enlarged_node_radius + horizontal_gap_between_nodes
 
+            def align_objects_sequentially(mobjects, centre = False):
+                for i,mobject in enumerate(mobjects):
+                    if i >= 1:
+                        mobject[i].next_to(mobject[i - 1], RIGHT)
+
             # Propagate.
             propagate_text = TexMobject(r'\textit{Propagate}', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
             propagate_text.scale(disttracker_text_scale)
@@ -1091,6 +1096,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
             digit = None
             for layer in descendents_by_height:
                 anims = []
+
                 if not brace:
                     brace = create_brace_for_node_pair(centre_node, layer[0], 1)
                     digit = brace.text
@@ -1107,6 +1113,18 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                     self.play(*anims)
                     self.play(create_scroll_digit_to_animation(digit, digit.digitValue, digit.digitValue + 1, digitMObjectScale = digit.text_scale_factor))
                     digit.digitValue = digit.digitValue + 1 
+
+                nodes_with_coins = []
+                for node in layer:
+                    if 'coin_colour' in node.config:
+                        nodes_with_coins.append(node)
+
+                if not nodes_with_coins:
+                    cross_out = Cross(collect_text)
+                    self.play(Write(cross_out))
+                    self.play(FadeOut(cross_out))
+                else:
+                    self.play(WiggleOutThenIn(collect_text))
 
 
             g.restore_from_state(previous_graph_state)
