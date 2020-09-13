@@ -993,28 +993,31 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
             def create_brace_for_node_pair(nodeLeft, nodeRight):
                 dummyLeftMObject = Circle(radius = 0)
                 dummyLeftMObject.move_to(g.mobject_for_node[nodeLeft].get_center())
-                dummyLeftMObject.shift(nodeLeft.config['radius'] * DOWN)
+                dummyLeftMObject.shift(nodeLeft.config['radius'] * UP)
 
                 dummyRightMObject = Circle(radius = 0)
                 dummyRightMObject.move_to(g.mobject_for_node[nodeRight].get_center())
-                dummyRightMObject.shift(nodeRight.config['radius'] * DOWN)
+                dummyRightMObject.shift(nodeRight.config['radius'] * UP)
 
                 dummyGroup = VGroup()
                 dummyGroup.add(dummyLeftMObject)
                 dummyGroup.add(dummyRightMObject)
 
-                return Brace(dummyGroup, color = BLACK, fill_color = BLACK )
+                return Brace(dummyGroup, color = BLACK, fill_color = BLACK, direction = UP )
 
-            b1 = create_brace_for_node_pair(centre_node, descendents_by_height[0][0])
-            self.play(Write(b1))
-
-            b2 = create_brace_for_node_pair(centre_node, descendents_by_height[1][0])
-            self.play(Transform(b1, b2))
-
+            brace = None
+            for layer in descendents_by_height:
+                if not brace:
+                    brace = create_brace_for_node_pair(centre_node, layer[0])
+                    brace_anim = GrowFromCenter(brace)
+                else:
+                    brace_target = create_brace_for_node_pair(centre_node, layer[0])
+                    brace_anim = Transform(brace, brace_target)
+                self.play(brace_anim)
 
             g.restore_from_state(previous_graph_state)
 
-            self.play(g.create_animation())
+            self.play(g.create_animation(), FadeOutAndShift(brace, UP))
 
             self.play(RotateGraph(g, centre_node, PI / 2))
 
