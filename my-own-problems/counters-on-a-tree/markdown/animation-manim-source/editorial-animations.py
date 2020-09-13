@@ -1147,13 +1147,32 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                             anims.append(Transform(i, target))
                         if is_first_coin:
                             equal_symbol = TexMobject(r'=', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                            equal_symbol.scale(disttracker_text_scale)
+                            equal_symbol.equal_symbol = True
+                            print("equal_symbol:", repr(equal_symbol))
                             new_objects.append(equal_symbol)
                             grundy_xor_elements_targets.insert(0, equal_symbol)
                             grundy_xor_elements_targets.insert(0, coin_digit_mobject)
                             grundy_xor_elements.insert(0, equal_symbol)
                             grundy_xor_elements.insert(0, coin_digit_mobject)
                         else:
-                            pass
+                            equals_index = -1
+                            print("enumerating grundy_xor_elements:")
+                            for i,obj in enumerate(grundy_xor_elements):
+                                print(" ", repr(i))
+                                if hasattr(obj, 'equal_symbol'):
+                                    equals_index = i
+                                    break
+                            self.save_thumbnail() # TODO - remove
+                            assert(equals_index != -1)
+                            xor_symbol = TexMobject(r'\oplus', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                            xor_symbol.scale(disttracker_text_scale)
+                            new_objects.append(xor_symbol)
+                            grundy_xor_elements_targets.insert(equals_index, coin_digit_mobject)
+                            grundy_xor_elements_targets.insert(equals_index, xor_symbol)
+                            grundy_xor_elements.insert(equals_index, coin_digit_mobject)
+                            grundy_xor_elements.insert(equals_index, xor_symbol)
+
 
                         align_objects_sequentially(grundy_xor_elements_targets, grundy_xor_y)
                         coin_copy = g.mobject_for_node[node].coin_mobject.copy()
