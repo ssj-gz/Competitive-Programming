@@ -890,11 +890,15 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
         MAGENTA = "#ff00ff"
 
+        branch_roots = []
+
+
         b1 = create_node(centre_node, 0.2, -0.8, random.randint(0, 7), None)
         b1_nodeA = create_node(b1, 0.9, -0.9, random.randint(0, 7), ORANGE)
         b1_nodeB = create_node(b1, 0.1, -1.1, random.randint(0, 7), None)
         b1_nodeC = create_node(b1, -0.6, -0.8, random.randint(0, 7), None)
         b1_nodeD = create_node(b1_nodeA, -0.2, -0.7, random.randint(0, 7), None)
+        branch_roots.append(b1)
 
         rotate_tree_90_degrees_counter_clockwise(g)
 
@@ -904,6 +908,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
         b2_nodeC = create_node(b2, -0.6, -0.8, random.randint(0, 7), None)
         b2_nodeD = create_node(b2_nodeB, -0.2, -0.7, random.randint(0, 7), GREEN)
         b2_nodeE = create_node(b2_nodeA, -0.2, -0.7, random.randint(0, 7), None)
+        branch_roots.append(b2)
 
         rotate_tree_90_degrees_counter_clockwise(g)
 
@@ -912,26 +917,51 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
         b3_nodeB = create_node(b3, -0.1, -1.1, random.randint(0, 7), None)
         b3_nodeC = create_node(b3_nodeA, 0.1, -0.9, random.randint(0, 7), RED)
         b4_nodeC = create_node(b3_nodeC, -0.9, 0.0, random.randint(0, 7), None)
+        branch_roots.append(b3)
 
         rotate_tree_90_degrees_counter_clockwise(g)
 
         b4 = create_node(centre_node, 0.3, -0.8, random.randint(0, 7), PURPLE)
         b4_nodeA = create_node(b4, 0.6, -0.8, random.randint(0, 7), None)
         b4_nodeB = create_node(b4_nodeA, 0.1, -0.7, random.randint(0, 7), GREY)
+        branch_roots.append(b4)
 
         self.play(g.create_animation())
 
-        b4_nodeB.config['radius'] = 1
-        b4_nodeB.config['center_y'] = b4_nodeB.config['center_y'] - 2
-        b4_nodeB.config['center_x'] = b4_nodeB.config['center_x'] - 4.5
-        blah_mobject = g.mobject_for_node[b4_nodeB]
-        print("Before radius change:", blah_mobject.get_width())
+        rightmost_branch = b3
+        other_branches = branch_roots.copy()
+        other_branches.remove(b3)
+
+        blah = g.find_descendents_at_height(centre_node, ignore_node_list = other_branches)
+        for layer in blah:
+            layer.sort(key = lambda m: -m.config['center_y'])
+
+        x = centre_node.config['center_x']
+        for layer in blah:
+            y = centre_node.config['center_y']
+            for node in layer:
+                if node == centre_node:
+                    continue
+                node.config['center_x'] = x
+                node.config['center_y'] = y
+                y = y - 1
+
+            x = x + 1
 
         self.play(g.create_animation())
 
-        print("After radius change:", blah_mobject.get_width())
-        b4_nodeB.config['radius'] = node_radius
-        self.play(g.create_animation())
+
+        #b4_nodeB.config['radius'] = 1
+        #b4_nodeB.config['center_y'] = b4_nodeB.config['center_y'] - 2
+        #b4_nodeB.config['center_x'] = b4_nodeB.config['center_x'] - 4.5
+        #blah_mobject = g.mobject_for_node[b4_nodeB]
+        #print("Before radius change:", blah_mobject.get_width())
+
+        #self.play(g.create_animation())
+
+        #print("After radius change:", blah_mobject.get_width())
+        #b4_nodeB.config['radius'] = node_radius
+        #self.play(g.create_animation())
 
 
 
