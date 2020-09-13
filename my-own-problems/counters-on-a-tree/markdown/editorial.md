@@ -200,7 +200,15 @@ And that's it!
 
 
 # ALTERNATE EXPLANATION:
-Could contain more or less short descriptions of possible other approaches.
+**A Faster Alternative to Centroid Decomposition?**  When I first solved this Problem (and [CHGORAM2](https://www.codechef.com/problems/CHGORAM2)), I didn't know much about the properties of Centroid Decomposition and so came up with my own approach which I called the _light-first DFS_:
+
+**TODO - add publically available link to http://campus.codechef.com/SEP20TST/viewsolution/37862309/ **
+
+This runs quite a bit faster than my Centroid Decomposition based solution.  Questions for the interested reader :)
+
+* Why does this work? What is its worst-case complexity? How would you prove it?
+* Are there any Problems for which a CD approach would work but not a LFDFS? Vice-versa?
+* Is the speedup due to mere implementation details, or might there be certain trees where LFDFS is _asymptotically_ better than CD? If yes, what kind of trees would you expect to be faster in practice?
 
 # SOLUTIONS:
 
