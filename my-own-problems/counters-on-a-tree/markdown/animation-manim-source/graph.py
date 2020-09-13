@@ -105,6 +105,7 @@ class NodeMObject(VMobject):
             self.value = config['value']
             value_mobject = TexMobject(str(self.value))
             value_mobject.set_color(BLACK)
+            self.value_mobject = value_mobject
             self.add(value_mobject)
 
     def copy(self):

@@ -52,6 +52,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
         g = Graph(scene, globals()["Node"], globals()["NodeMObject"])
         previous_node = None
         nodes = []
+        blah_node = None
         for i in range(0, num_nodes):
             newNode = g.create_node(node_left + node_radius, frame_height * proportion_of_frame_height_to_use / 2 - (arrow_total_length + arrow_dist_above_node), { 'radius' : node_radius})
             newNode.config['coin_mobject'] = None
@@ -61,10 +62,27 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             node_left = node_left + node_diameter + gap_between_nodes
             previous_node = newNode
             nodes.append(newNode)
+            if i == 2:
+                newNode.config['value'] = 3
+                blah_node = newNode
+
 
         scene.play(g.create_animation(run_time = 2))
 
-        scene.play(RotateGraph(g, nodes[-1], -PI), run_time = 10)
+        # TODO - remove all this
+        #node_mobject = g.create_mobject_for_node(nodes[2])
+        node_mobject = g.mobject_for_node[blah_node]
+        print("node_mobject pos initial:", node_mobject.get_center())
+        circle = Circle(color=BLACK, fill_opacity = 1, fill_color = RED, radius = 0.2)
+        circle.move_to(node_mobject.get_center())
+        node_mobject.remove(node_mobject.value_mobject)
+        node_mobject.add(circle)
+        node_mobject.add(node_mobject.value_mobject)
+        node_mobject.move_to([blah_node.config['center_x'], blah_node.config['center_y'], 0])
+        #node_mobject.move_to([blah_node.config['center_x'], blah_node.config['center_y'], 0])
+        scene.bring_to_back(circle)
+        print("node_mobject pos after:", node_mobject.get_center())
+        scene.play(RotateGraph(g, nodes[-1], +PI / 2), run_time = 10)
         scene.wait(2)
         return
 
@@ -747,7 +765,6 @@ class RotateGraph(Animation):
     def __init__(self, graph, node_to_rotate_about, angle):
         dummyMObject = Circle()
         dummyMObject.set_opacity(0)
-        Animation.__init__(self, dummyMObject)
 
         self.graph = graph
         self.node_to_rotate_about = node_to_rotate_about
@@ -755,8 +772,15 @@ class RotateGraph(Animation):
 
         self.original_node_pos = {}
 
+        dummyGroup = VGroup()
         for node in graph.nodes:
             self.original_node_pos[node] = [node.config['center_x'], node.config['center_y']]
+            dummyGroup.add(graph.mobject_for_node[node])
+
+        for edge in graph.edges:
+            dummyGroup.add(graph.mobject_for_edge[edge])
+
+        Animation.__init__(self, dummyGroup)
 
     def interpolate_mobject(self, alpha):
         for node in self.graph.nodes:
