@@ -838,6 +838,7 @@ class NodeCoinMObject(VMobject):
         if 'value' in config:
             self.value = config['value']
             value_mobject = TexMobject(str(self.value), colour = BLACK, fill_opacity = 1, fill_color = config['value_colour'])
+            value_mobject.scale(0.8)
             self.value_mobject = value_mobject
             self.add(value_mobject)
 
@@ -853,16 +854,22 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
         super().construct()
 
         g = Graph(self, globals()["Node"], globals()["NodeCoinMObject"])
-        node_radius = 0.5
+        node_radius = 0.3
 
         grundy_node_tex_colour = "#2600ff"
 
-        def create_node(parent, x, y, grundy_number, coin_colour):
-            config = {'radius': node_radius, 'value' : grundy_number, 'coin_colour': GREEN, 'coin_radius': node_radius * 3 / 5, 'value_colour': grundy_node_tex_colour}
+        def create_node(parent, dx, dy, grundy_number, coin_colour):
+            config = {'radius': node_radius, 'value' : grundy_number, 'coin_radius': node_radius * 3 / 5, 'value_colour': grundy_node_tex_colour}
             if coin_colour:
                 config['coin_colour'] = coin_colour
 
-            new_node = g.create_node(x, y, config)
+            parent_x = 0
+            parent_y = 0
+            if parent:
+                parent_x = parent.config['center_x']
+                parent_y = parent.config['center_y']
+
+            new_node = g.create_node(parent_x + dx, parent_y + dy, config)
             if parent:
                 g.create_edge(new_node, parent, {})
 
@@ -870,6 +877,11 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
 
         centre_node = create_node(None, 1, 1, 7, GREEN)
+        b1 = create_node(centre_node, 0.2, -0.8, random.randint(0, 7), None)
+        b1_nodeA = create_node(b1, 0.9, -0.9, random.randint(0, 7), ORANGE)
+        b1_nodeB = create_node(b1, 0.1, -1.1, random.randint(0, 7), None)
+        b1_nodeC = create_node(b1, -0.6, -0.8, random.randint(0, 7), None)
+        b1_nodeD = create_node(b1_nodeA, -0.2, -0.7, random.randint(0, 7), None)
 
         self.play(g.create_animation())
 
