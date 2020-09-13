@@ -990,7 +990,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
             self.play(g.create_animation())
 
-            def create_brace_for_node_pair(nodeLeft, nodeRight):
+            def create_brace_for_node_pair(nodeLeft, nodeRight, tex):
                 dummyLeftMObject = Circle(radius = 0)
                 dummyLeftMObject.move_to(g.mobject_for_node[nodeLeft].get_center())
                 dummyLeftMObject.shift(nodeLeft.config['radius'] * UP)
@@ -1003,21 +1003,36 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                 dummyGroup.add(dummyLeftMObject)
                 dummyGroup.add(dummyRightMObject)
 
-                return Brace(dummyGroup, color = BLACK, fill_color = BLACK, direction = UP )
+                brace = Brace(dummyGroup, color = BLACK, fill_color = BLACK, direction = UP )
+                text = TexMobject(tex, color = BLACK, fill_opacity = 1, fill_color = BLACK)
+                text.next_to(brace, UP)
+                brace.text = text
+
+                return brace
+
+
+
 
             brace = None
+            digit = None
             for layer in descendents_by_height:
+                anims = []
                 if not brace:
-                    brace = create_brace_for_node_pair(centre_node, layer[0])
-                    brace_anim = GrowFromCenter(brace)
+                    brace = create_brace_for_node_pair(centre_node, layer[0], 0)
+                    digit = brace.text
+                    anims.append(GrowFromCenter(brace))
+                    anims.append(Write(digit))
                 else:
-                    brace_target = create_brace_for_node_pair(centre_node, layer[0])
-                    brace_anim = Transform(brace, brace_target)
-                self.play(brace_anim)
+                    brace_target = create_brace_for_node_pair(centre_node, layer[0], 0)
+                    digit_target = digit.copy()
+                    digit_target.next_to(brace_target, UP)
+                    anims.append(Transform(brace, brace_target))
+                    anims.append(Transform(digit, digit_target))
+                self.play(*anims)
 
             g.restore_from_state(previous_graph_state)
 
-            self.play(g.create_animation(), FadeOutAndShift(brace, UP))
+            self.play(g.create_animation(), FadeOutAndShift(brace, UP), FadeOutAndShift(digit, UP))
 
             self.play(RotateGraph(g, centre_node, PI / 2))
 
