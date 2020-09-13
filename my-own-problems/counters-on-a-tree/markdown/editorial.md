@@ -191,7 +191,7 @@ However, what if on each call to $\textit{addToAllDists}(1)$, for each $x$, inst
 
 And that's it!
 
-**TODO - end less lamely, and do the complexity analysis, as well.  Should mention somewhere that reducing m_numBits gives _asymptotic_ gains i.e. without it, _creating_ a $\textit{DistTracker}$ for each Centroid $T_i$ would contribute $O(N^2)$ to the runtime**
+**TODO - end less lamely.  Should maybe mention somewhere that reducing m_numBits gives _asymptotic_ gains i.e. without it, _creating_ a $\textit{DistTracker}$ for each Centroid $T_i$ would contribute $O(N^2)$ to the runtime**
 
 **Complexity Analysis**
 
