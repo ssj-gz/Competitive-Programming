@@ -104,9 +104,7 @@ So: for **Phase Two**, we need to find the height of $v$ ($\textit{newParentHeig
 
 **TODO - diagram here - tree consisting of loads of tiny nodes, colour-coded/ with lines drawn round them indicating the breakdown described below**
 
-The set of nodes to which we can reparent $u_i$ consists of: 
-
-* those in section $A$ minus a set we'll call $\textit{AD}$: the nodes in $A$ that are descendents of $u_i$
+* The set of nodes to which we can reparent $u_i$ consists of those in section $A$ minus a set we'll call $\textit{AD}$: the nodes in $A$ that are descendents of $u_i$
 * $\textit{AD}$ is equal to the set $D$ of all descendents of $u_i$ minus the set that we'll call $\textit{DH}$: those nodes $x\in D$ with $x.\textit{height} > h$
 * From the schematic, $\textit{DH}$ is precisely the set of _proper descendents_ of all $y$ such that $y\in D$ and $y.\textit{height}=h$. 
 
