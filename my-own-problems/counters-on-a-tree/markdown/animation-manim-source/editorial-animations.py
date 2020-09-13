@@ -82,8 +82,10 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
         #node_mobject.move_to([blah_node.config['center_x'], blah_node.config['center_y'], 0])
         scene.bring_to_back(circle)
         print("node_mobject pos after:", node_mobject.get_center())
-        scene.play(RotateGraph(g, nodes[-1], +PI / 2), run_time = 10)
-        scene.wait(2)
+        scene.play(RotateGraph(g, nodes[-1], +PI / 4), run_time = 3)
+        scene.play(ApplyMethod(node_mobject.scale, 3))
+        scene.play(ApplyMethod(node_mobject.scale, 1 / 3))
+        scene.play(RotateGraph(g, nodes[-1], -PI / 4), run_time = 3)
         return
 
         coin_radius = node_radius / 2
