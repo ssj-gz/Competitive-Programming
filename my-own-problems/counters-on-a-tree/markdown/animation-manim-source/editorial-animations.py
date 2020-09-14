@@ -985,6 +985,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
 
         grundy_xor_elements = [grundy_value_mobject]
+        grundy_xor_digits = []
 
         self.play(Write(disttracker_title_display), Write(grundy_number_label), Write(grundy_value_mobject))
 
@@ -992,6 +993,19 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
         horizontal_gap_between_nodes = enlarged_node_radius
         vertical_gap_between_nodes = enlarged_node_radius
         branch_to_straighten_index = 2
+
+        def add_amount_to_change_by(digitMObject, amount_to_change_by):
+            text = str(amount_to_change_by)
+            if amount_to_change_by > 0:
+                text = "+" + text
+            plusAmount = TexMobject(text)
+            plusAmount.set_color(RED)
+            plusAmount.scale(disttracker_text_scale / 3)
+            plusAmount.next_to(digitMObject, TOP / 5)
+            plusAmount.shift((digitMObject.get_width() / 2, 0, 0))
+            self.add(plusAmount)
+            return plusAmount
+
         # Iterate through the branches.
         for i in range(0, len(branch_roots)):
             print("branch_to_straighten_index:", branch_to_straighten_index)
@@ -1075,9 +1089,76 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
             self.play(Write(nodes_at_current_dist_rect))
             for layer in descendents_by_height:
                 nodes_at_current_dist_rect_target = create_rectangle_around_nodes(layer, gap_size = SMALL_BUFF)
-                self.play(Transform(nodes_at_current_dist_rect, nodes_at_current_dist_rect_target))
 
-            self.play(FadeOutAndShift(propagate_text, UP), FadeOut(nodes_at_current_dist_rect))
+                addToAllDists_anims = []
+                addToAllDists_text = TexMobject(r'\textit{addToAllDists}(1)', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                addToAllDists_text.scale(disttracker_text_scale)
+                addToAllDists_text.next_to(propagate_text.get_center(), 2 * DOWN)
+                addToAllDists_text.align_on_border(RIGHT)
+                addToAllDists_anims.append(FadeInFrom(addToAllDists_text, DOWN))
+
+                addPlusOneAnims = []
+                fadePlusOneAnims = []
+                for digit_mobject in grundy_xor_digits:
+                    plusOne = add_amount_to_change_by(digit_mobject, 1)
+
+                    fadedMovedPlusOne = plusOne.copy()
+                    fadedMovedPlusOne.set_opacity(0)
+                    fadedMovedPlusOne.shift((0, 3 * plusOne.get_height(), 0))
+
+                    addPlusOneAnims.append(FadeInFrom(plusOne, DOWN))
+
+                    fadePlusOneAnims.append(Transform(plusOne, fadedMovedPlusOne))
+
+                self.play(FadeInFrom(addToAllDists_text, DOWN), LaggedStart(*addPlusOneAnims))
+
+                increment_digits_and_change_grundy_anims = []
+                distTracker.adjustAllDistances(1)
+                for digit_mobject in grundy_xor_digits:
+                    increment_digits_and_change_grundy_anims.append(create_scroll_digit_to_animation(digit_mobject, digit_mobject.digitValue, digit_mobject.digitValue + 1, digitMObjectScale = digit_mobject.text_scale_factor))
+                    digit_mobject.digitValue = digit_mobject.digitValue + 1
+
+                increment_digits_and_change_grundy_anims.append(create_scroll_digit_to_animation(grundy_value_mobject, grundy_value_mobject.digitValue, distTracker.grundyNumber(), digitMObjectScale = grundy_value_mobject.text_scale_factor))
+                grundy_value_mobject.digitValue = distTracker.grundyNumber()
+
+                self.play(Transform(nodes_at_current_dist_rect, nodes_at_current_dist_rect_target), FadeOutAndShift(addToAllDists_text, UP), *increment_digits_and_change_grundy_anims, LaggedStart(*fadePlusOneAnims))
+
+                print("distTracker:", distTracker.distances)
+
+            # Reset DistTracker.
+            amount_to_subtract_from_disttracker = len(descendents_by_height)
+            print("amount_to_subtract_from_disttracker:", amount_to_subtract_from_disttracker, " DistTracker:", distTracker.distances)
+            addToAllDists_text = TexMobject(r'\textit{addToAllDists}(' + str(-amount_to_subtract_from_disttracker) + ')', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+            addToAllDists_text.scale(disttracker_text_scale)
+            addToAllDists_text.next_to(propagate_text, 2 * DOWN)
+            addToAllDists_text.align_on_border(RIGHT)
+            addToAllDists_anims.append(FadeInFrom(addToAllDists_text, DOWN))
+
+            distTracker.adjustAllDistances(-amount_to_subtract_from_disttracker)
+            subtractAnims = []
+            fadeSubtractAnims = []
+            for digit_mobject in grundy_xor_digits:
+                subtractFromDistTracker = add_amount_to_change_by(digit_mobject, -amount_to_subtract_from_disttracker)
+
+                fadedMovedSubtractFromDistTracker = subtractFromDistTracker.copy()
+                fadedMovedSubtractFromDistTracker.set_opacity(0)
+                fadedMovedSubtractFromDistTracker.shift((0, 3 * subtractFromDistTracker.get_height(), 0))
+
+                subtractAnims.append(FadeInFrom(subtractFromDistTracker, DOWN))
+
+                fadeSubtractAnims.append(Transform(subtractFromDistTracker, fadedMovedSubtractFromDistTracker))
+
+            self.play(FadeInFrom(addToAllDists_text, DOWN), LaggedStart(*subtractAnims))
+
+            increment_digits_and_change_grundy_anims = []
+            for digit_mobject in grundy_xor_digits:
+                increment_digits_and_change_grundy_anims.append(create_scroll_digit_to_animation(digit_mobject, digit_mobject.digitValue, digit_mobject.digitValue - amount_to_subtract_from_disttracker, digitMObjectScale = digit_mobject.text_scale_factor))
+                digit_mobject.digitValue = digit_mobject.digitValue - amount_to_subtract_from_disttracker
+
+            increment_digits_and_change_grundy_anims.append(create_scroll_digit_to_animation(grundy_value_mobject, grundy_value_mobject.digitValue, distTracker.grundyNumber(), digitMObjectScale = grundy_value_mobject.text_scale_factor))
+            grundy_value_mobject.digitValue = distTracker.grundyNumber()
+
+            self.play(FadeOutAndShift(propagate_text, UP), FadeOut(nodes_at_current_dist_rect), FadeOutAndShift(addToAllDists_text, UP), *increment_digits_and_change_grundy_anims, LaggedStart(*fadeSubtractAnims))
 
             # Collect
             collect_text = TexMobject(r'\textit{Collect}', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
@@ -1201,6 +1282,10 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
                         self.play(*anims)
 
+                        coin_copy.text_scale_factor = disttracker_text_scale
+                        coin_copy.digitValue = distance_from_center
+                        grundy_xor_digits.append(coin_copy)
+
                         distTracker.insertDist(distance_from_center)
                         self.play(create_scroll_digit_to_animation(grundy_value_mobject, grundy_value_mobject.digitValue, distTracker.grundyNumber(), digitMObjectScale = grundy_value_mobject.text_scale_factor),
                                    FadeOutAndShift(insertDist_text, UP))
@@ -1209,7 +1294,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
                 distance_from_center = distance_from_center + 1
 
-
+            
             g.restore_from_state(previous_graph_state)
 
             self.play(g.create_animation(), FadeOutAndShift(brace, UP), FadeOutAndShift(distance_from_centre_label, UP), FadeOutAndShift(collect_text, UP))
