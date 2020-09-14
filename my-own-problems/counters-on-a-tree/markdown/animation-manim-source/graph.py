@@ -100,6 +100,8 @@ class GraphNodeMoveAnim(Animation):
                     edge_object.set_start_and_end_attrs([start_and_end_point[0][0], start_and_end_point[0][1], 0], [start_and_end_point[1][0], start_and_end_point[1][1], 0])
                     if 'colour' in edge.config:
                         edge_object.set_color(interpolate_color(edge_object.config['colour'], edge.config['colour'], alpha))
+                        if alpha == 1:
+                            edge_object.config['colour'] = edge.config['colour']
                     edge_object.generate_points()
 
 class NodeMObject(VMobject):
@@ -343,12 +345,16 @@ class Graph:
         for node in self.nodes:
             config_for_node[node] = node.config.copy()
 
-        return config_for_node
+        config_for_edge = {}
+        for edge in self.edges:
+            config_for_edge[edge] = edge.config.copy()
+
+        return [config_for_node, config_for_edge]
 
     def restore_from_state(self, state):
-        config_for_node = state
+        config_for_node = state[0]
+        config_for_edge = state[1]
         for node in self.nodes:
             node.config = config_for_node[node].copy()
-
-        return config_for_node
-
+        for edge in self.edges:
+            edge.config = config_for_edge[edge].copy()
