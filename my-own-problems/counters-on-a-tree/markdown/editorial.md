@@ -125,7 +125,7 @@ We won't go into much detail on [Centroid Decomposition](https://www.geeksforgee
 
 Let $D_i$ be the degree of $C_i$ in $T_i$, and let $b_1, b_2, \dots, b_{D_i}$ be the neighbours of $C_i$ in $T_i$.  We partition the $u\in T_i$, $u \ne C_i$ into $D_i$ _branches_, where the node $u$ is in branch $l$ if the unique path from $C_i$ to $u$ passes through $b_l$.  For example:
 
-**TODO - image here - medium size $T_i$ with $D_i = 4$ - MOVCOIN2_ED_3_THUMB.png, linking to MOVCOIN2_ED_3_ANIM.gif.  In the meantime, you can probably figure it out from anims 6 & 7 XD**
+[![](https://etotheipiplusone.com/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_3_THUMB.png)](https://etotheipiplusone.com/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_3_ANIM.gif)
 
 With this notation, **C3** can be rephrased as:
 
