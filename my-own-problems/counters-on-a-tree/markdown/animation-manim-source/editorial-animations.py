@@ -4,6 +4,7 @@ from ssjgz_scene import *
 from downarrow import *
 from digit_scroll_animation import *
 from graph import *
+from itertools import chain
 
 class DistTracker():
     def __init__(self):
@@ -854,7 +855,7 @@ class NodeCoinMObject(VMobject):
     def copy(self):
         return self.deepcopy()
 
-def create_rectangle_around_nodes(nodes, gap_size):
+def create_rectangle_around_nodes(nodes, gap_size = SMALL_BUFF, stroke_width = 1):
     rect_top = -1000
     rect_bottom = +1000
     rect_left = 1000
@@ -873,7 +874,7 @@ def create_rectangle_around_nodes(nodes, gap_size):
     rect_top = rect_top + gap_size
     rect_bottom = rect_bottom - gap_size
 
-    rectangle = Rectangle(color=RED, width = rect_right - rect_left, height = rect_top - rect_bottom)
+    rectangle = Rectangle(color=RED, width = rect_right - rect_left, height = rect_top - rect_bottom, stroke_width = stroke_width)
     # Shift so that top-left is at origin.
     rectangle.shift(rectangle.get_width() / 2 * RIGHT, rectangle.get_height() / 2 * DOWN)
     # Shift to correct position.
@@ -1013,8 +1014,6 @@ class MoveCoins2Editorial_3_show_branches(SSJGZScene):
             node.config['center_x'] = new_x
             node.config['center_y'] = new_y
 
-
-
         scale_factor = 1.2
 
         for node in g.nodes:
@@ -1032,20 +1031,45 @@ class MoveCoins2Editorial_3_show_branches(SSJGZScene):
             node.config['radius'] = node.config['radius'] * scale_factor
 
 
-        branch_label_mobjects = []
+        branch_root_label_mobjects = []
         for branch_index in range(0, len(branch_roots)):
             branch_label = TexMobject(r'b_' + str(branch_index + 1), colour = BLACK, fill_opacity = 1, fill_color = BLACK)
-            branch_label_mobjects.append(branch_label)
+            branch_root_label_mobjects.append(branch_label)
 
 
         self.play(g.create_animation())
 
-        branch_label_mobjects[0].next_to(g.mobject_for_node[branch_roots[0]], UP, buff = SMALL_BUFF)
-        branch_label_mobjects[1].next_to(g.mobject_for_node[branch_roots[1]], LEFT, buff = SMALL_BUFF)
-        branch_label_mobjects[2].next_to(g.mobject_for_node[branch_roots[2]], DOWN, buff = SMALL_BUFF)
-        branch_label_mobjects[3].next_to(g.mobject_for_node[branch_roots[3]], UP, buff = SMALL_BUFF)
+        branch_root_label_mobjects[0].next_to(g.mobject_for_node[branch_roots[0]], UP, buff = SMALL_BUFF)
+        branch_root_label_mobjects[1].next_to(g.mobject_for_node[branch_roots[1]], LEFT, buff = SMALL_BUFF)
+        branch_root_label_mobjects[2].next_to(g.mobject_for_node[branch_roots[2]], DOWN, buff = SMALL_BUFF)
+        branch_root_label_mobjects[3].next_to(g.mobject_for_node[branch_roots[3]], UP, buff = SMALL_BUFF)
+        center_label_mobject = TexMobject(r'C', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+        center_label_mobject.next_to(g.mobject_for_node[centre_node], UP, buff = SMALL_BUFF)
+        center_label_mobject.shift([0.1, 0, 0])
 
-        self.play(*map(FadeIn, branch_label_mobjects))
+        self.play(LaggedStart(*map(FadeIn, branch_root_label_mobjects), FadeIn(center_label_mobject)))
+
+        new_objects = []
+        for branch_index in range(0, len(branch_roots)):
+            other_branches = branch_roots.copy()
+            other_branches.remove(branch_roots[branch_index])
+            branch_nodes = g.find_descendents_at_height(centre_node, ignore_node_list = other_branches)
+            branch_nodes = list(chain(*branch_nodes))
+            branch_nodes.remove(centre_node)
+            branch_rect = create_rectangle_around_nodes(branch_nodes, gap_size = SMALL_BUFF, stroke_width = 8)
+            new_objects.append(branch_rect)
+            branch_label = TexMobject(r'B_' + str(branch_index + 1), colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+            branch_label.scale(2)
+            if branch_index != 0:
+                branch_label.next_to(branch_rect, LEFT, buff = SMALL_BUFF)
+            else:
+                branch_label.next_to(branch_rect, RIGHT, buff = SMALL_BUFF)
+            new_objects.append(branch_label)
+
+        self.play(LaggedStart(*map(FadeIn, new_objects), lag_ratio = 2 * DEFAULT_LAGGED_START_LAG_RATIO))
+
+        self.save_thumbnail()
+
 
 class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
     def construct(self):
