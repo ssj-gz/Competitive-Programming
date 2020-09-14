@@ -1109,27 +1109,27 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                 return brace
 
             brace = None
-            digit = None
+            distance_from_centre_label = None
             distance_from_center = 1
             for layer in descendents_by_height:
                 anims = []
 
                 if not brace:
                     brace = create_brace_for_node_pair(centre_node, layer[0], 1)
-                    digit = brace.text
-                    digit.digitValue = 1
+                    distance_from_centre_label = brace.text
+                    distance_from_centre_label.digitValue = 1
                     anims.append(GrowFromCenter(brace))
-                    anims.append(Write(digit))
+                    anims.append(Write(distance_from_centre_label))
                     self.play(*anims)
                 else:
-                    brace_target = create_brace_for_node_pair(centre_node, layer[0], digit.digitValue)
-                    digit_target = digit.copy()
+                    brace_target = create_brace_for_node_pair(centre_node, layer[0], distance_from_centre_label.digitValue)
+                    digit_target = distance_from_centre_label.copy()
                     digit_target.next_to(brace_target, UP)
                     anims.append(Transform(brace, brace_target))
-                    anims.append(Transform(digit, digit_target))
+                    anims.append(Transform(distance_from_centre_label, digit_target))
                     self.play(*anims, run_time = 0.5)
-                    self.play(create_scroll_digit_to_animation(digit, digit.digitValue, digit.digitValue + 1, digitMObjectScale = digit.text_scale_factor), run_time = 0.5)
-                    digit.digitValue = digit.digitValue + 1 
+                    self.play(create_scroll_digit_to_animation(distance_from_centre_label, distance_from_centre_label.digitValue, distance_from_centre_label.digitValue + 1, digitMObjectScale = distance_from_centre_label.text_scale_factor), run_time = 0.5)
+                    distance_from_centre_label.digitValue = distance_from_centre_label.digitValue + 1 
 
                 nodes_with_coins = []
                 for node in layer:
@@ -1191,10 +1191,19 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                         anims.append(Transform(coin_copy, coin_digit_mobject))
                         for i in new_objects:
                             anims.append(FadeIn(i))
+
+                        insertDist_text = TexMobject(r'\textit{insertDist}(' + str(distance_from_center) + ')', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                        insertDist_text.scale(disttracker_text_scale)
+                        insertDist_text.next_to(collect_text.get_center(), 2 * DOWN)
+                        insertDist_text.align_on_border(RIGHT)
+                        anims.append(WiggleOutThenIn(distance_from_centre_label, scale_value = 2, run_time = 1))
+                        anims.append(FadeInFrom(insertDist_text, DOWN))
+
                         self.play(*anims)
 
                         distTracker.insertDist(distance_from_center)
-                        self.play(create_scroll_digit_to_animation(grundy_value_mobject, grundy_value_mobject.digitValue, distTracker.grundyNumber(), digitMObjectScale = grundy_value_mobject.text_scale_factor), run_time = 0.5)
+                        self.play(create_scroll_digit_to_animation(grundy_value_mobject, grundy_value_mobject.digitValue, distTracker.grundyNumber(), digitMObjectScale = grundy_value_mobject.text_scale_factor),
+                                   FadeOutAndShift(insertDist_text, UP))
                         grundy_value_mobject.digitValue = distTracker.grundyNumber()
 
 
@@ -1203,7 +1212,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
             g.restore_from_state(previous_graph_state)
 
-            self.play(g.create_animation(), FadeOutAndShift(brace, UP), FadeOutAndShift(digit, UP), FadeOutAndShift(collect_text, UP))
+            self.play(g.create_animation(), FadeOutAndShift(brace, UP), FadeOutAndShift(distance_from_centre_label, UP), FadeOutAndShift(collect_text, UP))
 
             self.play(RotateGraph(g, centre_node, PI / 2))
 
