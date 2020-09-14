@@ -1133,8 +1133,8 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
                 if not nodes_with_coins:
                     cross_out = Cross(collect_text)
-                    self.play(Write(cross_out))
-                    self.play(FadeOut(cross_out))
+                    self.play(Write(cross_out), run_time = 0.3)
+                    self.play(FadeOut(cross_out), run_time = 0.3)
                 else:
                     for node in nodes_with_coins:
                         coin_colour = node.config['coin_colour']
