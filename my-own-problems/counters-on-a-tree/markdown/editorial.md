@@ -205,7 +205,7 @@ And that's it!
 # ALTERNATE EXPLANATION:
 **A Faster Alternative to Centroid Decomposition?**  When I first solved this Problem (and [CHGORAM2](https://www.codechef.com/problems/CHGORAM2)), I didn't know much about the properties of Centroid Decomposition and so came up with my own approach which I called the _light-first DFS_:
 
-**TODO - add publically available link to http://campus.codechef.com/SEP20TST/viewsolution/37862309/ **
+https://www.codechef.com/viewsolution/37921982
 
 This runs quite a bit faster than my Centroid Decomposition based solution.  Questions for the interested reader :)
 
