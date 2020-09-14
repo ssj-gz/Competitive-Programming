@@ -1037,16 +1037,16 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                     y = y - 2 * enlarged_node_radius - vertical_gap_between_nodes
                 x = x + 2 * enlarged_node_radius + horizontal_gap_between_nodes
 
-            def align_objects_sequentially(mobjects, y, centre_horizontally = False):
+            def align_objects_sequentially(mobjects, y, centre_horizontally_around_x = None):
                 for i,mobject in enumerate(mobjects):
                     if i >= 1:
                         mobjects[i].next_to(mobjects[i - 1], RIGHT)
                     mobjects[i].set_y(y)
 
-                if centre_horizontally:
+                if centre_horizontally_around_x is not None:
                     left_edge = mobjects[0].get_x() - mobjects[0].get_width() / 2
                     total_width = (mobjects[-1].get_x() + mobjects[-1].get_width() / 2) - left_edge
-                    desired_left_edge = -total_width / 2
+                    desired_left_edge = -total_width / 2 + centre_horizontally_around_x
                     for mobject in mobjects:
                         mobject.set_x(mobject.get_x() + (desired_left_edge - left_edge))
 
@@ -1140,7 +1140,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                     new_grundy_number_mobject.scale(old_grundy_number_mobject.get_height() / new_grundy_number_mobject.get_height())
 
                     grundy_update_equation = [old_grundy_number_mobject, xor_symbol, grundy_from_disttracker_target, equal_symbol, new_grundy_number_mobject]
-                    align_objects_sequentially(grundy_update_equation, old_grundy_number_mobject.get_y())
+                    align_objects_sequentially(grundy_update_equation, old_grundy_number_mobject.get_y(), centre_horizontally_around_x = node.config['center_x'])
 
                     update_equation_amims = [
                                                 Transform(node_mobject.value_mobject, old_grundy_number_mobject),
@@ -1317,7 +1317,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                             grundy_xor_elements.insert(equals_index, xor_symbol)
 
 
-                        align_objects_sequentially(grundy_xor_elements_targets, grundy_xor_y, centre_horizontally = True)
+                        align_objects_sequentially(grundy_xor_elements_targets, grundy_xor_y, centre_horizontally_around_x = 0)
                         anims.append(Transform(coin_copy, coin_digit_mobject))
                         for i in new_objects:
                             anims.append(FadeIn(i))
