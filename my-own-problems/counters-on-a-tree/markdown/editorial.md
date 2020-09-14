@@ -210,6 +210,8 @@ This runs quite a bit faster than my Centroid Decomposition based solution.  Que
 * Are there any Problems for which a CD approach would work but not a LFDFS? Vice-versa?
 * Is the speedup due to mere implementation details, or might there be certain trees where LFDFS is _asymptotically_ better than CD? If yes, what kind of trees would you expect to be faster in practice?
 
+The fastest solution that I saw was @sg1729's, running in just [0.63s](https://www.codechef.com/viewsolution/37812504).
+
 # SOLUTIONS:
 
 [details="Setter's Solution (C++)"]
