@@ -1127,6 +1127,10 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                 self.play(Transform(nodes_at_current_dist_rect, nodes_at_current_dist_rect_target), FadeOutAndShift(addToAllDists_text, UP), *increment_digits_and_change_grundy_anims, LaggedStart(*fadePlusOneAnims))
 
                 # Propagate the grundy numbers to all the nodes in this layer.
+                # The animations are done in parallel, which makes things a little tricky.
+                create_equation_anims = []
+                new_grundy_number_mobjects = []
+                remove_equation_anims = []
                 for node in layer:
                     node_mobject = g.mobject_for_node[node]
                     old_grundy_number_mobject = node_mobject.value_mobject.copy()
@@ -1138,39 +1142,41 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                     new_grundy_number = node.grundy_number ^ distTracker.grundyNumber()
                     new_grundy_number_mobject = TexMobject(str(new_grundy_number), colour = BLACK, fill_opacity = 1, fill_color = old_grundy_number_mobject.get_fill_color())
                     new_grundy_number_mobject.scale(old_grundy_number_mobject.get_height() / new_grundy_number_mobject.get_height())
+                    new_grundy_number_mobjects.append(new_grundy_number_mobject)
 
                     grundy_update_equation = [old_grundy_number_mobject, xor_symbol, grundy_from_disttracker_target, equal_symbol, new_grundy_number_mobject]
                     align_objects_sequentially(grundy_update_equation, old_grundy_number_mobject.get_y(), centre_horizontally_around_x = node.config['center_x'])
+                    for i in grundy_update_equation:
+                        self.remove(i)
 
-                    update_equation_amims = [
+                    create_equation_anims.extend([ 
                                                 Transform(node_mobject.value_mobject, old_grundy_number_mobject),
                                                 FadeIn(xor_symbol),
                                                 Transform(grundy_from_disttracker, grundy_from_disttracker_target),
                                                 FadeIn(equal_symbol)
-                                            ]
+                                            ])
 
-                    self.play(*update_equation_amims)
-                    self.play(FadeIn(new_grundy_number_mobject))
 
                     new_grundy_number_mobject_in_node = new_grundy_number_mobject.copy()
                     new_grundy_number_mobject_in_node.move_to([node.config['center_x'], node.config['center_y'], 0])
-                    node_mobject.value_mobject.become(new_grundy_number_mobject)
-                    self.remove(new_grundy_number_mobject)
 
-                    remove_equation_anims = [ 
+                    remove_equation_anims.extend([ 
                                                 FadeOut(old_grundy_number_mobject),
                                                 FadeOut(xor_symbol),
                                                 FadeOut(grundy_from_disttracker),
                                                 FadeOut(equal_symbol),
                                                 Transform(node_mobject.value_mobject, new_grundy_number_mobject_in_node)
-                                            ]
+                                            ])
 
-                    self.play(*remove_equation_anims)
+                self.play(*create_equation_anims)
+                self.play(*map(FadeIn, new_grundy_number_mobjects))
 
+                for i,node in enumerate(layer):
+                    node_mobject = g.mobject_for_node[node]
+                    node_mobject.value_mobject.become(new_grundy_number_mobjects[i])
+                    self.remove(new_grundy_number_mobjects[i])
 
-
-
-
+                self.play(*remove_equation_anims)
 
                 print("distTracker:", distTracker.distances)
 
