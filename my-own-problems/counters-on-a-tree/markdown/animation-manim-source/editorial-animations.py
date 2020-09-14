@@ -909,6 +909,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
 
         b1 = create_node(centre_node, 0.2, -0.8, random.randint(0, 7), None)
+        b1.branch_root_number = 1
         b1_nodeA = create_node(b1, 0.9, -0.9, random.randint(0, 7), ORANGE)
         b1_nodeB = create_node(b1, 0.1, -1.1, random.randint(0, 7), BROWN)
         b1_nodeC = create_node(b1, -0.6, -0.8, random.randint(0, 7), None)
@@ -918,6 +919,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
         rotate_tree_90_degrees_counter_clockwise(g)
 
         b2 = create_node(centre_node, -0.2, -0.7, random.randint(0, 7), None)
+        b2.branch_root_number = 2
         b2_nodeA = create_node(b2, 0.9, -0.9, random.randint(0, 7), YELLOW)
         b2_nodeB = create_node(b2, 0.1, -1.1, random.randint(0, 7), None)
         b2_nodeC = create_node(b2, -0.6, -0.8, random.randint(0, 7), None)
@@ -928,6 +930,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
         rotate_tree_90_degrees_counter_clockwise(g)
 
         b3 = create_node(centre_node, -0.2, -0.7, random.randint(0, 7), MAGENTA)
+        b3.branch_root_number = 3
         b3_nodeA = create_node(b3, 0.6, -0.9, random.randint(0, 7), None)
         b3_nodeB = create_node(b3, -0.1, -1.1, random.randint(0, 7), None)
         b3_nodeC = create_node(b3_nodeA, 0.1, -0.9, random.randint(0, 7), None)
@@ -937,9 +940,14 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
         rotate_tree_90_degrees_counter_clockwise(g)
 
         b4 = create_node(centre_node, 0.3, -0.8, random.randint(0, 7), PURPLE)
+        b4.branch_root_number = 4
         b4_nodeA = create_node(b4, 0.6, -0.8, random.randint(0, 7), None)
         b4_nodeB = create_node(b4_nodeA, 0.1, -0.7, random.randint(0, 7), GREY)
         branch_roots.append(b4)
+
+        # Rotate 180 degrees, so that branch 1 is at the right.
+        rotate_tree_90_degrees_counter_clockwise(g)
+        rotate_tree_90_degrees_counter_clockwise(g)
 
         furthest_point_from_centre = 0.0
         for node in g.nodes:
@@ -994,7 +1002,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
         enlarged_node_radius = node_radius * 2
         horizontal_gap_between_nodes = enlarged_node_radius * 1.5
         vertical_gap_between_nodes = enlarged_node_radius * 1.1
-        branch_to_straighten_index = 2
+        branch_to_straighten_index = 0
 
         def add_amount_to_change_by(digitMObject, amount_to_change_by):
             text = str(amount_to_change_by)
@@ -1022,6 +1030,10 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
             rightmost_branch = branch_to_straighten
             other_branches = branch_roots.copy()
             other_branches.remove(branch_to_straighten)
+
+            branch_label = TexMobject(r'\textit{Branch }b_' + str(branch_to_straighten.branch_root_number), colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+            branch_label.align_on_border(RIGHT)
+            branch_label.set_y(self.camera.get_frame_height() / 2 - branch_label.get_height())
 
             descendents_by_height = g.find_descendents_at_height(centre_node, ignore_node_list = other_branches)
             descendents_by_height.pop(0) # Ditch the root
@@ -1059,7 +1071,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
             propagate_text.align_on_border(RIGHT)
             propagate_text.set_y(disttracker_title_display.get_y())
 
-            self.play(g.create_animation(), FadeInFrom(propagate_text, DOWN))
+            self.play(g.create_animation(), FadeInFrom(propagate_text, DOWN), FadeInFrom(branch_label, DOWN))
 
             def create_rectangle_around_nodes(nodes, gap_size):
                 rect_top = -1000
@@ -1354,7 +1366,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
             self.play(g.create_animation(), FadeOutAndShift(brace, UP), FadeOutAndShift(distance_from_centre_label, UP), FadeOutAndShift(collect_text, UP))
 
-            self.play(RotateGraph(g, centre_node, PI / 2))
+            self.play(RotateGraph(g, centre_node, PI / 2), FadeOutAndShift(branch_label, UP))
 
             branch_to_straighten_index = (branch_to_straighten_index + 1) % len(branch_roots)
 
