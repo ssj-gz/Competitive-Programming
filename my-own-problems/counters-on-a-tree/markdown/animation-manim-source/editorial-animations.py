@@ -887,7 +887,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
             new_node = g.create_node(parent_x + dx, parent_y + dy, config)
             new_node.grundy_number = grundy_number
             if parent:
-                g.create_edge(new_node, parent, {})
+                g.create_edge(new_node, parent, {'colour' : BLACK})
 
             return new_node
 
@@ -1039,6 +1039,12 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
             descendents_by_height.pop(0) # Ditch the root
             for layer in descendents_by_height:
                 layer.sort(key = lambda m: -m.config['center_y'])
+
+            for edge in g.edges:
+                for layer in descendents_by_height:
+                    for node in layer:
+                        if edge.start_node == node or edge.end_node == node:
+                            edge.config['colour'] = '#eeeeee'
 
             x = centre_node.config['center_x'] + node_radius + horizontal_gap_between_nodes + enlarged_node_radius
             for layer in descendents_by_height:
@@ -1357,6 +1363,9 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                         self.play(create_scroll_digit_to_animation(grundy_value_mobject, grundy_value_mobject.digitValue, distTracker.grundyNumber(), digitMObjectScale = grundy_value_mobject.text_scale_factor),
                                    FadeOutAndShift(insertDist_text, UP))
                         grundy_value_mobject.digitValue = distTracker.grundyNumber()
+
+                        if distance_from_center == 2:
+                            self.save_thumbnail()
 
 
                 distance_from_center = distance_from_center + 1
