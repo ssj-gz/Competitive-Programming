@@ -1012,7 +1012,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
             previous_graph_state = g.get_restorable_state()
             # Move the center node out of the way of the nodes from the other branches
-            centre_node.config['center_x'] = centre_node.config['center_x'] + 2 * enlarged_node_radius
+            centre_node.config['center_x'] = centre_node.config['center_x'] + 2.5 * enlarged_node_radius
             centre_node.config['radius'] = enlarged_node_radius
 
             branch_to_straighten = branch_roots[branch_to_straighten_index]
