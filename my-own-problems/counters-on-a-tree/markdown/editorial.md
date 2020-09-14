@@ -157,7 +157,8 @@ A BFS would also work and would likely be slightly more efficient: here's an exa
 
 Then we $\textit{clear}()$ our $\textit{DistTracker}$ and repeat, this time with $i=M,M-1,\dots,2,1$.
 
-**TODO - animation - MOVCOIN2_ED_5_THUMB.png, linking to MOVCOIN2_ED_5_ANIM.gif**
+[![](https://etotheipiplusone.com/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_5_THUMB.png)](https://etotheipiplusone.com/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_5_ANIM.gif)
+
 [/details]
 
 We now return to optimising our $\textit{DistTracker}$.  It often helps to take a bitwise approach to problems involving xor sums, and this is the case here.  Let's have a look at the binary representation of an increasing series of numbers and observe how each bit changes.  The numbers along the top of the table are the bit number with bit number $0$ being the least significant bit.
