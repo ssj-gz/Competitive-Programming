@@ -147,9 +147,7 @@ There were [one](https://www.codechef.com/viewsolution/37781202) or [two](https:
 # SOLUTIONS:
 
 [details="Setter's Solution (C++)"]
-```cpp
-**TODO - use a publically accessible link to the following code: http://campus.codechef.com/SEP20TST/viewsolution/36615800/ - we exceed the discuss post size limit if we include it inline!**
-```
+https://www.codechef.com/viewsolution/37919135
 [/details]
 
 [details="Tester's Solution (C++)"]
