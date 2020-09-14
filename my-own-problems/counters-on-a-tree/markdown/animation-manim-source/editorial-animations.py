@@ -868,6 +868,8 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
         PURPLE = "#800080"
         ORANGE = "#FF8C00"
 
+        distTracker = DistTracker()
+
         grundy_node_tex_colour = "#2600ff"
 
         def create_node(parent, dx, dy, grundy_number, coin_colour):
@@ -970,7 +972,10 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
         grundy_number_second_equals = None
 
         grundy_value_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = BLUE)
+        grundy_value_mobject.digitValue = 0
         grundy_value_mobject.scale(disttracker_text_scale)
+        grundy_value_mobject.text_scale_factor = disttracker_text_scale
+
         grundy_value_mobject.set_y(grundy_value_mobject.get_height() / 2 - self.camera.get_frame_height() / 2 + DEFAULT_MOBJECT_TO_EDGE_BUFFER)
 
         grundy_number_label = TexMobject(r'\textit{grundy number} =', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
@@ -1187,6 +1192,11 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                         for i in new_objects:
                             anims.append(FadeIn(i))
                         self.play(*anims)
+
+                        distTracker.insertDist(distance_from_center)
+                        self.play(create_scroll_digit_to_animation(grundy_value_mobject, grundy_value_mobject.digitValue, distTracker.grundyNumber(), digitMObjectScale = grundy_value_mobject.text_scale_factor), run_time = 0.5)
+                        grundy_value_mobject.digitValue = distTracker.grundyNumber()
+
 
                 distance_from_center = distance_from_center + 1
 
