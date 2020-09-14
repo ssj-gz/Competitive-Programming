@@ -1312,7 +1312,6 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                                 if hasattr(obj, 'equal_symbol'):
                                     equals_index = i
                                     break
-                            self.save_thumbnail() # TODO - remove
                             assert(equals_index != -1)
                             xor_symbol = TexMobject(r'\oplus', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
                             xor_symbol.scale(disttracker_text_scale)
