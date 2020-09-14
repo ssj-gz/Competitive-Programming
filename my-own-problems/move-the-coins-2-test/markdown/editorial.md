@@ -8,7 +8,7 @@
 **Tester:** [Suchan Park](https://www.codechef.com/users/tncks0121)  
 
 # DIFFICULTY:
-Hard **TODO - revisit this - seems to be easier than MOVCOIN2**
+Medium-Hard
 
 # PREREQUISITES:
 Persistence, Graph Theory, AVL Tree, Segment Tree
