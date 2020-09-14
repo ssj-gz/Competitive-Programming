@@ -1003,7 +1003,21 @@ class MoveCoins2Editorial_3_show_branches(SSJGZScene):
             node.config['center_y'] = node.config['center_y'] - centre_node_y
             node.config['radius'] = node.config['radius'] * scale_factor
 
+
+        branch_label_mobjects = []
+        for branch_index in range(0, len(branch_roots)):
+            branch_label = TexMobject(r'b_' + str(branch_index + 1), colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+            branch_label_mobjects.append(branch_label)
+
+
         self.play(g.create_animation())
+
+        branch_label_mobjects[0].next_to(g.mobject_for_node[branch_roots[0]], UP, buff = SMALL_BUFF)
+        branch_label_mobjects[1].next_to(g.mobject_for_node[branch_roots[1]], LEFT, buff = SMALL_BUFF)
+        branch_label_mobjects[2].next_to(g.mobject_for_node[branch_roots[2]], DOWN, buff = SMALL_BUFF)
+        branch_label_mobjects[3].next_to(g.mobject_for_node[branch_roots[3]], UP, buff = SMALL_BUFF)
+
+        self.play(*map(FadeIn, branch_label_mobjects))
 
 class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
     def construct(self):
