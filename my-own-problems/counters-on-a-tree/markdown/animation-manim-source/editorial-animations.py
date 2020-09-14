@@ -908,10 +908,10 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
         branch_roots = []
 
 
-        b1 = create_node(centre_node, 0.2, -0.8, random.randint(0, 7), None)
+        b1 = create_node(centre_node, 0.2, -0.8, random.randint(0, 7), BROWN)
         b1.branch_root_number = 1
         b1_nodeA = create_node(b1, 0.9, -0.9, random.randint(0, 7), ORANGE)
-        b1_nodeB = create_node(b1, 0.1, -1.1, random.randint(0, 7), BROWN)
+        b1_nodeB = create_node(b1, 0.1, -1.1, random.randint(0, 7), None)
         b1_nodeC = create_node(b1, -0.6, -0.8, random.randint(0, 7), None)
         b1_nodeD = create_node(b1_nodeA, -0.2, -0.7, random.randint(0, 7), None)
         branch_roots.append(b1)
@@ -1153,7 +1153,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                 for node in layer:
                     node_mobject = g.mobject_for_node[node]
                     old_grundy_number_mobject = node_mobject.value_mobject.copy()
-                    old_grundy_number_mobject.next_to(node_mobject, DOWN, buff = 0)
+                    old_grundy_number_mobject.next_to(node_mobject, DOWN, buff = SMALL_BUFF)
                     xor_symbol = TexMobject(r'\oplus', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
                     grundy_from_disttracker_target = grundy_value_mobject.copy()
                     grundy_from_disttracker = grundy_value_mobject.copy()
