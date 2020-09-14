@@ -8,7 +8,7 @@
 **Tester:** [Suchan Park](https://www.codechef.com/users/tncks0121)
 
 # DIFFICULTY:
-Medium-Hard **TODO - revisit this - seems harder than MVCN2TST**
+Hard
 
 # PREREQUISITES:
 Sprague-Grundy, Centroid Decomposition, Bit Manipulation, Ad-hoc
