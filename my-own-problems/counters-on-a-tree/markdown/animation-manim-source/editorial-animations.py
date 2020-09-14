@@ -845,6 +845,7 @@ class NodeCoinMObject(VMobject):
             self.value = config['value']
             value_mobject = TexMobject(str(self.value), colour = BLACK, fill_opacity = 1, fill_color = config['value_colour'])
             value_mobject.scale(0.8)
+            value_mobject.text_scale = 0.8
             self.value_mobject = value_mobject
             self.add(value_mobject)
 
@@ -884,6 +885,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                 parent_y = parent.config['center_y']
 
             new_node = g.create_node(parent_x + dx, parent_y + dy, config)
+            new_node.grundy_number = grundy_number
             if parent:
                 g.create_edge(new_node, parent, {})
 
@@ -1090,6 +1092,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
             for layer in descendents_by_height:
                 nodes_at_current_dist_rect_target = create_rectangle_around_nodes(layer, gap_size = SMALL_BUFF)
 
+                # Adjust all the distances + grundy (with instructions), and shift highlighting rect to this layer.
                 addToAllDists_anims = []
                 addToAllDists_text = TexMobject(r'\textit{addToAllDists}(1)', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
                 addToAllDists_text.scale(disttracker_text_scale)
@@ -1122,6 +1125,52 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                 grundy_value_mobject.digitValue = distTracker.grundyNumber()
 
                 self.play(Transform(nodes_at_current_dist_rect, nodes_at_current_dist_rect_target), FadeOutAndShift(addToAllDists_text, UP), *increment_digits_and_change_grundy_anims, LaggedStart(*fadePlusOneAnims))
+
+                # Propagate the grundy numbers to all the nodes in this layer.
+                for node in layer:
+                    node_mobject = g.mobject_for_node[node]
+                    old_grundy_number_mobject = node_mobject.value_mobject.copy()
+                    old_grundy_number_mobject.next_to(node_mobject, DOWN)
+                    xor_symbol = TexMobject(r'\oplus', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                    grundy_from_disttracker_target = grundy_value_mobject.copy()
+                    grundy_from_disttracker = grundy_value_mobject.copy()
+                    equal_symbol = TexMobject(r'=', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                    new_grundy_number = node.grundy_number ^ distTracker.grundyNumber()
+                    new_grundy_number_mobject = TexMobject(str(new_grundy_number), colour = BLACK, fill_opacity = 1, fill_color = old_grundy_number_mobject.get_fill_color())
+                    new_grundy_number_mobject.scale(old_grundy_number_mobject.get_height() / new_grundy_number_mobject.get_height())
+
+                    grundy_update_equation = [old_grundy_number_mobject, xor_symbol, grundy_from_disttracker_target, equal_symbol, new_grundy_number_mobject]
+                    align_objects_sequentially(grundy_update_equation, old_grundy_number_mobject.get_y())
+
+                    update_equation_amims = [
+                                                Transform(node_mobject.value_mobject, old_grundy_number_mobject),
+                                                FadeIn(xor_symbol),
+                                                Transform(grundy_from_disttracker, grundy_from_disttracker_target),
+                                                FadeIn(equal_symbol)
+                                            ]
+
+                    self.play(*update_equation_amims)
+                    self.play(FadeIn(new_grundy_number_mobject))
+
+                    new_grundy_number_mobject_in_node = new_grundy_number_mobject.copy()
+                    new_grundy_number_mobject_in_node.move_to([node.config['center_x'], node.config['center_y'], 0])
+                    node_mobject.value_mobject.become(new_grundy_number_mobject)
+                    self.remove(new_grundy_number_mobject)
+
+                    remove_equation_anims = [ 
+                                                FadeOut(old_grundy_number_mobject),
+                                                FadeOut(xor_symbol),
+                                                FadeOut(grundy_from_disttracker),
+                                                FadeOut(equal_symbol),
+                                                Transform(node_mobject.value_mobject, new_grundy_number_mobject_in_node)
+                                            ]
+
+                    self.play(*remove_equation_anims)
+
+
+
+
+
 
                 print("distTracker:", distTracker.distances)
 
