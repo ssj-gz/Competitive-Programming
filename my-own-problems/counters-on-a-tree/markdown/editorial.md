@@ -102,6 +102,8 @@ Imagine further that we proceed along the chain of nodes from left to right perf
 * If $v\in V_{\textit{coin}}$, _collect_ the contribution of $v$ via $\textit{distTracker}.\textit{insertDist}(0)$
 * Move to the next node in the chain, calling $\textit{distTracker}.\textit{addToAllDists}(1)$ to update the contributions we've collected as we go
 
+(**Click image to see the animation**)
+
 [![](http://vps2.etotheipiplusone.com:30176/public_html/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_1_THUMB.png)](http://vps2.etotheipiplusone.com:30176/public_html/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_1_ANIM.gif)
 
 This way, we _collect_ then  _propagate_ the contribution of each $v\in V_{\textit{coin}}$ to all nodes to $v$'s right.
