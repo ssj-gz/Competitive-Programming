@@ -854,6 +854,34 @@ class NodeCoinMObject(VMobject):
     def copy(self):
         return self.deepcopy()
 
+def create_rectangle_around_nodes(nodes, gap_size):
+    rect_top = -1000
+    rect_bottom = +1000
+    rect_left = 1000
+    rect_right = -1000
+    for node in nodes:
+        node_x = node.config['center_x']
+        node_y = node.config['center_y']
+        node_radius = node.config['radius']
+        rect_left = min(rect_left, node_x - node_radius)
+        rect_right = max(rect_right, node_x + node_radius)
+        rect_top = max(rect_top, node_y + node_radius)
+        rect_bottom = min(rect_bottom, node_y - node_radius)
+
+    rect_left = rect_left - gap_size
+    rect_right = rect_right + gap_size
+    rect_top = rect_top + gap_size
+    rect_bottom = rect_bottom - gap_size
+
+    rectangle = Rectangle(color=RED, width = rect_right - rect_left, height = rect_top - rect_bottom)
+    # Shift so that top-left is at origin.
+    rectangle.shift(rectangle.get_width() / 2 * RIGHT, rectangle.get_height() / 2 * DOWN)
+    # Shift to correct position.
+    rectangle.shift(rect_left * RIGHT + rect_top * UP)
+
+    return rectangle
+
+
 def create_centroid_and_branches_tree(scene):
     g = Graph(scene, globals()["Node"], globals()["NodeCoinMObject"])
     node_radius = 0.3
@@ -1144,33 +1172,6 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
             propagate_text.set_y(disttracker_title_display.get_y())
 
             self.play(g.create_animation(), FadeInFrom(propagate_text, DOWN), FadeInFrom(branch_label, DOWN))
-
-            def create_rectangle_around_nodes(nodes, gap_size):
-                rect_top = -1000
-                rect_bottom = +1000
-                rect_left = 1000
-                rect_right = -1000
-                for node in nodes:
-                    node_x = node.config['center_x']
-                    node_y = node.config['center_y']
-                    node_radius = node.config['radius']
-                    rect_left = min(rect_left, node_x - node_radius)
-                    rect_right = max(rect_right, node_x + node_radius)
-                    rect_top = max(rect_top, node_y + node_radius)
-                    rect_bottom = min(rect_bottom, node_y - node_radius)
-
-                rect_left = rect_left - gap_size
-                rect_right = rect_right + gap_size
-                rect_top = rect_top + gap_size
-                rect_bottom = rect_bottom - gap_size
-
-                rectangle = Rectangle(color=RED, width = rect_right - rect_left, height = rect_top - rect_bottom)
-                # Shift so that top-left is at origin.
-                rectangle.shift(rectangle.get_width() / 2 * RIGHT, rectangle.get_height() / 2 * DOWN)
-                # Shift to correct position.
-                rectangle.shift(rect_left * RIGHT + rect_top * UP)
-
-                return rectangle
 
             nodes_at_current_dist_rect = create_rectangle_around_nodes([centre_node], gap_size = SMALL_BUFF)
             self.play(Write(nodes_at_current_dist_rect))
