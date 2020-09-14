@@ -963,6 +963,48 @@ class MoveCoins2Editorial_3_show_branches(SSJGZScene):
     def construct(self):
         super().construct()
 
+        centroid_graph_info = create_centroid_and_branches_tree(self)
+        g = centroid_graph_info['graph']
+        centre_node = centroid_graph_info['centre_node']
+        branch_roots = centroid_graph_info['branch_roots']
+        node_radius = centre_node.config['radius']
+
+        centre_node_x = centre_node.config['center_x']
+        centre_node_y = centre_node.config['center_y']
+        # Make more space around the centre node by moving all nodes
+        # away from it by a constant amount.
+        extra_space_from_center = 1
+        for node in g.nodes:
+            if node is centre_node:
+                continue
+            dx = node.config['center_x'] - centre_node_x
+            dy = node.config['center_y'] - centre_node_y
+            distance = math.sqrt(dx * dx + dy * dy)
+            new_x = centre_node_x + dx * (distance + extra_space_from_center) / distance
+            new_y = centre_node_y + dy * (distance + extra_space_from_center) / distance
+            node.config['center_x'] = new_x
+            node.config['center_y'] = new_y
+
+
+
+        scale_factor = 1.2
+
+        for node in g.nodes:
+            dx = node.config['center_x'] - centre_node_x
+            dy = node.config['center_y'] - centre_node_y
+            distance = math.sqrt(dx * dx + dy * dy)
+            new_x = centre_node_x + dx * scale_factor
+            new_y = centre_node_y + dy * scale_factor
+            node.config['center_x'] = new_x
+            node.config['center_y'] = new_y
+
+        for node in g.nodes:
+            node.config['center_x'] = node.config['center_x'] - centre_node_x
+            node.config['center_y'] = node.config['center_y'] - centre_node_y
+            node.config['radius'] = node.config['radius'] * scale_factor
+
+        self.play(g.create_animation())
+
 class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
     def construct(self):
         super().construct()
