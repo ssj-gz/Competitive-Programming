@@ -98,6 +98,8 @@ class GraphNodeMoveAnim(Animation):
                     start_and_end_point = edge.get_start_and_end_point(alpha)
                     edge_object = self.graph.mobject_for_edge[edge]
                     edge_object.set_start_and_end_attrs([start_and_end_point[0][0], start_and_end_point[0][1], 0], [start_and_end_point[1][0], start_and_end_point[1][1], 0])
+                    if 'colour' in edge.config:
+                        edge_object.set_color(interpolate_color(edge_object.config['colour'], edge.config['colour'], alpha))
                     edge_object.generate_points()
 
 class NodeMObject(VMobject):
@@ -315,9 +317,10 @@ class Graph:
                 line_start_and_end = edge.get_start_and_end_point(1)
                 newEdgeMObject = Line([line_start_and_end[0][0], line_start_and_end[0][1], 0],
                                       [line_start_and_end[1][0], line_start_and_end[1][1], 0])
+                newEdgeMObject.config = edge.config.copy()
                 edge.get_start_and_end_point(alpha = 1)
                 if 'colour' in edge.config:
-                    newEdgeMObject.set_color(edge.config.colour)
+                    newEdgeMObject.set_color(edge.config['colour'])
                 else:
                     newEdgeMObject.set_color(BLACK)
                 self.mobject_for_edge[edge] = newEdgeMObject
