@@ -137,9 +137,9 @@ c. $u$ and $v$ are in different _branches_ of $T_i$
 
 from which it follows that doing the following for every $i=1,2,\ldots, M$:
 
-1. for each $j=1,2,\dots,D_i$, propagate the contributions of all $v \in V_\textit{coin}\cap B_j$ to the nodes in the other $D_i-1$ branches of $T_i$; and
-2. propagate the contributions of all $v \in V_\textit{coin}\cap T_i$ to $C_i$; and 
-3. (if $C_i.\textit{hasCoin}$) propagate the contribution of $C_i$ to all other nodes in $T_i$
+1. propagate the contributions of all $v \in V_\textit{coin}\cap T_i$ to $C_i$; and 
+2. (if $C_i.\textit{hasCoin}$) propagate the contribution of $C_i$ to all other nodes in $T_i$
+3. for each $j=1,2,\dots,D_i$, propagate the contributions of all $v \in V_\textit{coin}\cap B_j$ to the nodes in the other $D_i-1$ branches of $T_i$; and
 
 will propagate the contributions of all $v \in V_{\textit{coin}}$ to all $u \in T$, as required.
 
