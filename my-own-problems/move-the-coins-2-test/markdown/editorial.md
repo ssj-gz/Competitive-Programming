@@ -126,7 +126,7 @@ Recall that _persistent_ (or _versioned_) data structures are structures that ar
 
 How does this help? Imagine, in our precomputation step, for each $h$, we created an AVL Tree, $\textit{prefixesForHeight}(h)$.  The first revision (version $0$) of this tree is empty.  We then insert the first value of $H=\textit{NHDFS}(h)$ into the tree; version $1$ contains the first element (the _prefix_ of size one) of $H$, in sorted order.  We then insert the second element of $H$; version $2$ of the tree contains the first two elements (the prefix of size two) of $H$, again in sorted order.  We continue until all elements of $H$ are added, and then create a similar tree, $\textit{suffixesForHeight}(h)$.  Revision $0$ of this tree is empty, and for revision one we add the _last_ element of $H$ (the _suffix_ of size one).  Then we get revision two by adding the last-but-one element of $H$, and so on until all elements have been added.
 
-**TODO - insert the Epic manim animation illustrating all this when I finally get it done!**
+[![](https://etotheipiplusone.com/codechef/editorials/MVCN2TST/images/MVCN2TST_ED_2_THUMB.png)](https://etotheipiplusone.com/codechef/editorials/MVCN2TST/images/MVCN2TST_ED_2_ANIM.gif)
 
 Now, this doesn't give us the sorted _array_ of the first $l-1$ elements of $H$ or the last $r-1$ elements of $H$, but it does give us, in $\mathcal{O}(1)$, a pair of _trees_ representing this pair of sorted arrays.  We can now adapt the "Find the $k^{\text{th}}$ Element of Two Sorted Arrays" to work with AVL Trees instead of arrays to find the object of Phase Three, $v_i$ (see $\textit{findKthFromPair}$ in the code).
 
