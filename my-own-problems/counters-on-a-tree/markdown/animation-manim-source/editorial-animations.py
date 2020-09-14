@@ -32,6 +32,8 @@ class DistTracker():
         self.distances = []
         self.numTimesAdjusted = 0
 
+grundy_node_tex_colour = "#2600ff"
+
 def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implementation = 'naive', right_to_left = False):
         # Graph, coins, and the Grundy numbers beneath the coins.
         num_nodes = 8
@@ -852,6 +854,111 @@ class NodeCoinMObject(VMobject):
     def copy(self):
         return self.deepcopy()
 
+def create_centroid_and_branches_tree(scene):
+    g = Graph(scene, globals()["Node"], globals()["NodeCoinMObject"])
+    node_radius = 0.3
+
+    MAGENTA = "#ff00ff"
+    RED = "#ff0000"
+    BROWN = "#8B4513"
+    PURPLE = "#800080"
+    ORANGE = "#FF8C00"
+
+    def create_node(parent, dx, dy, grundy_number, coin_colour):
+        config = {'radius': node_radius, 'value' : grundy_number, 'coin_radius': node_radius * 3 / 5, 'value_colour': grundy_node_tex_colour}
+        if coin_colour:
+            config['coin_colour'] = coin_colour
+
+        parent_x = 0
+        parent_y = 0
+        if parent:
+            parent_x = parent.config['center_x']
+            parent_y = parent.config['center_y']
+
+        new_node = g.create_node(parent_x + dx, parent_y + dy, config)
+        new_node.grundy_number = grundy_number
+        if parent:
+            g.create_edge(new_node, parent, {'colour' : BLACK})
+
+        return new_node
+
+    centre_node = create_node(None, 1, 1, 7, None)
+    centre_node.config['border_colour'] = RED
+
+    def rotate_tree_90_degrees_counter_clockwise(graph):
+        center_x = centre_node.config['center_x']
+        center_y = centre_node.config['center_y']
+
+        for node in graph.nodes:
+            dx = node.config['center_x'] - center_x
+            dy = node.config['center_y'] - center_y
+
+            node.config['center_x'] = center_x - dy
+            node.config['center_y'] = center_y + dx
+
+    branch_roots = []
+
+    b1 = create_node(centre_node, 0.2, -0.8, random.randint(0, 7), BROWN)
+    b1.branch_root_number = 1
+    b1_nodeA = create_node(b1, 0.9, -0.9, random.randint(0, 7), ORANGE)
+    b1_nodeB = create_node(b1, 0.1, -1.1, random.randint(0, 7), None)
+    b1_nodeC = create_node(b1, -0.6, -0.8, random.randint(0, 7), None)
+    b1_nodeD = create_node(b1_nodeA, -0.2, -0.7, random.randint(0, 7), None)
+    branch_roots.append(b1)
+
+    rotate_tree_90_degrees_counter_clockwise(g)
+
+    b2 = create_node(centre_node, -0.2, -0.7, random.randint(0, 7), None)
+    b2.branch_root_number = 2
+    b2_nodeA = create_node(b2, 0.9, -0.9, random.randint(0, 7), YELLOW)
+    b2_nodeB = create_node(b2, 0.1, -1.1, random.randint(0, 7), None)
+    b2_nodeC = create_node(b2, -0.6, -0.8, random.randint(0, 7), None)
+    b2_nodeD = create_node(b2_nodeB, -0.2, -0.7, random.randint(0, 7), GREEN)
+    b2_nodeE = create_node(b2_nodeA, -0.2, -0.7, random.randint(0, 7), None)
+    branch_roots.append(b2)
+
+    rotate_tree_90_degrees_counter_clockwise(g)
+
+    b3 = create_node(centre_node, -0.2, -0.7, random.randint(0, 7), MAGENTA)
+    b3.branch_root_number = 3
+    b3_nodeA = create_node(b3, 0.6, -0.9, random.randint(0, 7), None)
+    b3_nodeB = create_node(b3, -0.1, -1.1, random.randint(0, 7), None)
+    b3_nodeC = create_node(b3_nodeA, 0.1, -0.9, random.randint(0, 7), None)
+    b4_nodeD = create_node(b3_nodeC, -0.9, 0.0, random.randint(0, 7), RED)
+    branch_roots.append(b3)
+
+    rotate_tree_90_degrees_counter_clockwise(g)
+
+    b4 = create_node(centre_node, 0.3, -0.8, random.randint(0, 7), PURPLE)
+    b4.branch_root_number = 4
+    b4_nodeA = create_node(b4, 0.6, -0.8, random.randint(0, 7), None)
+    b4_nodeB = create_node(b4_nodeA, 0.1, -0.7, random.randint(0, 7), GREY)
+    branch_roots.append(b4)
+
+    # Rotate 180 degrees, so that branch 1 is at the right.
+    rotate_tree_90_degrees_counter_clockwise(g)
+    rotate_tree_90_degrees_counter_clockwise(g)
+
+    furthest_point_from_centre = 0.0
+    for node in g.nodes:
+        dx = node.config['center_x'] - centre_node.config['center_x']
+        dy = node.config['center_y'] - centre_node.config['center_y']
+        furthest_point_from_centre = max(furthest_point_from_centre, math.sqrt(dx * dx + dy * dy))
+
+    print("furthest_point_from_centre:", furthest_point_from_centre)
+
+    required_center_x = -scene.camera.get_frame_width() / 2 +  DEFAULT_MOBJECT_TO_EDGE_BUFFER + furthest_point_from_centre
+    required_center_y = scene.camera.get_frame_height() / 2 -  DEFAULT_MOBJECT_TO_EDGE_BUFFER - furthest_point_from_centre
+    dx = required_center_x - centre_node.config['center_x']
+    dy = required_center_y - centre_node.config['center_y']
+    print("dx: ", dx, " dy: ", dy)
+    for node in g.nodes:
+        node.config['center_x'] = node.config['center_x'] + dx
+        node.config['center_y'] = node.config['center_y'] + dy
+
+    return { 'graph' : g, 'branch_roots' : branch_roots, 'centre_node' : centre_node, 'furthest_point_from_centre' : furthest_point_from_centre }
+
+
 class MoveCoins2Editorial_3_show_branches(SSJGZScene):
     def construct(self):
         super().construct()
@@ -860,111 +967,14 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
     def construct(self):
         super().construct()
 
-        g = Graph(self, globals()["Node"], globals()["NodeCoinMObject"])
-        node_radius = 0.3
-
-        MAGENTA = "#ff00ff"
-        RED = "#ff0000"
-        BROWN = "#8B4513"
-        PURPLE = "#800080"
-        ORANGE = "#FF8C00"
-
         distTracker = DistTracker()
 
-        grundy_node_tex_colour = "#2600ff"
-
-        def create_node(parent, dx, dy, grundy_number, coin_colour):
-            config = {'radius': node_radius, 'value' : grundy_number, 'coin_radius': node_radius * 3 / 5, 'value_colour': grundy_node_tex_colour}
-            if coin_colour:
-                config['coin_colour'] = coin_colour
-
-            parent_x = 0
-            parent_y = 0
-            if parent:
-                parent_x = parent.config['center_x']
-                parent_y = parent.config['center_y']
-
-            new_node = g.create_node(parent_x + dx, parent_y + dy, config)
-            new_node.grundy_number = grundy_number
-            if parent:
-                g.create_edge(new_node, parent, {'colour' : BLACK})
-
-            return new_node
-
-        centre_node = create_node(None, 1, 1, 7, None)
-        centre_node.config['border_colour'] = RED
-
-        def rotate_tree_90_degrees_counter_clockwise(graph):
-            center_x = centre_node.config['center_x']
-            center_y = centre_node.config['center_y']
-
-            for node in graph.nodes:
-                dx = node.config['center_x'] - center_x
-                dy = node.config['center_y'] - center_y
-
-                node.config['center_x'] = center_x - dy
-                node.config['center_y'] = center_y + dx
-
-        branch_roots = []
-
-
-        b1 = create_node(centre_node, 0.2, -0.8, random.randint(0, 7), BROWN)
-        b1.branch_root_number = 1
-        b1_nodeA = create_node(b1, 0.9, -0.9, random.randint(0, 7), ORANGE)
-        b1_nodeB = create_node(b1, 0.1, -1.1, random.randint(0, 7), None)
-        b1_nodeC = create_node(b1, -0.6, -0.8, random.randint(0, 7), None)
-        b1_nodeD = create_node(b1_nodeA, -0.2, -0.7, random.randint(0, 7), None)
-        branch_roots.append(b1)
-
-        rotate_tree_90_degrees_counter_clockwise(g)
-
-        b2 = create_node(centre_node, -0.2, -0.7, random.randint(0, 7), None)
-        b2.branch_root_number = 2
-        b2_nodeA = create_node(b2, 0.9, -0.9, random.randint(0, 7), YELLOW)
-        b2_nodeB = create_node(b2, 0.1, -1.1, random.randint(0, 7), None)
-        b2_nodeC = create_node(b2, -0.6, -0.8, random.randint(0, 7), None)
-        b2_nodeD = create_node(b2_nodeB, -0.2, -0.7, random.randint(0, 7), GREEN)
-        b2_nodeE = create_node(b2_nodeA, -0.2, -0.7, random.randint(0, 7), None)
-        branch_roots.append(b2)
-
-        rotate_tree_90_degrees_counter_clockwise(g)
-
-        b3 = create_node(centre_node, -0.2, -0.7, random.randint(0, 7), MAGENTA)
-        b3.branch_root_number = 3
-        b3_nodeA = create_node(b3, 0.6, -0.9, random.randint(0, 7), None)
-        b3_nodeB = create_node(b3, -0.1, -1.1, random.randint(0, 7), None)
-        b3_nodeC = create_node(b3_nodeA, 0.1, -0.9, random.randint(0, 7), None)
-        b4_nodeD = create_node(b3_nodeC, -0.9, 0.0, random.randint(0, 7), RED)
-        branch_roots.append(b3)
-
-        rotate_tree_90_degrees_counter_clockwise(g)
-
-        b4 = create_node(centre_node, 0.3, -0.8, random.randint(0, 7), PURPLE)
-        b4.branch_root_number = 4
-        b4_nodeA = create_node(b4, 0.6, -0.8, random.randint(0, 7), None)
-        b4_nodeB = create_node(b4_nodeA, 0.1, -0.7, random.randint(0, 7), GREY)
-        branch_roots.append(b4)
-
-        # Rotate 180 degrees, so that branch 1 is at the right.
-        rotate_tree_90_degrees_counter_clockwise(g)
-        rotate_tree_90_degrees_counter_clockwise(g)
-
-        furthest_point_from_centre = 0.0
-        for node in g.nodes:
-            dx = node.config['center_x'] - centre_node.config['center_x']
-            dy = node.config['center_y'] - centre_node.config['center_y']
-            furthest_point_from_centre = max(furthest_point_from_centre, math.sqrt(dx * dx + dy * dy))
-
-        print("furthest_point_from_centre:", furthest_point_from_centre)
-
-        required_center_x = -self.camera.get_frame_width() / 2 +  DEFAULT_MOBJECT_TO_EDGE_BUFFER + furthest_point_from_centre
-        required_center_y = self.camera.get_frame_height() / 2 -  DEFAULT_MOBJECT_TO_EDGE_BUFFER - furthest_point_from_centre
-        dx = required_center_x - centre_node.config['center_x']
-        dy = required_center_y - centre_node.config['center_y']
-        print("dx: ", dx, " dy: ", dy)
-        for node in g.nodes:
-            node.config['center_x'] = node.config['center_x'] + dx
-            node.config['center_y'] = node.config['center_y'] + dy
+        centroid_graph_info = create_centroid_and_branches_tree(self)
+        g = centroid_graph_info['graph']
+        centre_node = centroid_graph_info['centre_node']
+        branch_roots = centroid_graph_info['branch_roots']
+        node_radius = centre_node.config['radius']
+        furthest_point_from_centre = centroid_graph_info['furthest_point_from_centre']
 
         self.play(g.create_animation())
 
