@@ -992,7 +992,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
         self.play(Write(disttracker_title_display), Write(grundy_number_label), Write(grundy_value_mobject))
 
         enlarged_node_radius = node_radius * 2
-        horizontal_gap_between_nodes = enlarged_node_radius
+        horizontal_gap_between_nodes = enlarged_node_radius * 1.5
         vertical_gap_between_nodes = enlarged_node_radius
         branch_to_straighten_index = 2
 
@@ -1130,7 +1130,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                 for node in layer:
                     node_mobject = g.mobject_for_node[node]
                     old_grundy_number_mobject = node_mobject.value_mobject.copy()
-                    old_grundy_number_mobject.next_to(node_mobject, DOWN)
+                    old_grundy_number_mobject.next_to(node_mobject, DOWN, buff = 0)
                     xor_symbol = TexMobject(r'\oplus', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
                     grundy_from_disttracker_target = grundy_value_mobject.copy()
                     grundy_from_disttracker = grundy_value_mobject.copy()
