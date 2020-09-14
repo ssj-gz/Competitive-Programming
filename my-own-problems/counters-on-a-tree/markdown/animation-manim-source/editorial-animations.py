@@ -981,7 +981,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
         grundy_number_label = TexMobject(r'\textit{grundy number} =', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
         grundy_number_label.scale(disttracker_text_scale)
         grundy_number_label.set_x(0)
-        grundy_number_label.next_to(grundy_value_mobject, UP)
+        grundy_number_label.next_to(grundy_value_mobject, UP * 2)
 
 
         grundy_xor_elements = [grundy_value_mobject]
