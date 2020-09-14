@@ -216,7 +216,7 @@ The fastest solution that I saw was @sg1729's, running in just [0.63s](https://w
 # SOLUTIONS:
 
 [details="Setter's Solution (C++)"]
-**TODO - add publically-accessible link to the following: http://campus.codechef.com/SEP20TST/viewsolution/36836393/ . I can't inline the code here as it would exceed the forum post size limit!**
+https://www.codechef.com/viewsolution/37919044
 [/details]
 
 [details="Tester's Solution (Kotlin)"]
