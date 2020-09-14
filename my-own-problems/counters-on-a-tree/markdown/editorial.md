@@ -102,13 +102,13 @@ Imagine further that we proceed along the chain of nodes from left to right perf
 * If $v\in V_{\textit{coin}}$, _collect_ the contribution of $v$ via $\textit{distTracker}.\textit{insertDist}(0)$
 * Move to the next node in the chain, calling $\textit{distTracker}.\textit{addToAllDists}(1)$ to update the contributions we've collected as we go
 
-**TODO - animation showing this - MOVCOIN2_ED_1_THUMB.png, linking to MOVCOIN2_ED_1_ANIM.gif**
+[![](http://vps2.etotheipiplusone.com:30176/public_html/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_1_THUMB.png)](http://vps2.etotheipiplusone.com:30176/public_html/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_1_ANIM.gif)
 
 This way, we _collect_ then  _propagate_ the contribution of each $v\in V_{\textit{coin}}$ to all nodes to $v$'s right.
 
 Let's $\textit{clear}()$ our $\textit{distTracker}$ and repeat the process, this time working in the opposite direction:
 
-**TODO - animation showing this - MOVCOIN2_ED_2_THUMB.png, linking to MOVCOIN2_ED_2_ANIM.gif**
+[![](http://vps2.etotheipiplusone.com:30176/public_html/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_2_THUMB.png)](http://vps2.etotheipiplusone.com:30176/public_html/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_2_ANIM.gif)
 
 Now we've propagated the contribution of each $v \in V_{\textit{coin}}$ to all nodes to $v$'s right _and_ to its left i.e. to all nodes, and so have computed all $R.\textit{grundy}$, as required.  It turns out that Bob wins two of the games and Alice wins the rest.
 
@@ -123,7 +123,7 @@ We won't go into much detail on [Centroid Decomposition](https://www.geeksforgee
 
 Let $D_i$ be the degree of $C_i$ in $T_i$, and let $b_1, b_2, \dots, b_{D_i}$ be the neighbours of $C_i$ in $T_i$.  We partition the $u\in T_i$, $u \ne C_i$ into $D_i$ _branches_, where the node $u$ is in branch $l$ if the unique path from $C_i$ to $u$ passes through $b_l$.  For example:
 
-**TODO - image here - medium size $T_i$ with $D_i = 4$ - MOVCOIN2_ED_3_THUMB.png, linking to MOVCOIN2_ED_3_ANIM.gif**
+**TODO - image here - medium size $T_i$ with $D_i = 4$ - MOVCOIN2_ED_3_THUMB.png, linking to MOVCOIN2_ED_3_ANIM.gif.  In the meantime, you can probably figure it out from anims 6 & 7 XD**
 
 With this notation, **C3** can be rephrased as:
 
@@ -150,7 +150,8 @@ For each $i=1,2,\dots,M$, create a fresh $\textit{DistTracker}$ and perform the 
 
 A BFS would also work and would likely be slightly more efficient: here's an example:
 
-**TODO - animation - MOVCOIN2_ED_4_THUMB.png, linking to MOVCOIN2_ED_4_ANIM.gif**
+[![](http://vps2.etotheipiplusone.com:30176/public_html/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_4_THUMB.png)](http://vps2.etotheipiplusone.com:30176/public_html/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_4_ANIM.gif)
+
 
 Then we $\textit{clear}()$ our $\textit{DistTracker}$ and repeat, this time with $i=M,M-1,\dots,2,1$.
 
@@ -179,7 +180,7 @@ The pattern is clear: the $x^{\text{th}}$ bit is $0$ $2^x$ times in a row, then 
 
 Note that the $x^{\text{th}}$ bit of the grundy number is set if and only if the number of tracked distances with their $x^{\text{th}}$ bit set is _odd_, so _pairs_ of distances with their $x^{\text{th}}$ bit set contribute nothing to the grundy number and so are crossed out.  If we know which bits of the grundy number are set, computing the number itself is trivial.
 
-**TODO - animation showing this - MOVCOIN2_ED_6_THUMB.png, linking to MOVCOIN2_ED_6_ANIM.gif**
+[![](http://vps2.etotheipiplusone.com:30176/public_html/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_6_THUMB.png)](http://vps2.etotheipiplusone.com:30176/public_html/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_6_ANIM.gif)
 
 Note that the fourth row of the grid is omitted: since the graph only has 8 nodes, the max distance between two nodes is seven, and so a tracked distance can never enter the red-one-zone for a fourth row and change the grundy number.  Similar logic is used to reduce $\textit{m\_numBits}$ in the $\textit{DistTracker}$ implementation.  In general, the number of bits/ rows is $\mathcal{O}(\log (\textit{max distance between nodes}))$.
 
@@ -187,7 +188,7 @@ With this new $\textit{DistTracker}$, the computation of the grundy number (the 
 
 However, what if on each call to $\textit{addToAllDists}(1)$, for each $x$, instead of moving all coins on row $x$ one cell to the right on and tracking whether they enter the red-one-zone, _we scrolled the red-one-zone on that row by one to the left_ and counted how many coins its hits or leave? Since the number of rows is $\mathcal{O}(\log N)$, $\textit{addToAllDists}(1)$ is now $\mathcal{O}(\log N)$, so all operations on $\textit{DistTracker}$ are now $\mathcal{O}(\log N)$ in the worst case.
 
-**TODO - animation showing this - MOVCOIN2_ED_7_THUMB.png, linking to MOVCOIN2_ED_7_ANIM.gif**
+[![](http://vps2.etotheipiplusone.com:30176/public_html/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_7_THUMB.png)](http://vps2.etotheipiplusone.com:30176/public_html/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_7_ANIM.gif)
 
 And that's it!
 
