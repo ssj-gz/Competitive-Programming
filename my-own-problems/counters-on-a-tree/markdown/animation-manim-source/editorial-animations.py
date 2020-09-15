@@ -1470,19 +1470,6 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
             branch_to_straighten_index = (branch_to_straighten_index + 1) % len(branch_roots)
 
-
-        #b4_nodeB.config['radius'] = 1
-        #b4_nodeB.config['center_y'] = b4_nodeB.config['center_y'] - 2
-        #b4_nodeB.config['center_x'] = b4_nodeB.config['center_x'] - 4.5
-        #blah_mobject = g.mobject_for_node[b4_nodeB]
-        #print("Before radius change:", blah_mobject.get_width())
-
-        #self.play(g.create_animation())
-
-        #print("After radius change:", blah_mobject.get_width())
-        #b4_nodeB.config['radius'] = node_radius
-        #self.play(g.create_animation())
-
 class MoveCoins2Editorial_5_collect_and_propagate_branches_naive_backwards(SSJGZScene):
     def construct(self):
         super().construct()
