@@ -1119,7 +1119,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
         enlarged_node_radius = node_radius * 2
         horizontal_gap_between_nodes = enlarged_node_radius * 1.5
-        vertical_gap_between_nodes = enlarged_node_radius * 1.1
+        vertical_gap_between_nodes = enlarged_node_radius * 1.3
         branch_to_straighten_index = 0
 
         def add_amount_to_change_by(digitMObject, amount_to_change_by):
@@ -1141,7 +1141,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
             previous_graph_state = g.get_restorable_state()
             # Move the center node out of the way of the nodes from the other branches
             centre_node.config['center_x'] = centre_node.config['center_x'] + 3 * enlarged_node_radius
-            centre_node.config['center_y'] = centre_node.config['center_y'] + enlarged_node_radius * 1.2
+            centre_node.config['center_y'] = centre_node.config['center_y'] + enlarged_node_radius * 1.5
             centre_node.config['radius'] = enlarged_node_radius
 
             branch_to_straighten = branch_roots[branch_to_straighten_index]
