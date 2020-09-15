@@ -189,7 +189,7 @@ Note that the fourth row of the grid is omitted: since the graph only has 8 node
 
 With this new $\textit{DistTracker}$, the computation of the grundy number (the xor of all the tracked distances) has been rolled into $\textit{addToAllDists}()$, so $\textit{grundyNumber}()$ has been reduced from $\mathcal{O}(N)$ to $\mathcal{O}(1)$, a substantial improvement; however, $\textit{addToAllDists}()$ remains $\mathcal{O}(N)$ as it must still move all coins on each call, so we don't appear to have gained much.
 
-However, what if on each call to $\textit{addToAllDists}(1)$, for each $x$, instead of moving all coins on row $x$ one cell to the right on and tracking whether they enter the red-one-zone, _we scrolled the red-one-zone on that row by one to the left_ and counted how many coins its hits or leave? Since the number of rows is $\mathcal{O}(\log N)$, $\textit{addToAllDists}(1)$ is now $\mathcal{O}(\log N)$, so all operations on $\textit{DistTracker}$ are now $\mathcal{O}(\log N)$ in the worst case.
+However, what if on each call to $\textit{addToAllDists}(1)$, for each $x$, instead of moving all coins on row $x$ one cell to the right on and tracking whether they enter the red-one-zone, _we scrolled the red-one-zone on that row by one to the left_ and counted how many coins it hits or leaves? Since the number of rows is $\mathcal{O}(\log N)$, $\textit{addToAllDists}(1)$ is now $\mathcal{O}(\log N)$, so all operations on $\textit{DistTracker}$ are now $\mathcal{O}(\log N)$ in the worst case.
 
 [![](https://etotheipiplusone.com/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_7_THUMB.png)](https://etotheipiplusone.com/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_7_ANIM.gif)
 
