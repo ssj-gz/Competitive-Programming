@@ -35,6 +35,19 @@ class DistTracker():
 
 grundy_node_tex_colour = "#2600ff"
 
+def align_objects_sequentially(mobjects, y, centre_horizontally_around_x = None):
+    for i,mobject in enumerate(mobjects):
+        if i >= 1:
+            mobjects[i].next_to(mobjects[i - 1], RIGHT)
+        mobjects[i].set_y(y)
+
+    if centre_horizontally_around_x is not None:
+        left_edge = mobjects[0].get_x() - mobjects[0].get_width() / 2
+        total_width = (mobjects[-1].get_x() + mobjects[-1].get_width() / 2) - left_edge
+        desired_left_edge = -total_width / 2 + centre_horizontally_around_x
+        for mobject in mobjects:
+            mobject.set_x(mobject.get_x() + (desired_left_edge - left_edge))
+
 def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implementation = 'naive', right_to_left = False):
         # Graph, coins, and the Grundy numbers beneath the coins.
         num_nodes = 8
@@ -1173,21 +1186,6 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                     node.config['radius'] = enlarged_node_radius
                     y = y - 2 * enlarged_node_radius - vertical_gap_between_nodes
                 x = x + 2 * enlarged_node_radius + horizontal_gap_between_nodes
-
-            def align_objects_sequentially(mobjects, y, centre_horizontally_around_x = None):
-                for i,mobject in enumerate(mobjects):
-                    if i >= 1:
-                        mobjects[i].next_to(mobjects[i - 1], RIGHT)
-                    mobjects[i].set_y(y)
-
-                if centre_horizontally_around_x is not None:
-                    left_edge = mobjects[0].get_x() - mobjects[0].get_width() / 2
-                    total_width = (mobjects[-1].get_x() + mobjects[-1].get_width() / 2) - left_edge
-                    desired_left_edge = -total_width / 2 + centre_horizontally_around_x
-                    for mobject in mobjects:
-                        mobject.set_x(mobject.get_x() + (desired_left_edge - left_edge))
-
-
 
             # Propagate.
             propagate_text = TexMobject(r'\textit{Propagate}', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
