@@ -1238,6 +1238,10 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
                 # Propagate the grundy numbers to all the nodes in this layer.
                 # The animations are done in parallel, which makes things a little tricky.
+                for edge in g.edges: # Workaround manim's odd z-ordering that makes the edges appear
+                                     # in front of the equations, for some reason.
+                    self.bring_to_back(g.mobject_for_edge[edge])
+
                 create_equation_anims = []
                 new_grundy_number_mobjects = []
                 remove_equation_anims = []
