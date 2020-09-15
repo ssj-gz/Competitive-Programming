@@ -1118,7 +1118,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
         self.play(Write(disttracker_title_display), Write(grundy_number_label), Write(grundy_value_mobject))
 
         enlarged_node_radius = node_radius * 2
-        horizontal_gap_between_nodes = enlarged_node_radius * 1.5
+        horizontal_gap_between_nodes = enlarged_node_radius * 1.4
         vertical_gap_between_nodes = enlarged_node_radius * 1.3
         branch_to_straighten_index = 0
 
