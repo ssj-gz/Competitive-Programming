@@ -419,3 +419,4 @@ fun main (args: Array<String>) {
 ```
 [/details]
 
+All diagrams and animations were created using the wonderful [manim](https://github.com/3b1b/manim) library.  High-res MP4 renders can be found [here](http://vps2.etotheipiplusone.com:30176/public_html/codechef/editorials/MOVCOIN2/videos/).
