@@ -84,7 +84,7 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
             nodes_at_height.append(next_node_layer)
             last_node_layer = next_node_layer
 
-        gap_between_parent_and_child = 0.3
+        gap_between_parent_and_child = 0.4
         min_gap_between_siblings = 0.1
         blah = False
         if blah:
@@ -228,7 +228,7 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
 
         self.wait(2)
 
-        ARect = create_rectangle_around_nodes(nodes_at_height[0:up_to_height+1], 0.15, A_COLOUR)
+        ARect = create_rectangle_around_nodes(nodes_at_height[0:up_to_height+1], 0.22, A_COLOUR)
         ALabel = TexMobject('A', color = BLACK, fill_color = A_COLOUR)
         ALabel.next_to(ARect, LEFT)
 
@@ -246,7 +246,7 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
             new_text_objects[i].next_to(new_text_objects[i - 1], RIGHT)
             previous_mobject = new_text_objects[i]
 
-        AD = create_polygon_around_nodes(descendents[0:up_to_height - node_to_reparent_height + 2], 0.1, AD_COLOUR)
+        AD = create_polygon_around_nodes(descendents[0:up_to_height - node_to_reparent_height + 2], 0.15, AD_COLOUR)
         ADLabel = TexMobject('AD', color = BLACK, fill_color = AD_COLOUR)
         ADLabel.next_to(AD, LEFT)
 
