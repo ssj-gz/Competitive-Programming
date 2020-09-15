@@ -134,7 +134,7 @@ And that's it!
 
 **Complexity Analysis**
 
-* Precomputation: $\textit{nodesAtHeightInDFSOrder}$, $\textit{numProperDescendantsForNodeAtHeightPrefixSum}$ and $\textit{numCanReparentToPrefixSum}$ are $\mathcal{O}(N)$ in total over all $h$; $\textit{prefixesForHeight}$ and $\textit{suffixesForHeight}$ are $\mathcal{O}(\log N)$
+* Precomputation: $\textit{nodesAtHeightInDFSOrder}$, $\textit{numProperDescendantsForNodeAtHeightPrefixSum}$ and $\textit{numCanReparentToPrefixSum}$ are $\mathcal{O}(N)$ in total over all $h$; $\textit{prefixesForHeight}$ and $\textit{suffixesForHeight}$ are $\mathcal{O}(N \log N)$
 * Phase One - $\mathcal{O}(N)$
 * Phase Two - $\mathcal{O}(\log N)$ calls to $\textit{findNumNonDescendantsUpToHeight}$, each of which is $\mathcal{O}(\log N)$ due to the call to $\textit{descendantRangeFor}$
 * Phase Three - $\textit{findKthFromPair}$ would be $\mathcal{O}(\log N)$ if it were working with sorted arrays, but AVL Trees give it an extra $\mathcal{O}(\log N)$.
