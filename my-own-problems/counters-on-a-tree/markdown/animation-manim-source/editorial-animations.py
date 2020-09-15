@@ -1483,7 +1483,9 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
         #b4_nodeB.config['radius'] = node_radius
         #self.play(g.create_animation())
 
-
+class MoveCoins2Editorial_5_collect_and_propagate_branches_naive_backwards(SSJGZScene):
+    def construct(self):
+        super().construct()
 
 class MoveCoins2Editorial_6_collect_and_propagate_along_node_chain_left_to_right_partial_grid(SSJGZScene):
 
