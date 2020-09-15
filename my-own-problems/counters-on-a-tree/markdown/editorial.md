@@ -34,7 +34,7 @@ We form a $\textit{DistTracker}$ data structure with the following API:
 ```
 class DistTracker
     insertDist(distance) { ... }
-    addToAllDists(distance) { ... }
+    addToAllDists(toAdd) { ... }
     grundyNumber() { ... } // Return the xor sum of all the contained distances 
 ```
 
