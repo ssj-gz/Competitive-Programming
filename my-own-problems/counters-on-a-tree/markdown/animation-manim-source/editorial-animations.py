@@ -444,7 +444,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                     grundy_xor_digits.append(coin_copy)
 
                     scene.play(create_scroll_digit_to_animation(grundy_value_mobject, grundy_value_mobject.digitValue, distTracker.grundyNumber(), digitMObjectScale = grundy_value_mobject.text_scale_factor),
-                               FadeOutAndShift(insertDist_text, UP))
+                               FadeOutAndShift(insertDist_text, UP), *outtro_anims)
                     grundy_value_mobject.digitValue = distTracker.grundyNumber()
                     #shift_elements_to_right_by = 0
                     #new_tracked_distance_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = coin_mobject_for_node.get_fill_color())
