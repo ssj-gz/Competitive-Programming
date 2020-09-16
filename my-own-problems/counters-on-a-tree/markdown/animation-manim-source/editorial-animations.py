@@ -35,10 +35,10 @@ class DistTracker():
 
 grundy_node_tex_colour = "#2600ff"
 
-def align_objects_sequentially(mobjects, y, centre_horizontally_around_x = None):
+def align_objects_sequentially(mobjects, y, centre_horizontally_around_x = None, x_gap_between_elements = DEFAULT_MOBJECT_TO_MOBJECT_BUFFER):
     for i,mobject in enumerate(mobjects):
         if i >= 1:
-            mobjects[i].next_to(mobjects[i - 1], RIGHT)
+            mobjects[i].next_to(mobjects[i - 1], RIGHT, buff = x_gap_between_elements)
         mobjects[i].set_y(y)
 
     if centre_horizontally_around_x is not None:
@@ -330,7 +330,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             new_grundy_number_mobjects = []
             remove_equation_anims = []
             for node in [node]:
-                equation_scale_factor = 1.0
+                equation_scale_factor = 1.4
                 equation_drop_y_amount = node.config['grundy_text'].get_height()
                 node_mobject = g.mobject_for_node[node]
                 old_grundy_number_mobject = node.config['grundy_text'].copy()
@@ -352,7 +352,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                 new_grundy_number_mobjects.append(new_grundy_number_mobject)
 
                 grundy_update_equation = [old_grundy_number_mobject, xor_symbol, grundy_from_disttracker_target, equal_symbol, new_grundy_number_mobject]
-                align_objects_sequentially(grundy_update_equation, old_grundy_number_mobject.get_y(), centre_horizontally_around_x = node.config['center_x'])
+                align_objects_sequentially(grundy_update_equation, old_grundy_number_mobject.get_y(), centre_horizontally_around_x = node.config['center_x'], x_gap_between_elements = SMALL_BUFF)
                 for i in grundy_update_equation:
                     scene.remove(i)
 
@@ -365,6 +365,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
 
                 new_grundy_number_mobject_under = new_grundy_number_mobject.copy()
+                new_grundy_number_mobject_under.scale(1 / equation_scale_factor)
                 new_grundy_number_mobject_under.move_to([grundy_number_under_node_x, grundy_number_under_node_y, 0])
 
                 remove_equation_anims.extend([ 
