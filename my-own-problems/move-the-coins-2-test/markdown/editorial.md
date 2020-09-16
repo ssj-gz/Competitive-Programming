@@ -19,7 +19,7 @@ Given a rooted tree $G$, find the $c_i^{\text{th}}$ element in a list $L$ of pai
 # QUICK EXPLANATION:
 The reparenting $(u,v)$ is _valid_ if and only if $v$ is not a descendant of $u$.  As we find each reparenting, we _simulate_ its removal from $L$ by mapping each $c_i$ to point to the corresponding index $X_i$ in the _original_ $L$ using e.g. an order-statistic tree, so the problem boils down to finding each requested element $(u_i, v_i)$  at a given index $X_i$ in the original $L$, online.
 
-The solution is broken down into three "phases", one for of the three clauses in the ordering:
+The solution is broken down into three "phases", one for each of the three clauses in the ordering:
 
 **Phase One**: Find $u_i$ (the $\textit{nodeToReparent}$).  For each node $u$ in order, find the number of $v$'s such that $(u,v)$ is a valid reparenting, and form a prefix sum array from this.  The first element in this array strictly greater than $X_i$ gives our $u_i$, and can be found via binary search.
 
