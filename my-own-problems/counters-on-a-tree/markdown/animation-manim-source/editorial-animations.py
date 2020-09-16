@@ -331,6 +331,8 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             for node in [node]:
                 node_mobject = g.mobject_for_node[node]
                 old_grundy_number_mobject = node.config['grundy_text'].copy()
+                grundy_number_under_node_x = old_grundy_number_mobject.get_x()
+                grundy_number_under_node_y = old_grundy_number_mobject.get_y()
                 old_grundy_number_mobject.next_to(node_mobject, DOWN, buff = SMALL_BUFF)
                 xor_symbol = TexMobject(r'\oplus', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
                 grundy_from_disttracker_target = grundy_value_mobject.copy()
@@ -354,15 +356,15 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                                         ])
 
 
-                new_grundy_number_mobject_in_node = new_grundy_number_mobject.copy()
-                new_grundy_number_mobject_in_node.move_to([node.config['center_x'], node.config['center_y'], 0])
+                new_grundy_number_mobject_under = new_grundy_number_mobject.copy()
+                new_grundy_number_mobject_under.move_to([grundy_number_under_node_x, grundy_number_under_node_y, 0])
 
                 remove_equation_anims.extend([ 
                                             FadeOut(old_grundy_number_mobject),
                                             FadeOut(xor_symbol),
                                             FadeOut(grundy_from_disttracker),
                                             FadeOut(equal_symbol),
-                                            Transform(node.config['grundy_text'], new_grundy_number_mobject_in_node)
+                                            Transform(node.config['grundy_text'], new_grundy_number_mobject_under)
                                         ])
 
             scene.play(*create_equation_anims)
