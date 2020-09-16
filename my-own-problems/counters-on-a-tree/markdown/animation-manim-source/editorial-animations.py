@@ -1131,7 +1131,8 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
         self.play(Write(disttracker_title_display), Write(grundy_number_label), Write(grundy_value_mobject))
 
         enlarged_node_radius = node_radius * 2
-        horizontal_gap_between_nodes = enlarged_node_radius * 1.4
+        horizontal_gap_between_nodes = enlarged_node_radius * 1.4 # i.e. between right edge of one and left edge of next
+        x_dist_between_node_centres = 2 * enlarged_node_radius + horizontal_gap_between_nodes
         vertical_gap_between_nodes = enlarged_node_radius * 1.3
         branch_to_straighten_index = 0
 
@@ -1185,7 +1186,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                     node.config['center_y'] = y
                     node.config['radius'] = enlarged_node_radius
                     y = y - 2 * enlarged_node_radius - vertical_gap_between_nodes
-                x = x + 2 * enlarged_node_radius + horizontal_gap_between_nodes
+                x = x + x_dist_between_node_centres
 
             # Propagate.
             propagate_text = TexMobject(r'\textit{Propagate}', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
@@ -1374,7 +1375,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                     brace_target = create_brace_for_node_pair(centre_node, layer[0], distance_from_centre_label.digitValue)
                     brace_target.text = brace.text
                     anims.append(Transform(brace, brace_target))
-                    self.play(Transform(brace, brace_target), create_scroll_digit_to_animation(distance_from_centre_label, distance_from_centre_label.digitValue, distance_from_centre_label.digitValue + 1, digitMObjectScale = distance_from_centre_label.text_scale_factor, x_move_amount = (2 * enlarged_node_radius + horizontal_gap_between_nodes) / 2))
+                    self.play(Transform(brace, brace_target), create_scroll_digit_to_animation(distance_from_centre_label, distance_from_centre_label.digitValue, distance_from_centre_label.digitValue + 1, digitMObjectScale = distance_from_centre_label.text_scale_factor, x_move_amount = x_dist_between_node_centres / 2))
                     distance_from_centre_label.digitValue = distance_from_centre_label.digitValue + 1 
 
                 nodes_with_coins = []
