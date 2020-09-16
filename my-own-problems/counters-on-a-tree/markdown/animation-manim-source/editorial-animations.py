@@ -368,21 +368,26 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                 new_grundy_number_mobject_under.scale(1 / equation_scale_factor)
                 new_grundy_number_mobject_under.move_to([grundy_number_under_node_x, grundy_number_under_node_y, 0])
 
-                remove_equation_anims.extend([ 
-                                            FadeOut(old_grundy_number_mobject),
-                                            FadeOut(xor_symbol),
-                                            FadeOut(grundy_from_disttracker),
-                                            FadeOut(equal_symbol),
-                                            Transform(node.config['grundy_text'], new_grundy_number_mobject_under)
-                                        ])
 
             scene.play(*create_equation_anims)
             scene.play(*map(FadeIn, new_grundy_number_mobjects))
 
             for i,node in enumerate([node]):
                 node_mobject = g.mobject_for_node[node]
-                node.config['grundy_text'].become(new_grundy_number_mobjects[i])
-                scene.remove(new_grundy_number_mobjects[i])
+                #node.config['grundy_text'].become(new_grundy_number_mobjects[i])
+                #scene.remove(new_grundy_number_mobjects[i])
+                # Ideally, we'd now Transform node.config['grundy_text'] into new_grundy_number_mobject_under,
+                # but for some reason, this results in a slightly glitch in the Transform animation,
+                # and I have no idea why.
+                scene.remove(node.config['grundy_text'])
+
+            remove_equation_anims.extend([ 
+                                        FadeOut(old_grundy_number_mobject),
+                                        FadeOut(xor_symbol),
+                                        FadeOut(grundy_from_disttracker),
+                                        FadeOut(equal_symbol),
+                                        Transform(new_grundy_number_mobject, new_grundy_number_mobject_under)
+                                    ])
 
             scene.play(*remove_equation_anims, FadeOutAndShift(propagate_text, UP))
 
