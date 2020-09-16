@@ -129,6 +129,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             node_mobject = g.mobject_for_node[node]
             node_grundy_tex = TexMobject('grundy', color = grundy_node_tex_colour, fill_opacity = 1, fill_color = grundy_node_tex_colour)
             node_grundy_tex.next_to(node_mobject, DOWN)
+            node_grundy_tex.text_scale_factor = 1
             grundy_tex_mobjects.append(node_grundy_tex)
             node.config['grundy_text'] = node_grundy_tex
 
@@ -329,18 +330,25 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             new_grundy_number_mobjects = []
             remove_equation_anims = []
             for node in [node]:
+                equation_scale_factor = 1.0
+                equation_drop_y_amount = node.config['grundy_text'].get_height()
                 node_mobject = g.mobject_for_node[node]
                 old_grundy_number_mobject = node.config['grundy_text'].copy()
                 grundy_number_under_node_x = old_grundy_number_mobject.get_x()
                 grundy_number_under_node_y = old_grundy_number_mobject.get_y()
-                old_grundy_number_mobject.next_to(node_mobject, DOWN, buff = SMALL_BUFF)
+                old_grundy_number_mobject.shift(equation_drop_y_amount * DOWN)
+                old_grundy_number_mobject.scale(equation_scale_factor)
                 xor_symbol = TexMobject(r'\oplus', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                xor_symbol.scale(equation_scale_factor)
                 grundy_from_disttracker_target = grundy_value_mobject.copy()
                 grundy_from_disttracker = grundy_value_mobject.copy()
+                grundy_from_disttracker_target.scale(old_grundy_number_mobject.get_height() / grundy_from_disttracker.get_height())
+                print("blah scale:", old_grundy_number_mobject.get_height() / grundy_from_disttracker.get_height())
                 equal_symbol = TexMobject(r'=', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                equal_symbol.scale(equation_scale_factor)
                 new_grundy_number = node.config['grundy_number'] ^ distTracker.grundyNumber()
                 new_grundy_number_mobject = TexMobject(str(new_grundy_number), colour = BLACK, fill_opacity = 1, fill_color = old_grundy_number_mobject.get_fill_color())
-                new_grundy_number_mobject.scale(old_grundy_number_mobject.get_height() / new_grundy_number_mobject.get_height())
+                new_grundy_number_mobject.scale(equation_scale_factor)
                 new_grundy_number_mobjects.append(new_grundy_number_mobject)
 
                 grundy_update_equation = [old_grundy_number_mobject, xor_symbol, grundy_from_disttracker_target, equal_symbol, new_grundy_number_mobject]
