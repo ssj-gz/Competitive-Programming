@@ -431,7 +431,8 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                     for i in new_objects:
                         anims.append(FadeIn(i))
 
-                    insertDist_text = TexMobject(r'\textit{insertDist}(' + str(0) + ')', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                    insertDist_text = TexMobject(r'\textit{insertDist}(', str(0), ')', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                    insertDist_text[1].set_color(coin_colour)
                     insertDist_text.scale(disttracker_text_scale)
                     insertDist_text.next_to(collect_text.get_center(), 2 * DOWN)
                     insertDist_text.align_on_border(RIGHT)
