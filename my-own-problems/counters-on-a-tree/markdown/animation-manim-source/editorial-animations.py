@@ -308,9 +308,6 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             #          Transform(grid, grid.copy()))
             ##self.play(WiggleOutThenIn(grid))
 
-        # Save a thumbnail now that the initial UI has been set up. 
-        # We might overwrite it later, though!
-        scene.save_thumbnail()
 
         # Ok - move through the node chain!
         distTracker = DistTracker()
@@ -318,6 +315,8 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
             if dist_tracker_implementation == 'optimised' and node_index == 7:
                 scene.save_thumbnail() # This state makes for a nice thumbnail :)
+            if dist_tracker_implementation != 'optimised' and node_index == 4:
+                scene.save_thumbnail()
 
             # Propagate.
             propagate_text = TexMobject(r'\textit{Propagate}', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
