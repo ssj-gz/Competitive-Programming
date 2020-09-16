@@ -165,16 +165,27 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
         if dist_tracker_implementation == 'naive':
 
             # Grundy number display.
+            grundy_value_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = BLUE)
+            grundy_value_mobject.digitValue = 0
+            grundy_value_mobject.scale(disttracker_text_scale)
+            grundy_value_mobject.text_scale_factor = disttracker_text_scale
+
+            grundy_value_mobject.set_y(grundy_value_mobject.get_height() / 2 - scene.camera.get_frame_height() / 2 + DEFAULT_MOBJECT_TO_EDGE_BUFFER)
+
+            grundy_number_label = TexMobject(r'\textit{grundy number} =', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+            grundy_number_label.scale(disttracker_text_scale)
+            grundy_number_label.set_x(0)
+            grundy_number_label.next_to(grundy_value_mobject, UP * 2)
+
+            grundy_xor_elements = [grundy_value_mobject]
+            grundy_xor_digits = []
+
             grundy_number_label = TexMobject(r'\textit{grundy number} =', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
             grundy_number_label.scale(disttracker_text_scale)
             grundy_number_label.next_to(disttracker_title_display, 2 * DOWN)
             grundy_number_label.align_on_border(LEFT)
 
             grundy_number_second_equals = None
-
-            grundy_value_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = BLUE)
-            grundy_value_mobject.scale(disttracker_text_scale)
-            grundy_value_mobject.next_to(grundy_number_label, RIGHT)
 
             scene.play(AnimationGroup(*intro_anims, Write(grundy_number_label), Write(grundy_value_mobject)))
 
