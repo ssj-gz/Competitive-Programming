@@ -180,11 +180,6 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             grundy_xor_elements = [grundy_value_mobject]
             grundy_xor_digits = []
 
-            grundy_number_label = TexMobject(r'\textit{grundy number} =', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
-            grundy_number_label.scale(disttracker_text_scale)
-            grundy_number_label.next_to(disttracker_title_display, 2 * DOWN)
-            grundy_number_label.align_on_border(LEFT)
-
             grundy_number_second_equals = None
 
             scene.play(AnimationGroup(*intro_anims, Write(grundy_number_label), Write(grundy_value_mobject)))
@@ -388,57 +383,121 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                           FadeOutAndShift(cross_out, UP))
             else:
                 if dist_tracker_implementation == 'naive':
-                    shift_elements_to_right_by = 0
-                    new_tracked_distance_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = coin_mobject_for_node.get_fill_color())
-                    new_tracked_distance_mobject.scale(disttracker_text_scale)
-                    new_tracked_distance_mobject.digit = 0
-                    shift_pairs = []
-                    new_element_to_add = None
-                    if not tracked_distance_mobjects:
-                        new_tracked_distance_mobject.next_to(grundy_number_label, RIGHT)
-
-                        assert(not grundy_number_second_equals)
-                        grundy_number_second_equals = TexMobject(r'=', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
-                        grundy_number_second_equals.scale(disttracker_text_scale)
-                        grundy_number_second_equals.next_to(new_tracked_distance_mobject, RIGHT)
-
-                        grundy_value_mobject_target = grundy_value_mobject.copy()
-                        grundy_value_mobject_target.next_to(grundy_number_second_equals, RIGHT)
-                        shift_pairs.append([grundy_value_mobject, grundy_value_mobject_target])
-
-                        new_element_to_add = grundy_number_second_equals
-                    else:
-                        xor_text = TexMobject(r'\oplus', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
-                        xor_text.scale(disttracker_text_scale)
-                        xor_text.next_to(tracked_distance_mobjects[-1], RIGHT)
-                        new_tracked_distance_mobject.next_to(xor_text, RIGHT)
-
-                        grundy_number_second_equals_target = grundy_number_second_equals.copy()
-                        grundy_number_second_equals_target.next_to(new_tracked_distance_mobject)
-
-                        grundy_value_mobject_target = grundy_value_mobject.copy()
-                        grundy_value_mobject_target.next_to(grundy_number_second_equals_target, RIGHT)
-
-                        shift_pairs.append([grundy_value_mobject, grundy_value_mobject_target])
-                        shift_pairs.append([grundy_number_second_equals, grundy_number_second_equals_target])
-
-                        new_element_to_add = xor_text
-
+                    coin_colour = coin_mobject_for_node.get_fill_color()
+                    print("coin_colour:", coin_colour, " coin_mobject:", hasattr(node, 'coin_mobject'), " node: ", repr(node))
+                    is_first_coin = (len(grundy_xor_elements) == 1)
+                    new_objects = []
+                    coin_digit_mobject = TexMobject(str(0), colour = BLACK, fill_opacity = 1, fill_color = coin_colour)
+                    coin_digit_mobject.scale(disttracker_text_scale)
+                    grundy_xor_elements_targets = []
+                    anims = []
+                    grundy_xor_y = grundy_xor_elements[-1].get_y()
 
                     coin_copy = coin_mobject_for_node.copy()
 
-                    animations = [Transform(coin_copy, new_tracked_distance_mobject),
-                                  Transform(grundy_value_mobject, grundy_value_mobject_target),
-                                  FadeIn(new_element_to_add),
-                                  FadeOutAndShift(collect_text, UP)]
-                    for shift_pair in shift_pairs:
-                        animations.append(Transform(shift_pair[0], shift_pair[1]))
+                    for i in grundy_xor_elements:
+                        target = i.copy()
+                        grundy_xor_elements_targets.append(target)
+                        anims.append(Transform(i, target))
+                    if is_first_coin:
+                        equal_symbol = TexMobject(r'=', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                        equal_symbol.scale(disttracker_text_scale)
+                        equal_symbol.equal_symbol = True
+                        print("equal_symbol:", repr(equal_symbol))
+                        new_objects.append(equal_symbol)
+                        grundy_xor_elements_targets.insert(0, equal_symbol)
+                        grundy_xor_elements_targets.insert(0, coin_digit_mobject)
+                        grundy_xor_elements.insert(0, equal_symbol)
+                        grundy_xor_elements.insert(0, coin_copy)
+                    else:
+                        equals_index = -1
+                        print("enumerating grundy_xor_elements:")
+                        for i,obj in enumerate(grundy_xor_elements):
+                            print(" ", repr(i))
+                            if hasattr(obj, 'equal_symbol'):
+                                equals_index = i
+                                break
+                        assert(equals_index != -1)
+                        xor_symbol = TexMobject(r'\oplus', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                        xor_symbol.scale(disttracker_text_scale)
+                        new_objects.append(xor_symbol)
+                        grundy_xor_elements_targets.insert(equals_index, coin_digit_mobject)
+                        grundy_xor_elements_targets.insert(equals_index, xor_symbol)
+                        grundy_xor_elements.insert(equals_index, coin_copy)
+                        grundy_xor_elements.insert(equals_index, xor_symbol)
 
-                    scene.play(*animations, *outtro_anims)
 
-                    scene.remove(coin_copy)
-                    scene.add(new_tracked_distance_mobject)
-                    tracked_distance_mobjects.append(new_tracked_distance_mobject)
+                    align_objects_sequentially(grundy_xor_elements_targets, grundy_xor_y, centre_horizontally_around_x = 0)
+                    anims.append(Transform(coin_copy, coin_digit_mobject))
+                    for i in new_objects:
+                        anims.append(FadeIn(i))
+
+                    insertDist_text = TexMobject(r'\textit{insertDist}(' + str(0) + ')', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                    insertDist_text.scale(disttracker_text_scale)
+                    insertDist_text.next_to(collect_text.get_center(), 2 * DOWN)
+                    insertDist_text.align_on_border(RIGHT)
+                    anims.append(FadeInFrom(insertDist_text, DOWN))
+
+                    scene.play(*anims)
+
+                    coin_copy.text_scale_factor = disttracker_text_scale
+                    coin_copy.digitValue = 0
+                    grundy_xor_digits.append(coin_copy)
+
+                    scene.play(create_scroll_digit_to_animation(grundy_value_mobject, grundy_value_mobject.digitValue, distTracker.grundyNumber(), digitMObjectScale = grundy_value_mobject.text_scale_factor),
+                               FadeOutAndShift(insertDist_text, UP))
+                    grundy_value_mobject.digitValue = distTracker.grundyNumber()
+                    #shift_elements_to_right_by = 0
+                    #new_tracked_distance_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = coin_mobject_for_node.get_fill_color())
+                    #new_tracked_distance_mobject.scale(disttracker_text_scale)
+                    #new_tracked_distance_mobject.digit = 0
+                    #shift_pairs = []
+                    #new_element_to_add = None
+                    #if not tracked_distance_mobjects:
+                    #    new_tracked_distance_mobject.next_to(grundy_number_label, RIGHT)
+
+                    #    assert(not grundy_number_second_equals)
+                    #    grundy_number_second_equals = TexMobject(r'=', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                    #    grundy_number_second_equals.scale(disttracker_text_scale)
+                    #    grundy_number_second_equals.next_to(new_tracked_distance_mobject, RIGHT)
+
+                    #    grundy_value_mobject_target = grundy_value_mobject.copy()
+                    #    grundy_value_mobject_target.next_to(grundy_number_second_equals, RIGHT)
+                    #    shift_pairs.append([grundy_value_mobject, grundy_value_mobject_target])
+
+                    #    new_element_to_add = grundy_number_second_equals
+                    #else:
+                    #    xor_text = TexMobject(r'\oplus', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                    #    xor_text.scale(disttracker_text_scale)
+                    #    xor_text.next_to(tracked_distance_mobjects[-1], RIGHT)
+                    #    new_tracked_distance_mobject.next_to(xor_text, RIGHT)
+
+                    #    grundy_number_second_equals_target = grundy_number_second_equals.copy()
+                    #    grundy_number_second_equals_target.next_to(new_tracked_distance_mobject)
+
+                    #    grundy_value_mobject_target = grundy_value_mobject.copy()
+                    #    grundy_value_mobject_target.next_to(grundy_number_second_equals_target, RIGHT)
+
+                    #    shift_pairs.append([grundy_value_mobject, grundy_value_mobject_target])
+                    #    shift_pairs.append([grundy_number_second_equals, grundy_number_second_equals_target])
+
+                    #    new_element_to_add = xor_text
+
+
+                    #coin_copy = coin_mobject_for_node.copy()
+
+                    #animations = [Transform(coin_copy, new_tracked_distance_mobject),
+                    #              Transform(grundy_value_mobject, grundy_value_mobject_target),
+                    #              FadeIn(new_element_to_add),
+                    #              FadeOutAndShift(collect_text, UP)]
+                    #for shift_pair in shift_pairs:
+                    #    animations.append(Transform(shift_pair[0], shift_pair[1]))
+
+                    #scene.play(*animations, *outtro_anims)
+
+                    #scene.remove(coin_copy)
+                    #scene.add(new_tracked_distance_mobject)
+                    #tracked_distance_mobjects.append(new_tracked_distance_mobject)
 
                 elif dist_tracker_implementation == 'partial_grid' or dist_tracker_implementation == 'optimised':
                     coin_mobjects_to_transform = []
