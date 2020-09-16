@@ -207,15 +207,15 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
             print("points:", points)
             return Polygon(*points, fill_opacity = 0, color = colour, stroke_width = 5)
 
-        def create_rectangle_around_nodes(node_layers, dist_from_node, colour):
-            rectangle_top = node_layers[0][0].config['center_y'] + node_radius + dist_from_node
-            rectangle_bottom = node_layers[-1][0].config['center_y'] - node_radius - dist_from_node
+        def create_rectangle_around_nodes(node_layers, colour, x_dist_from_node, top_dist_from_node, bottom_dist_from_node):
+            rectangle_top = node_layers[0][0].config['center_y'] + node_radius + top_dist_from_node
+            rectangle_bottom = node_layers[-1][0].config['center_y'] - node_radius - bottom_dist_from_node
 
             rectangle_left = 1000
             rectangle_right = -1000
             for layer in node_layers:
-                rectangle_left = min(rectangle_left, layer[0].config['center_x'] - node_radius - dist_from_node)
-                rectangle_right = max(rectangle_right, layer[-1].config['center_x'] + node_radius + dist_from_node)
+                rectangle_left = min(rectangle_left, layer[0].config['center_x'] - node_radius - x_dist_from_node)
+                rectangle_right = max(rectangle_right, layer[-1].config['center_x'] + node_radius + x_dist_from_node)
 
             rectangle = Rectangle(width = rectangle_right - rectangle_left, height = rectangle_top - rectangle_bottom, color = colour, stroke_width = 5)
             # Shift so that top-left is at origin.
@@ -228,7 +228,7 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
 
         self.wait(2)
 
-        ARect = create_rectangle_around_nodes(nodes_at_height[0:up_to_height+1], 0.24, A_COLOUR)
+        ARect = create_rectangle_around_nodes(nodes_at_height[0:up_to_height+1], A_COLOUR, x_dist_from_node = 0.15, top_dist_from_node = 0.15, bottom_dist_from_node = 0.24)
         ALabel = TexMobject('A', color = BLACK, fill_color = A_COLOUR)
         ALabel.next_to(ARect, LEFT)
 
