@@ -1377,6 +1377,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
                 create_equation_anims = []
                 new_grundy_number_mobjects = []
+                new_grundy_number_mobjects_in_nodes = []
                 remove_equation_anims = []
                 for node in layer:
                     node_mobject = g.mobject_for_node[node]
@@ -1406,13 +1407,13 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
                     new_grundy_number_mobject_in_node = new_grundy_number_mobject.copy()
                     new_grundy_number_mobject_in_node.move_to([node.config['center_x'], node.config['center_y'], 0])
+                    new_grundy_number_mobjects_in_nodes.append(new_grundy_number_mobject_in_node)
 
                     remove_equation_anims.extend([ 
                                                 FadeOut(old_grundy_number_mobject),
                                                 FadeOut(xor_symbol),
                                                 FadeOut(grundy_from_disttracker),
                                                 FadeOut(equal_symbol),
-                                                Transform(node_mobject.value_mobject, new_grundy_number_mobject_in_node)
                                             ])
 
                 self.play(*create_equation_anims)
@@ -1420,10 +1421,21 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 
                 for i,node in enumerate(layer):
                     node_mobject = g.mobject_for_node[node]
-                    node_mobject.value_mobject.become(new_grundy_number_mobjects[i])
-                    self.remove(new_grundy_number_mobjects[i])
+                    node_mobject.value_mobject.become(new_grundy_number_mobjects_in_nodes[i].copy())
+                    # Ideally, we'd Transform node_mobject.value_mobject into new_grundy_number_mobject_in_node,
+                    # but this results in a strange glitch and I don't know why.
+                    # Instead, Transform(new_grundy_number_mobject_in_node[i]), hide node_mobject.value_mobject,
+                    # and restore it later.
+                    node_mobject.value_mobject.set_opacity(0)
+                    remove_equation_anims.append(Transform(new_grundy_number_mobjects[i], new_grundy_number_mobjects_in_nodes[i]))
+
 
                 self.play(*remove_equation_anims)
+
+                for i,node in enumerate(layer):
+                    node_mobject = g.mobject_for_node[node]
+                    node_mobject.set_opacity(1)
+                    self.remove(new_grundy_number_mobjects[i])
 
                 print("distTracker:", distTracker.distances)
 
