@@ -1110,8 +1110,6 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
         disttracker_title_display.set_y(disttracker_top_y - disttracker_title_display.get_height() / 2 - MED_LARGE_BUFF)
 
         # Grundy number display.
-        grundy_number_second_equals = None
-
         grundy_value_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = BLUE)
         grundy_value_mobject.digitValue = 0
         grundy_value_mobject.scale(disttracker_text_scale)
