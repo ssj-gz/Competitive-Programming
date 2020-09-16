@@ -436,7 +436,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
             if coin_mobject_for_node:
                 scene.play(FadeInFrom(collect_text, DOWN),
-                           WiggleOutThenIn(coin_mobject_for_node))
+                           WiggleOutThenIn(coin_mobject_for_node, scale_value = 1.4))
             else:
                 scene.play(FadeInFrom(collect_text, DOWN))
 
