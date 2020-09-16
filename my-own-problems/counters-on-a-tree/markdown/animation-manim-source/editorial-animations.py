@@ -313,7 +313,6 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
         # Ok - move through the node chain!
         distTracker = DistTracker()
-        tracked_distance_mobjects = []
         for node_index,node in enumerate(nodes):
 
             if dist_tracker_implementation == 'optimised' and node_index == 7:
@@ -570,7 +569,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
                     addPlusOneAnims = []
                     fadePlusOneAnims = []
-                    for digit_mobject in tracked_distance_mobjects:
+                    for digit_mobject in grundy_xor_digits:
                         plusOne = add_plus_one(digit_mobject)
 
                         fadedMovedPlusOne = plusOne.copy()
@@ -585,17 +584,17 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                               LaggedStart(*addPlusOneAnims))
 
                     animations = []
-                    for digit_mobject in tracked_distance_mobjects:
-                        new_digit_value = digit_mobject.digit + 1
-                        animations.append(create_scroll_digit_to_animation(digit_mobject, digit_mobject.digit, new_digit_value, digitMObjectScale = disttracker_text_scale))
+                    for digit_mobject in grundy_xor_digits:
+                        new_digit_value = digit_mobject.digitValue + 1
+                        animations.append(create_scroll_digit_to_animation(digit_mobject, digit_mobject.digitValue, new_digit_value, digitMObjectScale = disttracker_text_scale))
 
                     print("current_grundy_value:", current_grundy_value, " new_grundy_value:", new_grundy_value)
 
                     animations.append(create_scroll_digit_to_animation(grundy_value_mobject, current_grundy_value, new_grundy_value, digitMObjectScale = disttracker_text_scale))
                     animations.extend(outtro_animations)
 
-                    for digit_mobject in tracked_distance_mobjects:
-                        digit_mobject.digit = digit_mobject.digit + 1
+                    for digit_mobject in grundy_xor_digits:
+                        digit_mobject.digitValue = digit_mobject.digitValue + 1
                     
                     scene.play(LaggedStart(*animations),
                               LaggedStart(*fadePlusOneAnims))
