@@ -325,39 +325,89 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             propagate_text.set_y(disttracker_title_display.get_y())
             scene.play(FadeInFrom(propagate_text, DOWN))
 
-            grundy_value_to_move = grundy_value_mobject.copy()
-            node_grundy = node.config['grundy_text']
-            node_grundy_target = node_grundy.copy()
-            node_grundy_target.shift([-node_grundy_target.get_width() * 2, -1, 0])
-            xor_symbol = TexMobject(r'\oplus', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
-            xor_symbol.next_to(node_grundy_target, RIGHT, buff = SMALL_BUFF)
-            grundy_value_destination = TexMobject(str(distTracker.grundyNumber()), colour = BLACK, fill_opacity = 1, fill_color = disttracker_grundy_color)
-            grundy_value_destination.next_to(xor_symbol, RIGHT, buff = SMALL_BUFF)
-            equal_symbol = TexMobject(r'=', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
-            equal_symbol.next_to(grundy_value_destination, buff = SMALL_BUFF)
+            create_equation_anims = []
+            new_grundy_number_mobjects = []
+            remove_equation_anims = []
+            for node in [node]:
+                node_mobject = g.mobject_for_node[node]
+                old_grundy_number_mobject = node.config['grundy_text'].copy()
+                old_grundy_number_mobject.next_to(node_mobject, DOWN, buff = SMALL_BUFF)
+                xor_symbol = TexMobject(r'\oplus', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                grundy_from_disttracker_target = grundy_value_mobject.copy()
+                grundy_from_disttracker = grundy_value_mobject.copy()
+                equal_symbol = TexMobject(r'=', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                new_grundy_number = node.config['grundy_number'] ^ distTracker.grundyNumber()
+                new_grundy_number_mobject = TexMobject(str(new_grundy_number), colour = BLACK, fill_opacity = 1, fill_color = old_grundy_number_mobject.get_fill_color())
+                new_grundy_number_mobject.scale(old_grundy_number_mobject.get_height() / new_grundy_number_mobject.get_height())
+                new_grundy_number_mobjects.append(new_grundy_number_mobject)
 
-            scene.play(
-                      Transform(node_grundy, node_grundy_target),
-                      Transform(grundy_value_to_move, grundy_value_destination),
-                      FadeIn(xor_symbol),
-                      FadeIn(equal_symbol))
+                grundy_update_equation = [old_grundy_number_mobject, xor_symbol, grundy_from_disttracker_target, equal_symbol, new_grundy_number_mobject]
+                align_objects_sequentially(grundy_update_equation, old_grundy_number_mobject.get_y(), centre_horizontally_around_x = node.config['center_x'])
+                for i in grundy_update_equation:
+                    scene.remove(i)
 
-            new_grundy_tex = TexMobject(str(node.config['grundy_number'] ^ distTracker.grundyNumber()), colour = BLACK, fill_opacity = 1, fill_color = grundy_node_tex_colour)
-            new_grundy_tex.next_to(equal_symbol, RIGHT, buff = SMALL_BUFF)
-            scene.play(FadeIn(new_grundy_tex))
+                create_equation_anims.extend([ 
+                                            Transform(node.config['grundy_text'], old_grundy_number_mobject),
+                                            FadeIn(xor_symbol),
+                                            Transform(grundy_from_disttracker, grundy_from_disttracker_target),
+                                            FadeIn(equal_symbol)
+                                        ])
 
-            node_grundy_to_fade_out = node_grundy.copy()
-            node_grundy.become(new_grundy_tex)
-            scene.remove(new_grundy_tex)
-            node_grundy_target = node_grundy.copy()
-            node_grundy_target.next_to(g.mobject_for_node[node], DOWN)
 
-            scene.play(FadeOutAndShift(propagate_text, UP),
-                      FadeOut(node_grundy_to_fade_out),
-                      FadeOut(grundy_value_to_move),
-                      FadeOut(xor_symbol),
-                      FadeOut(equal_symbol),
-                      Transform(node_grundy, node_grundy_target))
+                new_grundy_number_mobject_in_node = new_grundy_number_mobject.copy()
+                new_grundy_number_mobject_in_node.move_to([node.config['center_x'], node.config['center_y'], 0])
+
+                remove_equation_anims.extend([ 
+                                            FadeOut(old_grundy_number_mobject),
+                                            FadeOut(xor_symbol),
+                                            FadeOut(grundy_from_disttracker),
+                                            FadeOut(equal_symbol),
+                                            Transform(node.config['grundy_text'], new_grundy_number_mobject_in_node)
+                                        ])
+
+            scene.play(*create_equation_anims)
+            scene.play(*map(FadeIn, new_grundy_number_mobjects))
+
+            for i,node in enumerate([node]):
+                node_mobject = g.mobject_for_node[node]
+                node.config['grundy_text'].become(new_grundy_number_mobjects[i])
+                scene.remove(new_grundy_number_mobjects[i])
+
+            scene.play(*remove_equation_anims, FadeOutAndShift(propagate_text, UP))
+
+            #grundy_value_to_move = grundy_value_mobject.copy()
+            #node_grundy = node.config['grundy_text']
+            #node_grundy_target = node_grundy.copy()
+            #node_grundy_target.shift([-node_grundy_target.get_width() * 2, -1, 0])
+            #xor_symbol = TexMobject(r'\oplus', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+            #xor_symbol.next_to(node_grundy_target, RIGHT, buff = SMALL_BUFF)
+            #grundy_value_destination = TexMobject(str(distTracker.grundyNumber()), colour = BLACK, fill_opacity = 1, fill_color = disttracker_grundy_color)
+            #grundy_value_destination.next_to(xor_symbol, RIGHT, buff = SMALL_BUFF)
+            #equal_symbol = TexMobject(r'=', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+            #equal_symbol.next_to(grundy_value_destination, buff = SMALL_BUFF)
+
+            #scene.play(
+            #          Transform(node_grundy, node_grundy_target),
+            #          Transform(grundy_value_to_move, grundy_value_destination),
+            #          FadeIn(xor_symbol),
+            #          FadeIn(equal_symbol))
+
+            #new_grundy_tex = TexMobject(str(node.config['grundy_number'] ^ distTracker.grundyNumber()), colour = BLACK, fill_opacity = 1, fill_color = grundy_node_tex_colour)
+            #new_grundy_tex.next_to(equal_symbol, RIGHT, buff = SMALL_BUFF)
+            #scene.play(FadeIn(new_grundy_tex))
+
+            #node_grundy_to_fade_out = node_grundy.copy()
+            #node_grundy.become(new_grundy_tex)
+            #scene.remove(new_grundy_tex)
+            #node_grundy_target = node_grundy.copy()
+            #node_grundy_target.next_to(g.mobject_for_node[node], DOWN)
+
+            #scene.play(FadeOutAndShift(propagate_text, UP),
+            #          FadeOut(node_grundy_to_fade_out),
+            #          FadeOut(grundy_value_to_move),
+            #          FadeOut(xor_symbol),
+            #          FadeOut(equal_symbol),
+            #          Transform(node_grundy, node_grundy_target))
 
             # Collect.
             collect_text = TexMobject(r'\textit{Collect}', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
