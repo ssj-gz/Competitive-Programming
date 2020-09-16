@@ -161,7 +161,7 @@ Then we $\textit{clear}()$ our $\textit{DistTracker}$ and repeat, this time with
 
 [/details]
 
-We now return to optimising our $\textit{DistTracker}$.  It often helps to take a bitwise approach to problems involving xor sums, and this is the case here.  Let's have a look at the binary representation of an increasing series of numbers and observe how each bit changes.  The numbers along the top of the table are the bit number with bit number $0$ being the least significant bit.
+We now return to optimising our $\textit{DistTracker}$.  As is often the case with problems involving xor-sums, it helps to take a bitwise approach.  Let's have a look at the binary representation of an increasing series of numbers and observe how each bit changes.  The numbers along the top of the table are the bit number with bit number $0$ being the least significant bit.
 
 | N | 5 | 4 | 3 | 2 | 1 | 0 |
 | - | - | - | - | - | - | - |
