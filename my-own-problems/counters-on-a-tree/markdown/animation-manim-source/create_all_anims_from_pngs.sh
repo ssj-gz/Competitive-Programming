@@ -6,7 +6,7 @@ for i in 1 2 3 4 5 6 7; do
     cd $i
     ../../../../../convert-pngs-to-gif.sh
     cd -
-    mv $i/final/final.gif MOVCOIN2_ED_${i}.gif
+    mv $i/final/final.gif MOVCOIN2_ED_${i}_ANIM.gif
 done 
 mv MOV*.gif ../../../../
 
