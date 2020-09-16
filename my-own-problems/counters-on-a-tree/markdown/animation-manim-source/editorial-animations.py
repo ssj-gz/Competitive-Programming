@@ -487,13 +487,13 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             if node_index != num_nodes - 1:
 
                 print("adjustAllDistances")
-                adjust_dists_text = TexMobject(r'\textit{addToAllDists}(1)', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
-                adjust_dists_text.scale(disttracker_text_scale)
-                adjust_dists_text.align_on_border(RIGHT)
-                adjust_dists_text.set_y(disttracker_title_display.get_y())
+                addToAllDists_text = TexMobject(r'\textit{addToAllDists}(1)', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                addToAllDists_text.scale(disttracker_text_scale)
+                addToAllDists_text.align_on_border(RIGHT)
+                addToAllDists_text.set_y(disttracker_title_display.get_y())
 
-                intro_animations = [FadeInFrom(adjust_dists_text, DOWN)]
-                outtro_animations = [FadeOutAndShift(adjust_dists_text, UP), ApplyMethod(arrow.shift, [nodes[node_index + 1].config['center_x'] - node.config['center_x'], 0, 0])]
+                intro_animations = [FadeInFrom(addToAllDists_text, DOWN)]
+                outtro_animations = [FadeOutAndShift(addToAllDists_text, UP), ApplyMethod(arrow.shift, [nodes[node_index + 1].config['center_x'] - node.config['center_x'], 0, 0])]
 
                 current_grundy_value = distTracker.grundyNumber()
                 distTracker.adjustAllDistances(1)
