@@ -1334,7 +1334,7 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
             collect_text.set_y(disttracker_title_display.get_y())
             self.play(FadeInFrom(collect_text, DOWN))
 
-            def create_brace_for_node_pair(nodeLeft, nodeRight, tex):
+            def create_brace_for_node_pair(nodeLeft, nodeRight, tex = None):
                 dummyLeftMObject = Circle(radius = 0)
                 dummyLeftMObject.move_to(g.mobject_for_node[nodeLeft].get_center())
                 dummyLeftMObject.shift(nodeLeft.config['radius'] * UP)
@@ -1348,11 +1348,12 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                 dummyGroup.add(dummyRightMObject)
 
                 brace = Brace(dummyGroup, color = BLACK, fill_color = BLACK, direction = UP )
-                text = TexMobject(tex, color = BLACK, fill_opacity = 1, fill_color = BLACK)
-                text.text_scale_factor = 1.5
-                text.scale(text.text_scale_factor)
-                text.next_to(brace, UP)
-                brace.text = text
+                if tex:
+                    text = TexMobject(tex, color = BLACK, fill_opacity = 1, fill_color = BLACK)
+                    text.text_scale_factor = 1.5
+                    text.scale(text.text_scale_factor)
+                    text.next_to(brace, UP)
+                    brace.text = text
 
                 return brace
 
@@ -1371,12 +1372,9 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
                     self.play(*anims)
                 else:
                     brace_target = create_brace_for_node_pair(centre_node, layer[0], distance_from_centre_label.digitValue)
-                    digit_target = distance_from_centre_label.copy()
-                    digit_target.next_to(brace_target, UP)
+                    brace_target.text = brace.text
                     anims.append(Transform(brace, brace_target))
-                    anims.append(Transform(distance_from_centre_label, digit_target))
-                    self.play(*anims, run_time = 0.5)
-                    self.play(create_scroll_digit_to_animation(distance_from_centre_label, distance_from_centre_label.digitValue, distance_from_centre_label.digitValue + 1, digitMObjectScale = distance_from_centre_label.text_scale_factor), run_time = 0.5)
+                    self.play(Transform(brace, brace_target), create_scroll_digit_to_animation(distance_from_centre_label, distance_from_centre_label.digitValue, distance_from_centre_label.digitValue + 1, digitMObjectScale = distance_from_centre_label.text_scale_factor, x_move_amount = (2 * enlarged_node_radius + horizontal_gap_between_nodes) / 2))
                     distance_from_centre_label.digitValue = distance_from_centre_label.digitValue + 1 
 
                 nodes_with_coins = []
