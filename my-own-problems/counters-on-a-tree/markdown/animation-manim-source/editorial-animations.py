@@ -1219,404 +1219,409 @@ class MoveCoins2Editorial_3_show_branches(SSJGZScene):
 
         self.save_thumbnail()
 
+def do_collect_and_propagate_branches_naive(scene):
+    distTracker = DistTracker()
+
+    centroid_graph_info = create_centroid_and_branches_tree(scene)
+    g = centroid_graph_info['graph']
+    centre_node = centroid_graph_info['centre_node']
+    branch_roots = centroid_graph_info['branch_roots']
+    node_radius = centre_node.config['radius']
+    furthest_point_from_centre = centroid_graph_info['furthest_point_from_centre']
+
+    scene.play(g.create_animation())
+
+    # Graph is displayed; now the DistTracker.
+    graph_bottom = centre_node.config['center_y'] - furthest_point_from_centre
+
+    disttracker_top_y = graph_bottom
+    disttracker_text_scale = 1.5
+    disttracker_title_display = TexMobject(r'\textit{DistTracker}^\text{TM}', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+    disttracker_title_display.scale(disttracker_text_scale)
+    disttracker_title_display.align_on_border(LEFT)
+    disttracker_title_display.set_y(disttracker_top_y - disttracker_title_display.get_height() / 2 - MED_LARGE_BUFF)
+
+    # Grundy number display.
+    grundy_value_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = BLUE)
+    grundy_value_mobject.digitValue = 0
+    grundy_value_mobject.scale(disttracker_text_scale)
+    grundy_value_mobject.text_scale_factor = disttracker_text_scale
+
+    grundy_value_mobject.set_y(grundy_value_mobject.get_height() / 2 - scene.camera.get_frame_height() / 2 + DEFAULT_MOBJECT_TO_EDGE_BUFFER)
+
+    grundy_number_label = TexMobject(r'\textit{grundy number} =', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+    grundy_number_label.scale(disttracker_text_scale)
+    grundy_number_label.set_x(0)
+    grundy_number_label.next_to(grundy_value_mobject, UP * 2)
+
+
+    grundy_xor_elements = [grundy_value_mobject]
+    grundy_xor_digits = []
+
+    scene.play(Write(disttracker_title_display), Write(grundy_number_label), Write(grundy_value_mobject))
+
+    enlarged_node_radius = node_radius * 2
+    horizontal_gap_between_nodes = enlarged_node_radius * 1.4 # i.e. between right edge of one and left edge of next
+    x_dist_between_node_centres = 2 * enlarged_node_radius + horizontal_gap_between_nodes
+    vertical_gap_between_nodes = enlarged_node_radius * 1.3
+    branch_to_straighten_index = 0
+
+    def add_amount_to_change_by(digitMObject, amount_to_change_by):
+        text = str(amount_to_change_by)
+        if amount_to_change_by > 0:
+            text = "+" + text
+        plusAmount = TexMobject(text)
+        plusAmount.set_color(RED)
+        plusAmount.scale(disttracker_text_scale / 3)
+        plusAmount.next_to(digitMObject, TOP / 5)
+        plusAmount.shift((digitMObject.get_width() / 2, 0, 0))
+        scene.add(plusAmount)
+        return plusAmount
+
+    # Iterate through the branches.
+    for i in range(0, len(branch_roots)):
+        print("branch_to_straighten_index:", branch_to_straighten_index)
+
+        previous_graph_state = g.get_restorable_state()
+        # Move the center node out of the way of the nodes from the other branches
+        centre_node.config['center_x'] = centre_node.config['center_x'] + 3 * enlarged_node_radius
+        centre_node.config['center_y'] = centre_node.config['center_y'] + enlarged_node_radius * 1.5
+        centre_node.config['radius'] = enlarged_node_radius
+
+        branch_to_straighten = branch_roots[branch_to_straighten_index]
+        rightmost_branch = branch_to_straighten
+        other_branches = branch_roots.copy()
+        other_branches.remove(branch_to_straighten)
+
+        branch_label = TexMobject(r'\textit{Branch }b_' + str(branch_to_straighten.branch_root_number), colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+        branch_label.align_on_border(RIGHT)
+        branch_label.set_y(scene.camera.get_frame_height() / 2 - branch_label.get_height())
+
+        descendents_by_height = g.find_descendents_at_height(centre_node, ignore_node_list = other_branches)
+        descendents_by_height.pop(0) # Ditch the root
+        for layer in descendents_by_height:
+            layer.sort(key = lambda m: -m.config['center_y'])
+
+        for edge in g.edges:
+            for layer in descendents_by_height:
+                for node in layer:
+                    if edge.start_node == node or edge.end_node == node:
+                        edge.config['colour'] = '#eeeeee'
+
+        x = centre_node.config['center_x'] + node_radius + horizontal_gap_between_nodes + enlarged_node_radius
+        for layer in descendents_by_height:
+            y = centre_node.config['center_y']
+            for node in layer:
+                node.config['center_x'] = x
+                node.config['center_y'] = y
+                node.config['radius'] = enlarged_node_radius
+                y = y - 2 * enlarged_node_radius - vertical_gap_between_nodes
+            x = x + x_dist_between_node_centres
+
+        # Propagate.
+        propagate_text = TexMobject(r'\textit{Propagate}', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+        propagate_text.scale(disttracker_text_scale)
+        propagate_text.align_on_border(RIGHT)
+        propagate_text.set_y(disttracker_title_display.get_y())
+
+        scene.play(g.create_animation(), FadeInFrom(propagate_text, DOWN), FadeInFrom(branch_label, DOWN))
+
+        nodes_at_current_dist_rect = create_rectangle_around_nodes([centre_node], gap_size = SMALL_BUFF)
+        scene.play(Write(nodes_at_current_dist_rect))
+        for layer in descendents_by_height:
+            nodes_at_current_dist_rect_target = create_rectangle_around_nodes(layer, gap_size = SMALL_BUFF)
+
+            # Adjust all the distances + grundy (with instructions), and shift highlighting rect to this layer.
+            addToAllDists_anims = []
+            addToAllDists_text = TexMobject(r'\textit{addToAllDists}(1)', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+            addToAllDists_text.scale(disttracker_text_scale)
+            addToAllDists_text.next_to(propagate_text.get_center(), 2 * DOWN)
+            addToAllDists_text.align_on_border(RIGHT)
+            addToAllDists_anims.append(FadeInFrom(addToAllDists_text, DOWN))
+
+            addPlusOneAnims = []
+            fadePlusOneAnims = []
+            for digit_mobject in grundy_xor_digits:
+                plusOne = add_amount_to_change_by(digit_mobject, 1)
+
+                fadedMovedPlusOne = plusOne.copy()
+                fadedMovedPlusOne.set_opacity(0)
+                fadedMovedPlusOne.shift((0, 3 * plusOne.get_height(), 0))
+
+                addPlusOneAnims.append(FadeInFrom(plusOne, DOWN))
+
+                fadePlusOneAnims.append(Transform(plusOne, fadedMovedPlusOne))
+
+            scene.play(FadeInFrom(addToAllDists_text, DOWN), LaggedStart(*addPlusOneAnims))
+
+            increment_digits_and_change_grundy_anims = []
+            distTracker.adjustAllDistances(1)
+            for digit_mobject in grundy_xor_digits:
+                increment_digits_and_change_grundy_anims.append(create_scroll_digit_to_animation(digit_mobject, digit_mobject.digitValue, digit_mobject.digitValue + 1, digitMObjectScale = digit_mobject.text_scale_factor))
+                digit_mobject.digitValue = digit_mobject.digitValue + 1
+
+            increment_digits_and_change_grundy_anims.append(create_scroll_digit_to_animation(grundy_value_mobject, grundy_value_mobject.digitValue, distTracker.grundyNumber(), digitMObjectScale = grundy_value_mobject.text_scale_factor))
+            grundy_value_mobject.digitValue = distTracker.grundyNumber()
+
+            scene.play(Transform(nodes_at_current_dist_rect, nodes_at_current_dist_rect_target), FadeOutAndShift(addToAllDists_text, UP), *increment_digits_and_change_grundy_anims, LaggedStart(*fadePlusOneAnims))
+
+            # Propagate the grundy numbers to all the nodes in this layer.
+            # The animations are done in parallel, which makes things a little tricky.
+            for edge in g.edges: # Workaround manim's odd z-ordering that makes the edges appear
+                                 # in front of the equations, for some reason.
+                scene.bring_to_back(g.mobject_for_edge[edge])
+
+            create_equation_anims = []
+            new_grundy_number_mobjects = []
+            new_grundy_number_mobjects_in_nodes = []
+            remove_equation_anims = []
+            for node in layer:
+                node_mobject = g.mobject_for_node[node]
+                old_grundy_number_mobject = node_mobject.value_mobject.copy()
+                old_grundy_number_mobject.next_to(node_mobject, DOWN, buff = SMALL_BUFF)
+                xor_symbol = TexMobject(r'\oplus', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                grundy_from_disttracker_target = grundy_value_mobject.copy()
+                grundy_from_disttracker = grundy_value_mobject.copy()
+                equal_symbol = TexMobject(r'=', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                new_grundy_number = node.grundy_number ^ distTracker.grundyNumber()
+                new_grundy_number_mobject = TexMobject(str(new_grundy_number), colour = BLACK, fill_opacity = 1, fill_color = old_grundy_number_mobject.get_fill_color())
+                new_grundy_number_mobject.scale(old_grundy_number_mobject.get_height() / new_grundy_number_mobject.get_height())
+                new_grundy_number_mobjects.append(new_grundy_number_mobject)
+
+                grundy_update_equation = [old_grundy_number_mobject, xor_symbol, grundy_from_disttracker_target, equal_symbol, new_grundy_number_mobject]
+                align_objects_sequentially(grundy_update_equation, old_grundy_number_mobject.get_y(), centre_horizontally_around_x = node.config['center_x'])
+                for i in grundy_update_equation:
+                    scene.remove(i)
+
+                create_equation_anims.extend([ 
+                                            Transform(node_mobject.value_mobject, old_grundy_number_mobject),
+                                            FadeIn(xor_symbol),
+                                            Transform(grundy_from_disttracker, grundy_from_disttracker_target),
+                                            FadeIn(equal_symbol)
+                                        ])
+
+
+                new_grundy_number_mobject_in_node = new_grundy_number_mobject.copy()
+                new_grundy_number_mobject_in_node.move_to([node.config['center_x'], node.config['center_y'], 0])
+                new_grundy_number_mobjects_in_nodes.append(new_grundy_number_mobject_in_node)
+
+                remove_equation_anims.extend([ 
+                                            FadeOut(old_grundy_number_mobject),
+                                            FadeOut(xor_symbol),
+                                            FadeOut(grundy_from_disttracker),
+                                            FadeOut(equal_symbol),
+                                        ])
+
+            scene.play(*create_equation_anims)
+            scene.play(*map(FadeIn, new_grundy_number_mobjects))
+
+            for i,node in enumerate(layer):
+                node_mobject = g.mobject_for_node[node]
+                node_mobject.value_mobject.become(new_grundy_number_mobjects_in_nodes[i].copy())
+                # Ideally, we'd Transform node_mobject.value_mobject into new_grundy_number_mobject_in_node,
+                # but this results in a strange glitch and I don't know why.
+                # Instead, Transform(new_grundy_number_mobject_in_node[i]), hide node_mobject.value_mobject,
+                # and restore it later.
+                node_mobject.value_mobject.set_opacity(0)
+                remove_equation_anims.append(Transform(new_grundy_number_mobjects[i], new_grundy_number_mobjects_in_nodes[i]))
+
+
+            scene.play(*remove_equation_anims)
+
+            for i,node in enumerate(layer):
+                node_mobject = g.mobject_for_node[node]
+                node_mobject.set_opacity(1)
+                scene.remove(new_grundy_number_mobjects[i])
+
+            print("distTracker:", distTracker.distances)
+
+        # Reset DistTracker.
+        amount_to_subtract_from_disttracker = len(descendents_by_height)
+        print("amount_to_subtract_from_disttracker:", amount_to_subtract_from_disttracker, " DistTracker:", distTracker.distances)
+        addToAllDists_text = TexMobject(r'\textit{addToAllDists}(' + str(-amount_to_subtract_from_disttracker) + ')', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+        addToAllDists_text.scale(disttracker_text_scale)
+        addToAllDists_text.next_to(propagate_text, 2 * DOWN)
+        addToAllDists_text.align_on_border(RIGHT)
+        addToAllDists_anims.append(FadeInFrom(addToAllDists_text, DOWN))
+
+        distTracker.adjustAllDistances(-amount_to_subtract_from_disttracker)
+        subtractAnims = []
+        fadeSubtractAnims = []
+        for digit_mobject in grundy_xor_digits:
+            subtractFromDistTracker = add_amount_to_change_by(digit_mobject, -amount_to_subtract_from_disttracker)
+
+            fadedMovedSubtractFromDistTracker = subtractFromDistTracker.copy()
+            fadedMovedSubtractFromDistTracker.set_opacity(0)
+            fadedMovedSubtractFromDistTracker.shift((0, 3 * subtractFromDistTracker.get_height(), 0))
+
+            subtractAnims.append(FadeInFrom(subtractFromDistTracker, DOWN))
+
+            fadeSubtractAnims.append(Transform(subtractFromDistTracker, fadedMovedSubtractFromDistTracker))
+
+        scene.play(FadeInFrom(addToAllDists_text, DOWN), LaggedStart(*subtractAnims))
+
+        increment_digits_and_change_grundy_anims = []
+        for digit_mobject in grundy_xor_digits:
+            increment_digits_and_change_grundy_anims.append(create_scroll_digit_to_animation(digit_mobject, digit_mobject.digitValue, digit_mobject.digitValue - amount_to_subtract_from_disttracker, digitMObjectScale = digit_mobject.text_scale_factor))
+            digit_mobject.digitValue = digit_mobject.digitValue - amount_to_subtract_from_disttracker
+
+        increment_digits_and_change_grundy_anims.append(create_scroll_digit_to_animation(grundy_value_mobject, grundy_value_mobject.digitValue, distTracker.grundyNumber(), digitMObjectScale = grundy_value_mobject.text_scale_factor))
+        grundy_value_mobject.digitValue = distTracker.grundyNumber()
+
+        scene.play(FadeOutAndShift(propagate_text, UP), FadeOut(nodes_at_current_dist_rect), FadeOutAndShift(addToAllDists_text, UP), *increment_digits_and_change_grundy_anims, LaggedStart(*fadeSubtractAnims))
+
+        # Collect
+        collect_text = TexMobject(r'\textit{Collect}', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+        collect_text.scale(disttracker_text_scale)
+        collect_text.align_on_border(RIGHT)
+        collect_text.set_y(disttracker_title_display.get_y())
+        scene.play(FadeInFrom(collect_text, DOWN))
+
+        def create_brace_for_node_pair(nodeLeft, nodeRight, tex = None):
+            dummyLeftMObject = Circle(radius = 0)
+            dummyLeftMObject.move_to(g.mobject_for_node[nodeLeft].get_center())
+            dummyLeftMObject.shift(nodeLeft.config['radius'] * UP)
+
+            dummyRightMObject = Circle(radius = 0)
+            dummyRightMObject.move_to(g.mobject_for_node[nodeRight].get_center())
+            dummyRightMObject.shift(nodeRight.config['radius'] * UP)
+
+            dummyGroup = VGroup()
+            dummyGroup.add(dummyLeftMObject)
+            dummyGroup.add(dummyRightMObject)
+
+            brace = Brace(dummyGroup, color = BLACK, fill_color = BLACK, direction = UP )
+            if tex:
+                text = TexMobject(tex, color = BLACK, fill_opacity = 1, fill_color = BLACK)
+                text.text_scale_factor = 1.5
+                text.scale(text.text_scale_factor)
+                text.next_to(brace, UP)
+                brace.text = text
+
+            return brace
+
+        brace = None
+        distance_from_centre_label = None
+        distance_from_center = 1
+        for layer in descendents_by_height:
+            anims = []
+
+            if not brace:
+                brace = create_brace_for_node_pair(centre_node, layer[0], 1)
+                distance_from_centre_label = brace.text
+                distance_from_centre_label.digitValue = 1
+                anims.append(GrowFromCenter(brace))
+                anims.append(Write(distance_from_centre_label))
+                scene.play(*anims)
+            else:
+                brace_target = create_brace_for_node_pair(centre_node, layer[0], distance_from_centre_label.digitValue)
+                brace_target.text = brace.text
+                anims.append(Transform(brace, brace_target))
+                scene.play(Transform(brace, brace_target), create_scroll_digit_to_animation(distance_from_centre_label, distance_from_centre_label.digitValue, distance_from_centre_label.digitValue + 1, digitMObjectScale = distance_from_centre_label.text_scale_factor, x_move_amount = x_dist_between_node_centres / 2))
+                distance_from_centre_label.digitValue = distance_from_centre_label.digitValue + 1 
+
+            nodes_with_coins = []
+            for node in layer:
+                if 'coin_colour' in node.config:
+                    nodes_with_coins.append(node)
+
+            if not nodes_with_coins:
+                cross_out = Cross(collect_text)
+                scene.play(Write(cross_out), run_time = 0.3)
+                scene.play(FadeOut(cross_out), run_time = 0.3)
+            else:
+                for node in nodes_with_coins:
+                    coin_colour = node.config['coin_colour']
+                    print("coin_colour:", coin_colour, " coin_mobject:", hasattr(node, 'coin_mobject'), " node: ", repr(node))
+                    is_first_coin = (len(grundy_xor_elements) == 1)
+                    new_objects = []
+                    coin_digit_mobject = TexMobject(str(distance_from_center), colour = BLACK, fill_opacity = 1, fill_color = coin_colour)
+                    coin_digit_mobject.scale(disttracker_text_scale)
+                    grundy_xor_elements_targets = []
+                    anims = []
+                    grundy_xor_y = grundy_xor_elements[-1].get_y()
+
+                    coin_copy = g.mobject_for_node[node].coin_mobject.copy()
+
+                    for i in grundy_xor_elements:
+                        target = i.copy()
+                        grundy_xor_elements_targets.append(target)
+                        anims.append(Transform(i, target))
+                    if is_first_coin:
+                        equal_symbol = TexMobject(r'=', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                        equal_symbol.scale(disttracker_text_scale)
+                        equal_symbol.equal_symbol = True
+                        print("equal_symbol:", repr(equal_symbol))
+                        new_objects.append(equal_symbol)
+                        grundy_xor_elements_targets.insert(0, equal_symbol)
+                        grundy_xor_elements_targets.insert(0, coin_digit_mobject)
+                        grundy_xor_elements.insert(0, equal_symbol)
+                        grundy_xor_elements.insert(0, coin_copy)
+                    else:
+                        equals_index = -1
+                        print("enumerating grundy_xor_elements:")
+                        for i,obj in enumerate(grundy_xor_elements):
+                            print(" ", repr(i))
+                            if hasattr(obj, 'equal_symbol'):
+                                equals_index = i
+                                break
+                        assert(equals_index != -1)
+                        xor_symbol = TexMobject(r'\oplus', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                        xor_symbol.scale(disttracker_text_scale)
+                        new_objects.append(xor_symbol)
+                        grundy_xor_elements_targets.insert(equals_index, coin_digit_mobject)
+                        grundy_xor_elements_targets.insert(equals_index, xor_symbol)
+                        grundy_xor_elements.insert(equals_index, coin_copy)
+                        grundy_xor_elements.insert(equals_index, xor_symbol)
+
+
+                    align_objects_sequentially(grundy_xor_elements_targets, grundy_xor_y, centre_horizontally_around_x = 0)
+                    anims.append(Transform(coin_copy, coin_digit_mobject))
+                    for i in new_objects:
+                        anims.append(FadeIn(i))
+
+                    insertDist_text = TexMobject(r'\textit{insertDist}(',  str(distance_from_center), ')', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                    insertDist_text[1].set_color(coin_colour)
+                    insertDist_text.scale(disttracker_text_scale)
+                    insertDist_text.next_to(collect_text.get_center(), 2 * DOWN)
+                    insertDist_text.align_on_border(RIGHT)
+                    anims.append(WiggleOutThenIn(distance_from_centre_label, scale_value = 2, run_time = 1))
+                    anims.append(FadeInFrom(insertDist_text, DOWN))
+
+                    scene.play(*anims)
+
+                    coin_copy.text_scale_factor = disttracker_text_scale
+                    coin_copy.digitValue = distance_from_center
+                    grundy_xor_digits.append(coin_copy)
+
+                    distTracker.insertDist(distance_from_center)
+                    scene.play(create_scroll_digit_to_animation(grundy_value_mobject, grundy_value_mobject.digitValue, distTracker.grundyNumber(), digitMObjectScale = grundy_value_mobject.text_scale_factor),
+                               FadeOutAndShift(insertDist_text, UP))
+                    grundy_value_mobject.digitValue = distTracker.grundyNumber()
+
+                    if distance_from_center == 2:
+                        scene.save_thumbnail()
+
+
+            distance_from_center = distance_from_center + 1
+
+        
+        g.restore_from_state(previous_graph_state)
+
+        scene.play(g.create_animation(), FadeOutAndShift(brace, UP), FadeOutAndShift(distance_from_centre_label, UP), FadeOutAndShift(collect_text, UP))
+
+        scene.play(RotateGraph(g, centre_node, PI / 2), FadeOutAndShift(branch_label, UP))
+
+        branch_to_straighten_index = (branch_to_straighten_index + 1) % len(branch_roots)
+
+
+
 
 class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
     def construct(self):
         super().construct()
 
-        distTracker = DistTracker()
-
-        centroid_graph_info = create_centroid_and_branches_tree(self)
-        g = centroid_graph_info['graph']
-        centre_node = centroid_graph_info['centre_node']
-        branch_roots = centroid_graph_info['branch_roots']
-        node_radius = centre_node.config['radius']
-        furthest_point_from_centre = centroid_graph_info['furthest_point_from_centre']
-
-        self.play(g.create_animation())
-
-        # Graph is displayed; now the DistTracker.
-        graph_bottom = centre_node.config['center_y'] - furthest_point_from_centre
-
-        disttracker_top_y = graph_bottom
-        disttracker_text_scale = 1.5
-        disttracker_title_display = TexMobject(r'\textit{DistTracker}^\text{TM}', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
-        disttracker_title_display.scale(disttracker_text_scale)
-        disttracker_title_display.align_on_border(LEFT)
-        disttracker_title_display.set_y(disttracker_top_y - disttracker_title_display.get_height() / 2 - MED_LARGE_BUFF)
-
-        # Grundy number display.
-        grundy_value_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = BLUE)
-        grundy_value_mobject.digitValue = 0
-        grundy_value_mobject.scale(disttracker_text_scale)
-        grundy_value_mobject.text_scale_factor = disttracker_text_scale
-
-        grundy_value_mobject.set_y(grundy_value_mobject.get_height() / 2 - self.camera.get_frame_height() / 2 + DEFAULT_MOBJECT_TO_EDGE_BUFFER)
-
-        grundy_number_label = TexMobject(r'\textit{grundy number} =', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
-        grundy_number_label.scale(disttracker_text_scale)
-        grundy_number_label.set_x(0)
-        grundy_number_label.next_to(grundy_value_mobject, UP * 2)
-
-
-        grundy_xor_elements = [grundy_value_mobject]
-        grundy_xor_digits = []
-
-        self.play(Write(disttracker_title_display), Write(grundy_number_label), Write(grundy_value_mobject))
-
-        enlarged_node_radius = node_radius * 2
-        horizontal_gap_between_nodes = enlarged_node_radius * 1.4 # i.e. between right edge of one and left edge of next
-        x_dist_between_node_centres = 2 * enlarged_node_radius + horizontal_gap_between_nodes
-        vertical_gap_between_nodes = enlarged_node_radius * 1.3
-        branch_to_straighten_index = 0
-
-        def add_amount_to_change_by(digitMObject, amount_to_change_by):
-            text = str(amount_to_change_by)
-            if amount_to_change_by > 0:
-                text = "+" + text
-            plusAmount = TexMobject(text)
-            plusAmount.set_color(RED)
-            plusAmount.scale(disttracker_text_scale / 3)
-            plusAmount.next_to(digitMObject, TOP / 5)
-            plusAmount.shift((digitMObject.get_width() / 2, 0, 0))
-            self.add(plusAmount)
-            return plusAmount
-
-        # Iterate through the branches.
-        for i in range(0, len(branch_roots)):
-            print("branch_to_straighten_index:", branch_to_straighten_index)
-
-            previous_graph_state = g.get_restorable_state()
-            # Move the center node out of the way of the nodes from the other branches
-            centre_node.config['center_x'] = centre_node.config['center_x'] + 3 * enlarged_node_radius
-            centre_node.config['center_y'] = centre_node.config['center_y'] + enlarged_node_radius * 1.5
-            centre_node.config['radius'] = enlarged_node_radius
-
-            branch_to_straighten = branch_roots[branch_to_straighten_index]
-            rightmost_branch = branch_to_straighten
-            other_branches = branch_roots.copy()
-            other_branches.remove(branch_to_straighten)
-
-            branch_label = TexMobject(r'\textit{Branch }b_' + str(branch_to_straighten.branch_root_number), colour = BLACK, fill_opacity = 1, fill_color = BLACK)
-            branch_label.align_on_border(RIGHT)
-            branch_label.set_y(self.camera.get_frame_height() / 2 - branch_label.get_height())
-
-            descendents_by_height = g.find_descendents_at_height(centre_node, ignore_node_list = other_branches)
-            descendents_by_height.pop(0) # Ditch the root
-            for layer in descendents_by_height:
-                layer.sort(key = lambda m: -m.config['center_y'])
-
-            for edge in g.edges:
-                for layer in descendents_by_height:
-                    for node in layer:
-                        if edge.start_node == node or edge.end_node == node:
-                            edge.config['colour'] = '#eeeeee'
-
-            x = centre_node.config['center_x'] + node_radius + horizontal_gap_between_nodes + enlarged_node_radius
-            for layer in descendents_by_height:
-                y = centre_node.config['center_y']
-                for node in layer:
-                    node.config['center_x'] = x
-                    node.config['center_y'] = y
-                    node.config['radius'] = enlarged_node_radius
-                    y = y - 2 * enlarged_node_radius - vertical_gap_between_nodes
-                x = x + x_dist_between_node_centres
-
-            # Propagate.
-            propagate_text = TexMobject(r'\textit{Propagate}', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
-            propagate_text.scale(disttracker_text_scale)
-            propagate_text.align_on_border(RIGHT)
-            propagate_text.set_y(disttracker_title_display.get_y())
-
-            self.play(g.create_animation(), FadeInFrom(propagate_text, DOWN), FadeInFrom(branch_label, DOWN))
-
-            nodes_at_current_dist_rect = create_rectangle_around_nodes([centre_node], gap_size = SMALL_BUFF)
-            self.play(Write(nodes_at_current_dist_rect))
-            for layer in descendents_by_height:
-                nodes_at_current_dist_rect_target = create_rectangle_around_nodes(layer, gap_size = SMALL_BUFF)
-
-                # Adjust all the distances + grundy (with instructions), and shift highlighting rect to this layer.
-                addToAllDists_anims = []
-                addToAllDists_text = TexMobject(r'\textit{addToAllDists}(1)', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
-                addToAllDists_text.scale(disttracker_text_scale)
-                addToAllDists_text.next_to(propagate_text.get_center(), 2 * DOWN)
-                addToAllDists_text.align_on_border(RIGHT)
-                addToAllDists_anims.append(FadeInFrom(addToAllDists_text, DOWN))
-
-                addPlusOneAnims = []
-                fadePlusOneAnims = []
-                for digit_mobject in grundy_xor_digits:
-                    plusOne = add_amount_to_change_by(digit_mobject, 1)
-
-                    fadedMovedPlusOne = plusOne.copy()
-                    fadedMovedPlusOne.set_opacity(0)
-                    fadedMovedPlusOne.shift((0, 3 * plusOne.get_height(), 0))
-
-                    addPlusOneAnims.append(FadeInFrom(plusOne, DOWN))
-
-                    fadePlusOneAnims.append(Transform(plusOne, fadedMovedPlusOne))
-
-                self.play(FadeInFrom(addToAllDists_text, DOWN), LaggedStart(*addPlusOneAnims))
-
-                increment_digits_and_change_grundy_anims = []
-                distTracker.adjustAllDistances(1)
-                for digit_mobject in grundy_xor_digits:
-                    increment_digits_and_change_grundy_anims.append(create_scroll_digit_to_animation(digit_mobject, digit_mobject.digitValue, digit_mobject.digitValue + 1, digitMObjectScale = digit_mobject.text_scale_factor))
-                    digit_mobject.digitValue = digit_mobject.digitValue + 1
-
-                increment_digits_and_change_grundy_anims.append(create_scroll_digit_to_animation(grundy_value_mobject, grundy_value_mobject.digitValue, distTracker.grundyNumber(), digitMObjectScale = grundy_value_mobject.text_scale_factor))
-                grundy_value_mobject.digitValue = distTracker.grundyNumber()
-
-                self.play(Transform(nodes_at_current_dist_rect, nodes_at_current_dist_rect_target), FadeOutAndShift(addToAllDists_text, UP), *increment_digits_and_change_grundy_anims, LaggedStart(*fadePlusOneAnims))
-
-                # Propagate the grundy numbers to all the nodes in this layer.
-                # The animations are done in parallel, which makes things a little tricky.
-                for edge in g.edges: # Workaround manim's odd z-ordering that makes the edges appear
-                                     # in front of the equations, for some reason.
-                    self.bring_to_back(g.mobject_for_edge[edge])
-
-                create_equation_anims = []
-                new_grundy_number_mobjects = []
-                new_grundy_number_mobjects_in_nodes = []
-                remove_equation_anims = []
-                for node in layer:
-                    node_mobject = g.mobject_for_node[node]
-                    old_grundy_number_mobject = node_mobject.value_mobject.copy()
-                    old_grundy_number_mobject.next_to(node_mobject, DOWN, buff = SMALL_BUFF)
-                    xor_symbol = TexMobject(r'\oplus', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
-                    grundy_from_disttracker_target = grundy_value_mobject.copy()
-                    grundy_from_disttracker = grundy_value_mobject.copy()
-                    equal_symbol = TexMobject(r'=', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
-                    new_grundy_number = node.grundy_number ^ distTracker.grundyNumber()
-                    new_grundy_number_mobject = TexMobject(str(new_grundy_number), colour = BLACK, fill_opacity = 1, fill_color = old_grundy_number_mobject.get_fill_color())
-                    new_grundy_number_mobject.scale(old_grundy_number_mobject.get_height() / new_grundy_number_mobject.get_height())
-                    new_grundy_number_mobjects.append(new_grundy_number_mobject)
-
-                    grundy_update_equation = [old_grundy_number_mobject, xor_symbol, grundy_from_disttracker_target, equal_symbol, new_grundy_number_mobject]
-                    align_objects_sequentially(grundy_update_equation, old_grundy_number_mobject.get_y(), centre_horizontally_around_x = node.config['center_x'])
-                    for i in grundy_update_equation:
-                        self.remove(i)
-
-                    create_equation_anims.extend([ 
-                                                Transform(node_mobject.value_mobject, old_grundy_number_mobject),
-                                                FadeIn(xor_symbol),
-                                                Transform(grundy_from_disttracker, grundy_from_disttracker_target),
-                                                FadeIn(equal_symbol)
-                                            ])
-
-
-                    new_grundy_number_mobject_in_node = new_grundy_number_mobject.copy()
-                    new_grundy_number_mobject_in_node.move_to([node.config['center_x'], node.config['center_y'], 0])
-                    new_grundy_number_mobjects_in_nodes.append(new_grundy_number_mobject_in_node)
-
-                    remove_equation_anims.extend([ 
-                                                FadeOut(old_grundy_number_mobject),
-                                                FadeOut(xor_symbol),
-                                                FadeOut(grundy_from_disttracker),
-                                                FadeOut(equal_symbol),
-                                            ])
-
-                self.play(*create_equation_anims)
-                self.play(*map(FadeIn, new_grundy_number_mobjects))
-
-                for i,node in enumerate(layer):
-                    node_mobject = g.mobject_for_node[node]
-                    node_mobject.value_mobject.become(new_grundy_number_mobjects_in_nodes[i].copy())
-                    # Ideally, we'd Transform node_mobject.value_mobject into new_grundy_number_mobject_in_node,
-                    # but this results in a strange glitch and I don't know why.
-                    # Instead, Transform(new_grundy_number_mobject_in_node[i]), hide node_mobject.value_mobject,
-                    # and restore it later.
-                    node_mobject.value_mobject.set_opacity(0)
-                    remove_equation_anims.append(Transform(new_grundy_number_mobjects[i], new_grundy_number_mobjects_in_nodes[i]))
-
-
-                self.play(*remove_equation_anims)
-
-                for i,node in enumerate(layer):
-                    node_mobject = g.mobject_for_node[node]
-                    node_mobject.set_opacity(1)
-                    self.remove(new_grundy_number_mobjects[i])
-
-                print("distTracker:", distTracker.distances)
-
-            # Reset DistTracker.
-            amount_to_subtract_from_disttracker = len(descendents_by_height)
-            print("amount_to_subtract_from_disttracker:", amount_to_subtract_from_disttracker, " DistTracker:", distTracker.distances)
-            addToAllDists_text = TexMobject(r'\textit{addToAllDists}(' + str(-amount_to_subtract_from_disttracker) + ')', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
-            addToAllDists_text.scale(disttracker_text_scale)
-            addToAllDists_text.next_to(propagate_text, 2 * DOWN)
-            addToAllDists_text.align_on_border(RIGHT)
-            addToAllDists_anims.append(FadeInFrom(addToAllDists_text, DOWN))
-
-            distTracker.adjustAllDistances(-amount_to_subtract_from_disttracker)
-            subtractAnims = []
-            fadeSubtractAnims = []
-            for digit_mobject in grundy_xor_digits:
-                subtractFromDistTracker = add_amount_to_change_by(digit_mobject, -amount_to_subtract_from_disttracker)
-
-                fadedMovedSubtractFromDistTracker = subtractFromDistTracker.copy()
-                fadedMovedSubtractFromDistTracker.set_opacity(0)
-                fadedMovedSubtractFromDistTracker.shift((0, 3 * subtractFromDistTracker.get_height(), 0))
-
-                subtractAnims.append(FadeInFrom(subtractFromDistTracker, DOWN))
-
-                fadeSubtractAnims.append(Transform(subtractFromDistTracker, fadedMovedSubtractFromDistTracker))
-
-            self.play(FadeInFrom(addToAllDists_text, DOWN), LaggedStart(*subtractAnims))
-
-            increment_digits_and_change_grundy_anims = []
-            for digit_mobject in grundy_xor_digits:
-                increment_digits_and_change_grundy_anims.append(create_scroll_digit_to_animation(digit_mobject, digit_mobject.digitValue, digit_mobject.digitValue - amount_to_subtract_from_disttracker, digitMObjectScale = digit_mobject.text_scale_factor))
-                digit_mobject.digitValue = digit_mobject.digitValue - amount_to_subtract_from_disttracker
-
-            increment_digits_and_change_grundy_anims.append(create_scroll_digit_to_animation(grundy_value_mobject, grundy_value_mobject.digitValue, distTracker.grundyNumber(), digitMObjectScale = grundy_value_mobject.text_scale_factor))
-            grundy_value_mobject.digitValue = distTracker.grundyNumber()
-
-            self.play(FadeOutAndShift(propagate_text, UP), FadeOut(nodes_at_current_dist_rect), FadeOutAndShift(addToAllDists_text, UP), *increment_digits_and_change_grundy_anims, LaggedStart(*fadeSubtractAnims))
-
-            # Collect
-            collect_text = TexMobject(r'\textit{Collect}', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
-            collect_text.scale(disttracker_text_scale)
-            collect_text.align_on_border(RIGHT)
-            collect_text.set_y(disttracker_title_display.get_y())
-            self.play(FadeInFrom(collect_text, DOWN))
-
-            def create_brace_for_node_pair(nodeLeft, nodeRight, tex = None):
-                dummyLeftMObject = Circle(radius = 0)
-                dummyLeftMObject.move_to(g.mobject_for_node[nodeLeft].get_center())
-                dummyLeftMObject.shift(nodeLeft.config['radius'] * UP)
-
-                dummyRightMObject = Circle(radius = 0)
-                dummyRightMObject.move_to(g.mobject_for_node[nodeRight].get_center())
-                dummyRightMObject.shift(nodeRight.config['radius'] * UP)
-
-                dummyGroup = VGroup()
-                dummyGroup.add(dummyLeftMObject)
-                dummyGroup.add(dummyRightMObject)
-
-                brace = Brace(dummyGroup, color = BLACK, fill_color = BLACK, direction = UP )
-                if tex:
-                    text = TexMobject(tex, color = BLACK, fill_opacity = 1, fill_color = BLACK)
-                    text.text_scale_factor = 1.5
-                    text.scale(text.text_scale_factor)
-                    text.next_to(brace, UP)
-                    brace.text = text
-
-                return brace
-
-            brace = None
-            distance_from_centre_label = None
-            distance_from_center = 1
-            for layer in descendents_by_height:
-                anims = []
-
-                if not brace:
-                    brace = create_brace_for_node_pair(centre_node, layer[0], 1)
-                    distance_from_centre_label = brace.text
-                    distance_from_centre_label.digitValue = 1
-                    anims.append(GrowFromCenter(brace))
-                    anims.append(Write(distance_from_centre_label))
-                    self.play(*anims)
-                else:
-                    brace_target = create_brace_for_node_pair(centre_node, layer[0], distance_from_centre_label.digitValue)
-                    brace_target.text = brace.text
-                    anims.append(Transform(brace, brace_target))
-                    self.play(Transform(brace, brace_target), create_scroll_digit_to_animation(distance_from_centre_label, distance_from_centre_label.digitValue, distance_from_centre_label.digitValue + 1, digitMObjectScale = distance_from_centre_label.text_scale_factor, x_move_amount = x_dist_between_node_centres / 2))
-                    distance_from_centre_label.digitValue = distance_from_centre_label.digitValue + 1 
-
-                nodes_with_coins = []
-                for node in layer:
-                    if 'coin_colour' in node.config:
-                        nodes_with_coins.append(node)
-
-                if not nodes_with_coins:
-                    cross_out = Cross(collect_text)
-                    self.play(Write(cross_out), run_time = 0.3)
-                    self.play(FadeOut(cross_out), run_time = 0.3)
-                else:
-                    for node in nodes_with_coins:
-                        coin_colour = node.config['coin_colour']
-                        print("coin_colour:", coin_colour, " coin_mobject:", hasattr(node, 'coin_mobject'), " node: ", repr(node))
-                        is_first_coin = (len(grundy_xor_elements) == 1)
-                        new_objects = []
-                        coin_digit_mobject = TexMobject(str(distance_from_center), colour = BLACK, fill_opacity = 1, fill_color = coin_colour)
-                        coin_digit_mobject.scale(disttracker_text_scale)
-                        grundy_xor_elements_targets = []
-                        anims = []
-                        grundy_xor_y = grundy_xor_elements[-1].get_y()
-
-                        coin_copy = g.mobject_for_node[node].coin_mobject.copy()
-
-                        for i in grundy_xor_elements:
-                            target = i.copy()
-                            grundy_xor_elements_targets.append(target)
-                            anims.append(Transform(i, target))
-                        if is_first_coin:
-                            equal_symbol = TexMobject(r'=', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
-                            equal_symbol.scale(disttracker_text_scale)
-                            equal_symbol.equal_symbol = True
-                            print("equal_symbol:", repr(equal_symbol))
-                            new_objects.append(equal_symbol)
-                            grundy_xor_elements_targets.insert(0, equal_symbol)
-                            grundy_xor_elements_targets.insert(0, coin_digit_mobject)
-                            grundy_xor_elements.insert(0, equal_symbol)
-                            grundy_xor_elements.insert(0, coin_copy)
-                        else:
-                            equals_index = -1
-                            print("enumerating grundy_xor_elements:")
-                            for i,obj in enumerate(grundy_xor_elements):
-                                print(" ", repr(i))
-                                if hasattr(obj, 'equal_symbol'):
-                                    equals_index = i
-                                    break
-                            assert(equals_index != -1)
-                            xor_symbol = TexMobject(r'\oplus', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
-                            xor_symbol.scale(disttracker_text_scale)
-                            new_objects.append(xor_symbol)
-                            grundy_xor_elements_targets.insert(equals_index, coin_digit_mobject)
-                            grundy_xor_elements_targets.insert(equals_index, xor_symbol)
-                            grundy_xor_elements.insert(equals_index, coin_copy)
-                            grundy_xor_elements.insert(equals_index, xor_symbol)
-
-
-                        align_objects_sequentially(grundy_xor_elements_targets, grundy_xor_y, centre_horizontally_around_x = 0)
-                        anims.append(Transform(coin_copy, coin_digit_mobject))
-                        for i in new_objects:
-                            anims.append(FadeIn(i))
-
-                        insertDist_text = TexMobject(r'\textit{insertDist}(',  str(distance_from_center), ')', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
-                        insertDist_text[1].set_color(coin_colour)
-                        insertDist_text.scale(disttracker_text_scale)
-                        insertDist_text.next_to(collect_text.get_center(), 2 * DOWN)
-                        insertDist_text.align_on_border(RIGHT)
-                        anims.append(WiggleOutThenIn(distance_from_centre_label, scale_value = 2, run_time = 1))
-                        anims.append(FadeInFrom(insertDist_text, DOWN))
-
-                        self.play(*anims)
-
-                        coin_copy.text_scale_factor = disttracker_text_scale
-                        coin_copy.digitValue = distance_from_center
-                        grundy_xor_digits.append(coin_copy)
-
-                        distTracker.insertDist(distance_from_center)
-                        self.play(create_scroll_digit_to_animation(grundy_value_mobject, grundy_value_mobject.digitValue, distTracker.grundyNumber(), digitMObjectScale = grundy_value_mobject.text_scale_factor),
-                                   FadeOutAndShift(insertDist_text, UP))
-                        grundy_value_mobject.digitValue = distTracker.grundyNumber()
-
-                        if distance_from_center == 2:
-                            self.save_thumbnail()
-
-
-                distance_from_center = distance_from_center + 1
-
-            
-            g.restore_from_state(previous_graph_state)
-
-            self.play(g.create_animation(), FadeOutAndShift(brace, UP), FadeOutAndShift(distance_from_centre_label, UP), FadeOutAndShift(collect_text, UP))
-
-            self.play(RotateGraph(g, centre_node, PI / 2), FadeOutAndShift(branch_label, UP))
-
-            branch_to_straighten_index = (branch_to_straighten_index + 1) % len(branch_roots)
+        do_collect_and_propagate_branches_naive(self)
 
 class MoveCoins2Editorial_5_collect_and_propagate_branches_naive_backwards(SSJGZScene):
     def construct(self):
