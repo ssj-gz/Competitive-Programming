@@ -1219,7 +1219,7 @@ class MoveCoins2Editorial_3_show_branches(SSJGZScene):
 
         self.save_thumbnail()
 
-def do_collect_and_propagate_branches_naive(scene):
+def do_collect_and_propagate_branches_naive(scene, reverse_branch_order = False):
     distTracker = DistTracker()
 
     centroid_graph_info = create_centroid_and_branches_tree(scene)
@@ -1230,6 +1230,9 @@ def do_collect_and_propagate_branches_naive(scene):
     furthest_point_from_centre = centroid_graph_info['furthest_point_from_centre']
 
     scene.play(g.create_animation())
+
+    if reverse_branch_order:
+        scene.play(RotateGraph(g, centre_node, 3 * PI / 2))
 
     # Graph is displayed; now the DistTracker.
     graph_bottom = centre_node.config['center_y'] - furthest_point_from_centre
@@ -1264,7 +1267,10 @@ def do_collect_and_propagate_branches_naive(scene):
     horizontal_gap_between_nodes = enlarged_node_radius * 1.4 # i.e. between right edge of one and left edge of next
     x_dist_between_node_centres = 2 * enlarged_node_radius + horizontal_gap_between_nodes
     vertical_gap_between_nodes = enlarged_node_radius * 1.3
-    branch_to_straighten_index = 0
+    if not reverse_branch_order:
+        branch_to_straighten_index = 0
+    else: 
+        branch_to_straighten_index = len(branch_roots) - 1
 
     def add_amount_to_change_by(digitMObject, amount_to_change_by):
         text = str(amount_to_change_by)
@@ -1610,12 +1616,13 @@ def do_collect_and_propagate_branches_naive(scene):
 
         scene.play(g.create_animation(), FadeOutAndShift(brace, UP), FadeOutAndShift(distance_from_centre_label, UP), FadeOutAndShift(collect_text, UP))
 
-        scene.play(RotateGraph(g, centre_node, PI / 2), FadeOutAndShift(branch_label, UP))
 
-        branch_to_straighten_index = (branch_to_straighten_index + 1) % len(branch_roots)
-
-
-
+        if not reverse_branch_order:
+            branch_to_straighten_index = (branch_to_straighten_index + 1) % len(branch_roots)
+            scene.play(RotateGraph(g, centre_node, PI / 2), FadeOutAndShift(branch_label, UP))
+        else:
+            branch_to_straighten_index = (branch_to_straighten_index + len(branch_roots) - 1) % len(branch_roots)
+            scene.play(RotateGraph(g, centre_node, -PI / 2), FadeOutAndShift(branch_label, UP))
 
 class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
     def construct(self):
@@ -1626,6 +1633,8 @@ class MoveCoins2Editorial_4_collect_and_propagate_branches_naive(SSJGZScene):
 class MoveCoins2Editorial_5_collect_and_propagate_branches_naive_backwards(SSJGZScene):
     def construct(self):
         super().construct()
+
+        do_collect_and_propagate_branches_naive(self, reverse_branch_order =  True)
 
 class MoveCoins2Editorial_6_collect_and_propagate_along_node_chain_left_to_right_partial_grid(SSJGZScene):
 
