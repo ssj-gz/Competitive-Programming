@@ -1229,6 +1229,39 @@ def do_collect_and_propagate_branches_naive(scene, reverse_branch_order = False)
     node_radius = centre_node.config['radius']
     furthest_point_from_centre = centroid_graph_info['furthest_point_from_centre']
 
+    if reverse_branch_order:
+        # "Pretend" that we did the Propagate/Collect dance with branch order
+        # b1, b2, b3 and b4 prior to starting this i.e. that we did do_collect_and_propagate_branches_naive
+        # first.  We just need to update the grundy numbers.
+        distTracker = DistTracker()
+
+        for i in range(0, len(branch_roots)):
+            print("branch:", i + 1)
+            branch_to_straighten = branch_roots[i]
+            other_branches = branch_roots.copy()
+            other_branches.remove(branch_to_straighten)
+
+            descendents_by_height = g.find_descendents_at_height(centre_node, ignore_node_list = other_branches)
+            descendents_by_height.pop(0) # Ditch the root
+
+            for layer in descendents_by_height:
+                print("adjustAllDistances +1")
+                distTracker.adjustAllDistances(1)
+                for node in layer:
+                    new_grundy_value =  node.grundy_number ^ distTracker.grundyNumber()
+                    print(" change grundy from ", node.grundy_number, " to: ", new_grundy_value)
+                    node.grundy_number = new_grundy_value
+                    node.config['value'] = new_grundy_value
+            distTracker.adjustAllDistances(-len(descendents_by_height))
+
+            for dist_from_branch_root,layer in enumerate(descendents_by_height):
+                for node in layer:
+                    if 'coin_colour' in node.config:
+                        print("insertDist:", dist_from_branch_root + 1)
+                        distTracker.insertDist(dist_from_branch_root + 1)
+
+        distTracker.clear()
+
     scene.play(g.create_animation())
 
     if reverse_branch_order:
