@@ -145,9 +145,9 @@ will propagate the contributions of all $v \in V_{\textit{coin}}$ to all $u \in 
 
 Both **1.** and **2.** can be done separately using a naive algorithm (although my implementation rolls them into **3.**).  **3.** can be handled in a similar way to the "propagate-and-collect-and-then-in-reverse" approach from earlier, except now we are collecting and propagating _branches_ at a time, rather than nodes.
 
-For each $i=1,2,\dots,M$, create a fresh $\textit{DistTracker}$ and perform the following steps:
+For each $i=1,2,\dots,D_i$, create a fresh $\textit{DistTracker}$ and perform the following steps:
 
-1. Propagate the contributions to nodes in branch $i$; that is, do a DFS from $b_i$, calling $\textit{addToAllDists}(1)$ when we visit a node for the first time, and $\textit{addToAllDists}(-1)$ when we have fully explored it
+1. Propagate the contributions to nodes in branch $i$; that is, do a DFS from $b_i$, calling $\textit{addToAllDists}(1)$ when we visit a node for the first time, and $\textit{addToAllDists}(-1)$ after we have fully explored it
 2. Collect the contributions of nodes in branch $i$; that is, do a DFS from $b_i$, calling $\textit{insertDist}(d)$ when we encounter a node in $V_{\textit{coin}}$ at distance $d$ from $C_i$.
 
 A BFS would also work and would likely be slightly more efficient: here's an example:
@@ -155,7 +155,7 @@ A BFS would also work and would likely be slightly more efficient: here's an exa
 [![](https://etotheipiplusone.com/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_4_THUMB.png)](https://etotheipiplusone.com/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_4_ANIM.gif)
 
 
-Then we $\textit{clear}()$ our $\textit{DistTracker}$ and repeat, this time with $i=M,M-1,\dots,2,1$.
+Then we $\textit{clear}()$ our $\textit{DistTracker}$ and repeat, this time with $i=D_i,D_i-1,\dots,2,1$.
 
 [![](https://etotheipiplusone.com/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_5_THUMB.png)](https://etotheipiplusone.com/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_5_ANIM.gif)
 
