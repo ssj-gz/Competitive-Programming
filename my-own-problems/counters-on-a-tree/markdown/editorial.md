@@ -150,14 +150,12 @@ For each $i=1,2,\dots,D_i$, create a fresh $\textit{DistTracker}$ and perform th
 1. Propagate the contributions to nodes in branch $i$; that is, do a DFS from $b_i$, calling $\textit{addToAllDists}(1)$ when we visit a node for the first time, and $\textit{addToAllDists}(-1)$ after we have fully explored it
 2. Collect the contributions of nodes in branch $i$; that is, do a DFS from $b_i$, calling $\textit{insertDist}(d)$ when we encounter a node in $V_{\textit{coin}}$ at distance $d$ from $C_i$.
 
-A BFS would also work and would likely be slightly more efficient: here's an example:
+A BFS would also work and would likely be slightly more efficient; here's an example:
 
 [![](https://etotheipiplusone.com/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_4_THUMB.png)](https://etotheipiplusone.com/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_4_ANIM.gif)
 
 
-Then we $\textit{clear}()$ our $\textit{DistTracker}$ and repeat, this time with $i=D_i,D_i-1,\dots,2,1$.
-
-[![](https://etotheipiplusone.com/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_5_THUMB.png)](https://etotheipiplusone.com/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_5_ANIM.gif)
+Then we $\textit{clear}()$ our $\textit{DistTracker}$ and repeat, this time with $i=D_i,D_i-1,\dots,2,1$: click [here](https://etotheipiplusone.com/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_5_ANIM.gif) to watch an example.
 
 [/details]
 
