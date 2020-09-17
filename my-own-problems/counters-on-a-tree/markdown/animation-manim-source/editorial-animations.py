@@ -657,6 +657,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                     print("current_grundy_value:", current_grundy_value, " new_grundy_value:", new_grundy_value)
 
                     animations.append(create_scroll_digit_to_animation(grundy_value_mobject, current_grundy_value, new_grundy_value, digitMObjectScale = disttracker_text_scale))
+                    grundy_value_mobject.digitValue = new_grundy_value
                     animations.extend(outtro_animations)
 
                     for digit_mobject in grundy_xor_digits:
