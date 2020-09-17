@@ -96,7 +96,7 @@ and here is the table of $\textit{CRPS}(u)$ for each $u$ for this example, in or
 If we look at the $17^\text{th}$ (0-relative!) element in $L$, we see that it reparents the node $4$.  
 If we look at the $18^\text{th}$ element in $L$, we see that it reparents the node $5$.  
 If we look at the $28^\text{th}$ element in $L$, we see that it reparents the node $7$.  
-In general, hopefully the pattern is clear - _the node reparented by the $X_i^\text{th}$ element of $L$ is the first $u$ such that $\textit{CRPS}(u) > X_i$._  Since $\textit{CRPS}$ is non-increasing, we can easily find this $u$ using a binary search, and so find our $u_i$ in $\mathcal{O}(\log N)$, fulfilling Phase One.
+In general, hopefully the pattern is clear - _the node reparented by the $X_i^\text{th}$ element of $L$ is the first $u$ such that $\textit{CRPS}(u) > X_i$._  Since $\textit{CRPS}$ is non-decreasing, we can easily find this $u$ using a binary search, and so find our $u_i$ in $\mathcal{O}(\log N)$, fulfilling Phase One.
 
 Now that we know $u_i$, we can restrict our attention to the sub-list of $L$ of reparentings that reparent $u_i$; our final desired parenting is at some index $Y_i$ in this sublist.  How do we find $Y_i$? In focussing on this sublist, we are ignoring all the first elements of $L$ that reparent a node $x < u_i$, so we must subtract this number from $X_i$.  By definition, this number is $\textit{CRPS}(u_i - 1)$.  The index $Y_i$ is called $\textit{numOfReparentingThatReparentsNode}$ in the code; I'll be sticking with $Y_i$ here, for obvious reasons :)
 
