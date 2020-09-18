@@ -104,7 +104,7 @@ Imagine further that we proceed along the chain of nodes from left to right perf
 
 (**Click image to see the animation**)
 
-[![](https://etotheipiplusone.com/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_1_THUMB.png)](https://etotheipiplusone.com/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_1_ANIM.gif)
+[![](https://etotheipiplusone.com/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_1_THUMB.png)](http://vps2.etotheipiplusone.com:30176/public_html/codechef/editorials/MOVCOIN2/videos/MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right_naive.mp4)
 
 This way, we _collect_ then  _propagate_ the contribution of each $v\in V_{\textit{coin}}$ to all nodes to $v$'s right.
 
