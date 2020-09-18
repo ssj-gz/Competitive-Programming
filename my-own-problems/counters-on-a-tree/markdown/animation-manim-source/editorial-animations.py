@@ -1192,7 +1192,7 @@ class MoveCoins2Editorial_3_show_branches(SSJGZScene):
         branch_root_label_mobjects[2].next_to(g.mobject_for_node[branch_roots[2]], DOWN, buff = SMALL_BUFF)
         branch_root_label_mobjects[3].next_to(g.mobject_for_node[branch_roots[3]], UP, buff = SMALL_BUFF)
 
-        self.play(LaggedStart(*map(FadeIn, branch_root_label_mobjects)))
+        self.play(LaggedStart(*map(FadeIn, branch_root_label_mobjects), lag_ratio = 3 * DEFAULT_LAGGED_START_LAG_RATIO))
 
         new_objects = []
         for branch_index in range(0, len(branch_roots)):
@@ -1211,7 +1211,7 @@ class MoveCoins2Editorial_3_show_branches(SSJGZScene):
                 branch_label.next_to(branch_rect, RIGHT, buff = SMALL_BUFF)
             new_objects.append(branch_label)
 
-        self.play(LaggedStart(*map(FadeIn, new_objects), lag_ratio = 2 * DEFAULT_LAGGED_START_LAG_RATIO))
+        self.play(LaggedStart(*map(FadeIn, new_objects), lag_ratio = 3 * DEFAULT_LAGGED_START_LAG_RATIO))
 
         self.save_thumbnail()
 
