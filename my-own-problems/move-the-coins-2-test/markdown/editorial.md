@@ -102,7 +102,7 @@ Now that we know $u_i$, we can restrict our attention to the sub-list of $L$ of 
 
 So: for **Phase Two**, we need to find the height of $v_i$ ($\textit{newParentHeight}$ in the code), which is the height of $v$ in the $Y_i^\textit{th}$ valid reparenting that reparents $u_i$. In Phase One, we made a tally of all valid reparentings that reparented a node less than or equal to $x$, and found the first $x$ such that this tally exceeded $X_i$; we do a similar trick here in finding the number of reparentings that reparent $u_i$ to a node with height less than or equal to $h$, $\textit{NDUH}(u_i, h)$ ($\textit{findNumNonDescendantsUpToHeight}$ in the code) and find the first $h$ such that $\textit{NDUH}(u_i, h)$ exceeds $Y_i$.  To work out how to compute $\textit{NDUH}(u_i, h)$, consider the following schematic (**click to animate**):
 
-[![](https://etotheipiplusone.com/codechef/editorials/MVCN2TST/images/MVCN2TST_ED_1_THUMB.png)](https://etotheipiplusone.com/codechef/editorials/MVCN2TST/images/MVCN2TST_ED_1_ANIM.gif)
+[![](https://etotheipiplusone.com/codechef/editorials/MVCN2TST/images/MVCN2TST_ED_1_THUMB.png)](http://vps2.etotheipiplusone.com:30176/public_html/codechef/editorials/MVCN2TST/videos/MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descendents_up_to_height.mp4)
 
 * The set of nodes to which we can reparent $u_i$ consists of those in section $A$ minus a set we'll call $\textit{AD}$: the nodes in $A$ that are descendents of $u_i$
 * $\textit{AD}$ is equal to the set $D$ of all descendents of $u_i$ minus the set that we'll call $\textit{DH}$: those nodes $x\in D$ with $x.\textit{height} > h$
