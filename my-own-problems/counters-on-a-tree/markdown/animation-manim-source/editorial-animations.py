@@ -1180,18 +1180,19 @@ class MoveCoins2Editorial_3_show_branches(SSJGZScene):
             branch_label = TexMobject(r'b_' + str(branch_index + 1), colour = BLACK, fill_opacity = 1, fill_color = BLACK)
             branch_root_label_mobjects.append(branch_label)
 
+        center_label_mobject = TexMobject(r'C', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+        center_label_mobject.next_to(g.create_mobject_for_node(centre_node), UP, buff = SMALL_BUFF)
+        center_label_mobject.shift([0.1, 0, 0])
+        del g.mobject_for_node[centre_node]
 
-        self.play(g.create_animation())
+        self.play(g.create_animation(), Write(center_label_mobject))
 
         branch_root_label_mobjects[0].next_to(g.mobject_for_node[branch_roots[0]], UP, buff = SMALL_BUFF)
         branch_root_label_mobjects[1].next_to(g.mobject_for_node[branch_roots[1]], LEFT, buff = SMALL_BUFF)
         branch_root_label_mobjects[2].next_to(g.mobject_for_node[branch_roots[2]], DOWN, buff = SMALL_BUFF)
         branch_root_label_mobjects[3].next_to(g.mobject_for_node[branch_roots[3]], UP, buff = SMALL_BUFF)
-        center_label_mobject = TexMobject(r'C', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
-        center_label_mobject.next_to(g.mobject_for_node[centre_node], UP, buff = SMALL_BUFF)
-        center_label_mobject.shift([0.1, 0, 0])
 
-        self.play(LaggedStart(*map(FadeIn, branch_root_label_mobjects), FadeIn(center_label_mobject)))
+        self.play(LaggedStart(*map(FadeIn, branch_root_label_mobjects)))
 
         new_objects = []
         for branch_index in range(0, len(branch_roots)):
