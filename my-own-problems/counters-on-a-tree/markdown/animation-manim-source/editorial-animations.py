@@ -78,7 +78,6 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             previous_node = newNode
             nodes.append(newNode)
 
-        scene.play(g.create_animation(run_time = 2))
 
         coin_radius = node_radius / 2
 
@@ -116,11 +115,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                 arrow_tip_base_width = node_diameter * 2 / 3,
                 arrow_tip_length = node_diameter / 2
                 )
-        scene.play(GrowFromCenter(arrow))
-
-        scene.play(GrowFromCenter(coin_mobjects[0]),
-                  GrowFromCenter(coin_mobjects[1]),
-                  GrowFromCenter(coin_mobjects[2]))
+        scene.play(GrowFromCenter(arrow), g.create_animation(), *map(GrowFromCenter, coin_mobjects))
 
         grundy_node_tex_colour = "#2600ff"
         
