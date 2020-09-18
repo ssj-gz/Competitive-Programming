@@ -108,9 +108,7 @@ Imagine further that we proceed along the chain of nodes from left to right perf
 
 This way, we _collect_ then  _propagate_ the contribution of each $v\in V_{\textit{coin}}$ to all nodes to $v$'s right.
 
-Let's $\textit{clear}()$ our $\textit{distTracker}$ and repeat the process, this time working in the opposite direction:
-
-[![](https://etotheipiplusone.com/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_2_THUMB.png)](https://etotheipiplusone.com/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_2_ANIM.gif)
+Let's $\textit{clear}()$ our $\textit{distTracker}$ and repeat the process, this time working in the opposite direction: click [here](https://etotheipiplusone.com/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_2_ANIM.gif) to watch the example.
 
 Now we've propagated the contribution of each $v \in V_{\textit{coin}}$ to all nodes to $v$'s right _and_ to its left i.e. to all nodes, and so have computed all $R.\textit{grundy}$, as required.  It turns out that Bob wins two of the games and Alice wins the rest.
 
