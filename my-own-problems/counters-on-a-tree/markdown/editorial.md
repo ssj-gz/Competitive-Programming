@@ -119,7 +119,7 @@ We won't go into much detail on [Centroid Decomposition](https://www.geeksforgee
 
 **C1:** Centroid Decomposition of $T$ induces $M$ subtrees ($M$ is $\mathcal{O}(N)$) $T_i$ of $T$ each with a node $C_i$ that is the _centre_ of $T_i$  
 **C2:** The $\Sigma_{i=1}^M |T_i|$ is $\mathcal{O}(N\log N)$  
-**C3:** Let $u,v$ be any distinct pair of nodes, and let $P(u,v)=[u=p_0, p_1, \ldots, p_k=v]$ be the unique path between $u$ and $v$.  Then there is precisely one $i$ such that $u$ and $v$ are in subtree $T_i$ and $c_i \in P(u,v)$  
+**C3:** Let $u,v$ be any distinct pair of nodes, and let $P(u,v)=[u=p_0, p_1, \ldots, p_k=v]$ be the unique path between $u$ and $v$.  Then there is precisely one $i$ such that $u$ and $v$ are in subtree $T_i$ and $C_i \in P(u,v)$  
 
 Let $D_i$ be the degree of $C_i$ in $T_i$, and let $b_1, b_2, \dots, b_{D_i}$ be the neighbours of $C_i$ in $T_i$.  We partition the $u\in T_i$, $u \ne C_i$ into $D_i$ _branches_, where the node $u$ is in branch $l$ if the unique path from $C_i$ to $u$ passes through $b_l$.  For example:
 
