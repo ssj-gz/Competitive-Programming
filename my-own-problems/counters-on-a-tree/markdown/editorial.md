@@ -143,17 +143,17 @@ will propagate the contributions of all $v \in V_{\textit{coin}}$ to all $u \in 
 
 Both **1.** and **2.** can be done separately using a naive algorithm (although my implementation rolls them into **3.**).  **3.** can be handled in a similar way to the "propagate-and-collect-and-then-in-reverse" approach from earlier, except now we are collecting and propagating _branches_ at a time, rather than nodes.
 
-For each $i=1,2,\dots,D_i$, create a fresh $\textit{DistTracker}$ and perform the following steps:
+For each $j=1,2,\dots,D_i$, create a fresh $\textit{DistTracker}$ and perform the following steps:
 
-1. Propagate the contributions to nodes in branch $i$; that is, do a DFS from $b_i$, calling $\textit{addToAllDists}(1)$ when we visit a node for the first time, and $\textit{addToAllDists}(-1)$ after we have fully explored it
-2. Collect the contributions of nodes in branch $i$; that is, do a DFS from $b_i$, calling $\textit{insertDist}(d)$ when we encounter a node in $V_{\textit{coin}}$ at distance $d$ from $C_i$.
+1. Propagate the contributions to nodes in branch $j$; that is, do a DFS from $b_j$, calling $\textit{addToAllDists}(1)$ when we visit a node for the first time, and $\textit{addToAllDists}(-1)$ after we have fully explored it
+2. Collect the contributions of nodes in branch $j$; that is, do a DFS from $b_j$, calling $\textit{insertDist}(d)$ when we encounter a node in $V_{\textit{coin}}$ at distance $d$ from $C_i$.
 
 A BFS would also work and would likely be slightly more efficient; here's an example:
 
 [![](https://etotheipiplusone.com/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_4_THUMB.png)](http://vps2.etotheipiplusone.com:30176/public_html/codechef/editorials/MOVCOIN2/videos/MoveCoins2Editorial_4_collect_and_propagate_branches_naive.mp4)
 
 
-Then we $\textit{clear}()$ our $\textit{DistTracker}$ and repeat, this time with $i=D_i,D_i-1,\dots,2,1$: click [here](http://vps2.etotheipiplusone.com:30176/public_html/codechef/editorials/MOVCOIN2/videos/MoveCoins2Editorial_5_collect_and_propagate_branches_naive_backwards.mp4) to watch an example.
+Then we $\textit{clear}()$ our $\textit{DistTracker}$ and repeat, this time with $j=D_i,D_i-1,\dots,2,1$: click [here](http://vps2.etotheipiplusone.com:30176/public_html/codechef/editorials/MOVCOIN2/videos/MoveCoins2Editorial_5_collect_and_propagate_branches_naive_backwards.mp4) to watch an example.
 
 [/details]
 
