@@ -153,7 +153,7 @@ A BFS would also work and would likely be slightly more efficient; here's an exa
 [![](https://etotheipiplusone.com/codechef/editorials/MOVCOIN2/images/MOVCOIN2_ED_4_THUMB.png)](http://vps2.etotheipiplusone.com:30176/public_html/codechef/editorials/MOVCOIN2/videos/MoveCoins2Editorial_4_collect_and_propagate_branches_naive.mp4)
 
 
-Then we $\textit{clear}()$ our $\textit{DistTracker}$ and repeat, this time with $j=D_i,D_i-1,\dots,2,1$: click [here](http://vps2.etotheipiplusone.com:30176/public_html/codechef/editorials/MOVCOIN2/videos/MoveCoins2Editorial_5_collect_and_propagate_branches_naive_backwards.mp4) to watch an example.
+Then we $\textit{clear}()$ our $\textit{DistTracker}$ and repeat, this time with $j=D_i,D_{i-1},\dots,2,1$: click [here](http://vps2.etotheipiplusone.com:30176/public_html/codechef/editorials/MOVCOIN2/videos/MoveCoins2Editorial_5_collect_and_propagate_branches_naive_backwards.mp4) to watch an example.
 
 [/details]
 
