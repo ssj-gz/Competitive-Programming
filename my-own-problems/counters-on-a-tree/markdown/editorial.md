@@ -46,7 +46,7 @@ We then use Centroid Decomposition plus our $\textit{DistTracker}$ to _collect_ 
 
 As mentioned, this is the game of [Nim](https://en.wikipedia.org/wiki/Nim) in disguise: in Nim, we start with some number $M$ of piles, the $i^\textit{th}$ of which contains $p_i$ stones, and players take turns to choose a non-empty pile and take at least one stone from it, until a player cannot make a move, in which case they lose.  In the game $\textit{game}(T, R)$, let $v_C$ be the node containing the coin $C$; then the correspondence between the two games is as follows:
 
-* Each coin $c$ Corresponds to a pile of size $\textit{dist}(R,v_C)$ in the game of Nim
+* Each coin $C$ corresponds to a pile of size $\textit{dist}(R,v_C)$ in the game of Nim
 * Choosing a coin $C$ from a node not in $R$ and moving it strictly towards $R$ corresponds to choosing a non-empty pile of stones and taking at least one stone from it
 * The losing state - where all coins are in $R$ - corresponds to the losing state in Nim where all piles are empty.
 
