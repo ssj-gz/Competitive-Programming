@@ -58,7 +58,7 @@ $$
 
 is $0$.
 
-We can simplify this a little: consider two coins $C_A$ and $C_B$, both on the same node $v$.  Their contribution to $R.\textit{grundy}$ is $\textit{dist}(R, v) \oplus \textit{dist}(R, v)$.  But $x \oplus x = 0$ for all $x$, so we can remove _both_ coins without affecting $R.\textit{grundy}$.  For each $v$, we can safely remove _pairs_ of coins from $v$ until either $0$ or $1$ remain, depending on whether $c_v$ was originally odd or even.  We say that a node $v$ $\textit{hasCoin}$ if $c_v$ is odd, and set $V_\textit{coin}=$ the set of all such $v$.  We can now rephrase the formula for $R.\textit{grundy}$:
+We can simplify this a little: consider two coins $C_A$ and $C_B$, both on the same node $v$.  Their contribution to $R.\textit{grundy}$ is $\textit{dist}(R, v) \oplus \textit{dist}(R, v)$.  But $x \oplus x = 0$ for all $x$, so we can remove _both_ coins without affecting $R.\textit{grundy}$.  For each $v$, we can safely remove _pairs_ of coins from $v$ until either $0$ or $1$ remain, depending on whether $c_v$ was originally even or odd, respectively.  We say that a node $v$ $\textit{hasCoin}$ if $c_v$ is odd, and set $V_\textit{coin}=$ the set of all such $v$.  We can now rephrase the formula for $R.\textit{grundy}$:
 
 $$
 R.\textit{grundy}=\bigoplus_{v \in V_{\textit{coin}} }{\textit{dist}(R,v)}
