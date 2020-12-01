@@ -17,7 +17,7 @@ Sprague-Grundy, Centroid Decomposition, Bit Manipulation, Ad-hoc
 Bob and Alice are playing a game on a board which is a tree, $T$.  Each node of $T$ has some number of coins placed on it.  For a node $R$, define $\textit{game}(T, R)$ to be the game played on $T$ in which players take turns to move a coin from some node other than $R$ strictly towards $R$.  The first player unable to make a move loses the game.  For each $R$, find the winner of $game(T,R)$, assuming both players play perfectly.
 
 # QUICK EXPLANATION:
-The game $\textit{game}(T, R)$ is equivalent to the game of Nim, where there is a one-to-one correspondence between coins on the board and piles of stones: for a coin $C$, if $v_C$ is the node containing $C$, then $C$ corresponds to a Nim pile of size $\textit{dist}(R,v_C)$.  Thus, we can find the winner using the Sprague-Grundy Theorem. Some simple observations show that the exact value of $c_v$ is not important; only its parity: we set $V_{\textit{coin}}$ to be the set of nodes $v$ such that $c_v$ is odd.
+The game $\textit{game}(T, R)$ is equivalent to the game of Nim, where there is a one-to-one correspondence between coins on the board and piles of stones: for a coin $C$, if $v_C$ is the node containing $C$, then $C$ corresponds to a Nim pile of size $\textit{dist}(R,v_C)$.  Thus, we can find the winner using the Sprague-Grundy Theorem. Some simple observations show that we do not need the exact value of $c_v$, only its parity: we set $V_{\textit{coin}}$ to be the set of nodes $v$ such that $c_v$ is odd.
 
 Define
 
