@@ -53,7 +53,7 @@ As mentioned, this is the game of [Nim](https://en.wikipedia.org/wiki/Nim) in di
 The [Sprague-Grundy Theorem](https://en.wikipedia.org/wiki/Sprague-Grundy) proves several interesting statements but the one we're interested in is the remarkable (and very unintuitive!) result that in the game of Nim, the second player wins if and only if the _Grundy Number_  for the game is $0$, where the grundy number is the xor-sum of all the pile sizes i.e. $p_1 \oplus p_2 \oplus \dots \oplus p_K$. Applying this to our game, we see that Bob wins if and only if the grundy number $R.\textit{grundy}$ for the game $\textit{game}(T, R)$ defined by:
 
 $$
-R.\textit{grundy}=\bigoplus_{c\in \textit{coins}}{\textit{dist}(R,v_c)}
+R.\textit{grundy}=\bigoplus_{C\in \textit{coins}}{\textit{dist}(R,v_C)}
 $$
 
 is $0$.
