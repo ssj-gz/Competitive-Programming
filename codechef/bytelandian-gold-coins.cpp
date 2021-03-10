@@ -64,9 +64,11 @@ int main(int argc, char* argv[])
 
     map<int64_t, int64_t> maxDollarsForCoinLookup;
 
-    int64_t numCoins;
-    while (cin >> numCoins)
+    for (int64_t numCoins = 1; numCoins < 1'000'000; numCoins++)
     {
+        cout << "Q: 1 lines" << endl;
+        cout << numCoins << endl;
+        cout << "A: 1 lines" << endl;
         cout << calcMaxDollarsForCoin(numCoins, maxDollarsForCoinLookup) << endl;
     }
 }
