@@ -32,36 +32,14 @@ int countChangesRequiredToMakeChain(const string& originalString)
         return numChangesRequired;
     };
 
-    return min(countChangesRequiredToMakeChainBeginningWith('+'), countChangesRequiredToMakeChainBeginningWith('-'));
+    return min(countChangesRequiredToMakeChainBeginningWith('+'), 
+               countChangesRequiredToMakeChainBeginningWith('-'));
 }
 
 
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        for (int i = 1; i < 8192; i++)
-        {
-            string s;
-            int n = i;
-            while (n > 0)
-            {
-                if ((n & 1) == 1)
-                    s = '+' + s;
-                else
-                    s = '-' + s;
-                n >>= 1;
-            }
-            cout << "Q: 2 lines" << endl;
-            cout << 1 << endl;
-            cout << s << endl;
-            cout << "A: 1 lines" << endl;
-            cout << countChangesRequiredToMakeChain(s) << endl;
-        }
-
-        return 0;
-    }
     
     const auto T = read<int>();
 
