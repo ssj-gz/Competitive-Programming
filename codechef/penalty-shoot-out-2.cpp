@@ -19,44 +19,47 @@ T read()
 
 int findFirstShotWhereResultIsKnown(int numShots, const string& shotResults)
 {
-    int maxTotalA = numShots;
-    int maxTotalB = numShots;
-    int minTotalA = 0;
-    int minTotalB = 0;
-    for (int shotIndex = 0; shotIndex < numShots * 2; shotIndex++)
+    int finalAIfWinRest = numShots;
+    int finalBIfWinRest = numShots;
+    int finalAIfLoseRest = 0;
+    int finalBIfLoseRest = 0;
+    int numShotsTaken = 0;
+    bool isTeamATurn = true;
+    for (const auto shotResult : shotResults)
     {
-        const bool teamATookShot = ((shotIndex % 2) == 0);
-        if (shotResults[shotIndex] == '1')
+        if (shotResult == '1')
         {
-            if (teamATookShot)
+            if (isTeamATurn)
             {
-                minTotalA++;
+                finalAIfLoseRest++;
             }
             else
             {
-                minTotalB++;
+                finalBIfLoseRest++;
             }
         }
         else
         {
-            if (teamATookShot)
+            if (isTeamATurn)
             {
-                maxTotalA--;
+                finalAIfWinRest--;
             }
             else
             {
-                maxTotalB--;
+                finalBIfWinRest--;
             }
         }
+        numShotsTaken++;
+        isTeamATurn = !isTeamATurn;
 
-        if ((minTotalA > maxTotalB) || (minTotalB > maxTotalA))
-            return shotIndex + 1;
+        if ((finalAIfLoseRest > finalBIfWinRest) || (finalBIfLoseRest > finalAIfWinRest))
+            break;
+
     }
-    // Draw.
-    return 2 * numShots;
+    return numShotsTaken;
 }
 
-int main(int argc, char* argv[])
+int main()
 {
     ios::sync_with_stdio(false);
 
