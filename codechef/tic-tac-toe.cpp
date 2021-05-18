@@ -123,7 +123,7 @@ struct BoardState
 };
 
 
-int main(int argc, char* argv[])
+int main()
 {
     // Build complete lookup table of all possible board states
     // (including unreachable ones).
@@ -237,7 +237,7 @@ int main(int argc, char* argv[])
     for (int id = 0; id < maxId; id++)
     {
         int tempId = id;
-        BoardState board;
+        BoardState boardStateWithId;
         for (int row = 2; row >= 0; row--)
         {
             for (int col = 2; col >= 0; col--)
@@ -245,31 +245,31 @@ int main(int argc, char* argv[])
                 switch(tempId % 3)
                 {
                     case 0:
-                        board.board[row][col] = '_';
+                        boardStateWithId.board[row][col] = '_';
                         break;
                     case 1:
-                        board.board[row][col] = 'X';
+                        boardStateWithId.board[row][col] = 'X';
                         break;
                     case 2:
-                        board.board[row][col] = 'O';
+                        boardStateWithId.board[row][col] = 'O';
                         break;
                 }
                 tempId = tempId / 3;
             }
         }
-        assert(board.uniqueId() == id);
+        assert(boardStateWithId.uniqueId() == id);
         cout << "Q: 4 lines" << endl;
         cout << 1 << endl;
         for (int row = 0; row < 3; row++)
         {
             for (int col = 0; col < 3; col++)
             {
-                cout << board.board[row][col];
+                cout << boardStateWithId.board[row][col];
             }
             cout << endl;
         }
         cout << "A: 1 lines" << endl;
-        cout << result(board) << endl;
+        cout << result(boardStateWithId) << endl;
     }
 #endif
 }
