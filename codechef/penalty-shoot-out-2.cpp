@@ -19,10 +19,10 @@ T read()
 
 int findFirstShotWhereResultIsKnown(int numShots, const string& shotResults)
 {
-    int finalAIfWinRest = numShots;
-    int finalBIfWinRest = numShots;
-    int finalAIfLoseRest = 0;
-    int finalBIfLoseRest = 0;
+    int finalAIfAWinRest = numShots;
+    int finalBIfBWinRest = numShots;
+    int finalAIfALoseRest = 0;
+    int finalBIfBLoseRest = 0;
     int numShotsTaken = 0;
     bool isTeamATurn = true;
     for (const auto shotResult : shotResults)
@@ -31,28 +31,44 @@ int findFirstShotWhereResultIsKnown(int numShots, const string& shotResults)
         {
             if (isTeamATurn)
             {
-                finalAIfLoseRest++;
+                finalAIfALoseRest++;
             }
             else
             {
-                finalBIfLoseRest++;
+                finalBIfBLoseRest++;
             }
         }
         else
         {
             if (isTeamATurn)
             {
-                finalAIfWinRest--;
+                finalAIfAWinRest--;
             }
             else
             {
-                finalBIfWinRest--;
+                finalBIfBWinRest--;
             }
         }
         numShotsTaken++;
         isTeamATurn = !isTeamATurn;
 
-        if ((finalAIfLoseRest > finalBIfWinRest) || (finalBIfLoseRest > finalAIfWinRest))
+#ifdef DIAGNOSTICS
+        cout << "numShotsTaken: " << numShotsTaken << "; " << (numShots * 2 - numShotsTaken) << " remaining.  " << endl;
+        cout << " finalAIfALoseRest: " << finalAIfALoseRest << " finalBIfBWinRest: " << finalBIfBWinRest;
+        if (finalAIfALoseRest <= finalBIfBWinRest)
+            cout << " ... no conclusion can be drawn";
+        else
+            cout << " ... A guaranteed to win, even if A loses all remaining games!";
+        cout << endl;
+        cout << " finalBIfBLoseRest: " << finalBIfBLoseRest << " finalAIfAWinRest: " << finalAIfAWinRest;
+        if (finalBIfBLoseRest <= finalAIfAWinRest)
+            cout << " ... no conclusion can be drawn";
+        else
+            cout << " ... B guaranteed to win, even if B loses all remaining games!";
+        cout << endl;
+#endif
+
+        if ((finalAIfALoseRest > finalBIfBWinRest) || (finalBIfBLoseRest > finalAIfAWinRest))
             break;
 
     }
