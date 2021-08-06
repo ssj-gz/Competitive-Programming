@@ -9,7 +9,7 @@ export LATESTCPP=$(ls -1at *.cpp | head -n 1)
 echo "Compiling $LATESTCPP" 
 if [ -z "${USE_CLANG}" ]; then
     set -x
-    g++ -std=c++14 $LATESTCPP -O3 -g3 -Wall -Wextra -Wconversion -DONLINE_JUDGE -D_GLIBCXX_DEBUG    -fsanitize=undefined -ftrapv
+    g++ -std=c++14 $LATESTCPP -O3 -g3 -Wall -Wextra -Wconversion -DONLINE_JUDGE -D_GLIBCXX_DEBUG    -fsanitize=undefined -ftrapv -fno-sanitize-recover
     set +x
 else
     set -x
