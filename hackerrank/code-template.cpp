@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
     {
         struct timeval time;
         gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+        srand(static_cast<unsigned int>((time.tv_sec * 1000) + (time.tv_usec / 1000)));
         // TODO - generate randomised test.
         //const int T = rand() % 100 + 1;
         const int T = 1;
