@@ -1,4 +1,4 @@
-// Simon St James (ssjgz) - 2020-XX-XX
+// Simon St James (ssjgz) - 2021-XX-XX
 // 
 // Solution to: TODO - problem link here!
 //
@@ -25,6 +25,15 @@ T read()
     T toRead;
     cin >> toRead;
     assert(cin);
+    return toRead;
+}
+
+template <typename T>
+vector<T> readVector(typename vector<T>::size_type numElements)
+{
+    vector<T> toRead(numElements);
+    for (auto& element : toRead)
+        element = read<T>();
     return toRead;
 }
 
