@@ -7,11 +7,6 @@ using namespace std;
 int main()
 {
     string boardingPass;
-    vector<int> allSeatIds;
-    vector<int> mySeatIdPossibilities;
-    for (int i = 0; i <= 1023; i++)
-        mySeatIdPossibilities.push_back(i);
-    //vector<int> permittedMissingSeatIds;
     vector<int> seatIdsInList;
     while (cin >> boardingPass)
     {
@@ -31,7 +26,6 @@ int main()
             {
                 assert(false);
             }
-            //cout << "letter: " << boardingPass[i] << " new rowMin: " << rowMin << " new rowMax: " << rowMax << endl;
         }
         assert(rowMax == rowMin);
         const int row = rowMin;
@@ -52,31 +46,32 @@ int main()
             {
                 assert(false);
             }
-            //cout << "letter: " << boardingPass[i] << " new colMin: " << colMin << " new colMax: " << colMax << endl;
         }
         assert(colMax == colMin);
         const int col = colMin;
 
         const int seatId = row * 8 + col;
-        //cout << "seatId: " << seatId << endl;
-        if (const auto iter = find(mySeatIdPossibilities.begin(), mySeatIdPossibilities.end(), seatId); iter != mySeatIdPossibilities.end())
-        {
-            //cout << "erasing: " << seatId << endl;
-            mySeatIdPossibilities.erase(iter);
-        }
-        //if (row == 0 || row == 7)
-            //permittedMissingSeatIds.push_back(seatId);
+
         seatIdsInList.push_back(seatId);
     }
     bool foundMySeat = false;
-    for (const auto seatId : mySeatIdPossibilities)
+    for (int seatId = 0; seatId <= 1023; seatId++)
     {
         const int row = seatId / 8;
         if (row == 0 || row == 7)
+        {
+            // We know our seat is not in front or back row.
             continue;
+        }
+        if (find(seatIdsInList.begin(), seatIdsInList.end(), seatId) != seatIdsInList.end())
+        {
+            // We know our seat is not amongst the list of other passenger's seat ids.
+            continue;
+        }
         if ((find(seatIdsInList.begin(), seatIdsInList.end(), seatId - 1) == seatIdsInList.end()) ||
             (find(seatIdsInList.begin(), seatIdsInList.end(), seatId + 1) == seatIdsInList.end()))
         {
+            // We know the seats with id +/- 1 of ours are in the list.
             continue;
         }
         assert(!foundMySeat);
