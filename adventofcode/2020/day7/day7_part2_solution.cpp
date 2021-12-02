@@ -15,10 +15,11 @@ int64_t totalBagsContainedBy(const string& outerBagDesc, map<string, vector<pair
     int64_t result = 0;
     for (const auto& [bagDesc, count] : bagsContainedBy[outerBagDesc])
     {
-        cout << " blee: " << bagDesc << " - " << count << endl;
-        result += count * (1 + totalBagsContainedBy(bagDesc, bagsContainedBy, totalBagsContainedByLookup));
+        result += count * (1  // The directly contained bag itself ...
+                           + totalBagsContainedBy(bagDesc, bagsContainedBy, totalBagsContainedByLookup) // ... plus all bags which the directly contained bag contains.
+                          );
     }
-    cout << "totalBagsContainedBy " << outerBagDesc << " = " << result << endl;
+    // Memo-ise so we can look up the answer if we're asked for it again.
     totalBagsContainedByLookup[outerBagDesc] = result;
     return result;
 }
@@ -36,30 +37,32 @@ int main()
         outerBagDesc += str;
         lineStream >> str;
         outerBagDesc += "," + str;
-        cout << "outerBagDesc: " << outerBagDesc << endl;
+
         lineStream >> str;
-        cout << " str: " << str << endl;
         assert(str == "bags");
         lineStream >> str;
         assert(str == "contain");
+
         while (true)
         {
             int numOfInner;
             if (!(lineStream >> numOfInner))
+            {
+                // This outer bag contains no bags.
                 break;
+            }
 
             string innerBagDesc;
             lineStream >> str;
             innerBagDesc += str;
             lineStream >> str;
             innerBagDesc += "," + str;
-            cout << " " << numOfInner << " " << innerBagDesc << endl;
-
             bagsContainedBy[outerBagDesc].push_back({innerBagDesc, numOfInner});
 
             lineStream >> str;
             const char punctuation = str.back();
 
+            // Do we have more contained bags? ("," == yes; "." == no").
             assert(punctuation == '.' || punctuation == ',');
             if (punctuation == '.')
                 break;
