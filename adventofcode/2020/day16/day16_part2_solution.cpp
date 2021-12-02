@@ -11,19 +11,20 @@ struct Rule
     vector<pair<int64_t, int64_t>> validRangesInclusive;
 };
 
-void findValidRuleOrder(const vector<vector<int>>& ruleIndexCouldBeFieldIndex, int ruleNumber, vector<int>& unusedRuleIndices, vector<int>& currentRuleIndices, const vector<vector<int>>& validTicketsFieldValues, vector<int>& destOrderedRules)
+void findValidRuleOrder(const vector<vector<int>>& ruleIndexCouldBeFieldIndex, int fieldNumber, vector<int>& unusedRuleIndices, vector<int>& currentRuleIndices, vector<int>& ruleIndexForFieldIndex)
 {
-    static int largestRuleNumber = -1;
-    if (ruleNumber > largestRuleNumber)
+    static int largestFieldNumber = -1;
+    const int numRulesAndFields = ruleIndexCouldBeFieldIndex.size();
+    if (fieldNumber > largestFieldNumber)
     {
-        cout << "ruleNumber: " << ruleNumber << " / " << ruleIndexCouldBeFieldIndex.size() << endl;
-        largestRuleNumber = ruleNumber;
+        cout << "fieldNumber: " << fieldNumber << " / " << numRulesAndFields << endl;
+        largestFieldNumber = fieldNumber;
     }
-    if (ruleNumber == ruleIndexCouldBeFieldIndex.size())
+    if (fieldNumber == numRulesAndFields)
     {
-        assert(destOrderedRules.empty());
-        assert(currentRuleIndices.size() == ruleIndexCouldBeFieldIndex.size());
-        destOrderedRules = currentRuleIndices;
+        assert(ruleIndexForFieldIndex.empty());
+        assert(currentRuleIndices.size() == numRulesAndFields);
+        ruleIndexForFieldIndex = currentRuleIndices;
         cout << "found" << endl;
         return;
     }
@@ -32,45 +33,14 @@ void findValidRuleOrder(const vector<vector<int>>& ruleIndexCouldBeFieldIndex, i
         const int thisRuleIndex = unusedRuleIndices.back();
         unusedRuleIndices.pop_back();
 
-#if 0
-        bool ruleMatchesAllFields = true;
-        for (const auto& fieldValues : validTicketsFieldValues)
-        {
-            const auto fieldValue = fieldValues[ruleNumber];
-            bool fieldValueIsValid = false;
-            for (const auto& validRange : rule.validRangesInclusive)
-            {
-                if (fieldValue >= validRange.first && fieldValue <= validRange.second)
-                    fieldValueIsValid = true;
-            }
-            if (!fieldValueIsValid)
-            {
-                ruleMatchesAllFields = false;
-            }
-        }
-
-        if (ruleMatchesAllFields)
+        if (ruleIndexCouldBeFieldIndex[thisRuleIndex][fieldNumber])
         {
             currentRuleIndices.push_back(thisRuleIndex);
-            findValidRuleOrder(rules, ruleIndexCouldBeFieldIndex, ruleNumber + 1, unusedRuleIndices, currentRuleIndices, validTicketsFieldValues, destOrderedRules);
+            findValidRuleOrder(ruleIndexCouldBeFieldIndex, fieldNumber + 1, unusedRuleIndices, currentRuleIndices, ruleIndexForFieldIndex);
             currentRuleIndices.pop_back();
-            assert(ruleIndexCouldBeFieldIndex[thisRuleIndex][ruleNumber]);
-        }
-        else
-        {
-            assert(!ruleIndexCouldBeFieldIndex[thisRuleIndex][ruleNumber]);
-        }
-#endif
-        if (ruleIndexCouldBeFieldIndex[thisRuleIndex][ruleNumber])
-        {
-            currentRuleIndices.push_back(thisRuleIndex);
-            findValidRuleOrder(ruleIndexCouldBeFieldIndex, ruleNumber + 1, unusedRuleIndices, currentRuleIndices, validTicketsFieldValues, destOrderedRules);
-            currentRuleIndices.pop_back();
-            assert(ruleIndexCouldBeFieldIndex[thisRuleIndex][ruleNumber]);
         }
 
         unusedRuleIndices.insert(unusedRuleIndices.begin(), thisRuleIndex);
-
     }
 }
 
@@ -158,7 +128,7 @@ int main()
 
     }
 
-    vector<int> destOrderedRules;
+    vector<int> ruleIndexForFieldIndex;
     vector<int> unusedRuleIndices;
     vector<int> currentRuleIndices;
     for (int ruleIndex = 0; ruleIndex < rules.size(); ruleIndex++)
@@ -190,13 +160,13 @@ int main()
             ruleIndexCouldBeFieldIndex[ruleIndex][fieldIndex] = allFieldValuesMatchRule;
         }
     }
-    findValidRuleOrder(ruleIndexCouldBeFieldIndex, 0, unusedRuleIndices, currentRuleIndices, validTicketsFieldValues, destOrderedRules);
-    assert(!destOrderedRules.empty());
+    findValidRuleOrder(ruleIndexCouldBeFieldIndex, 0, unusedRuleIndices, currentRuleIndices, ruleIndexForFieldIndex);
+    assert(!ruleIndexForFieldIndex.empty());
     cout << "fields in order:" << endl;
     int64_t departureValuesProduct = 1;
     for (int fieldIndex = 0; fieldIndex < rules.size(); fieldIndex++)
     {
-        const auto& rule = rules[destOrderedRules[fieldIndex]];
+        const auto& rule = rules[ruleIndexForFieldIndex[fieldIndex]];
         cout << "field name: " << rule.fieldName << " your ticket field value: " << yourTicketFieldValues[fieldIndex] << endl;
         if (rule.fieldName.find("departure") == 0)
         {
