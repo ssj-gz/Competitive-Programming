@@ -11,24 +11,19 @@ struct Instruction
     bool alreadyExecuted = false;
 };
 
-pair<bool, int> terminatesCorrectly(vector<Instruction> instructions)
+pair<bool, int> runInstructions(vector<Instruction> instructions)
 {
-    cout << "Executing ... " << endl;
     int instructionIndex = 0;
     int64_t accumulatorValue = 0;
     while (true)
     {
-        cout << " instructionIndex: " << instructionIndex << endl;
         assert(0 <= instructionIndex && instructionIndex <= instructions.size());
         if (instructionIndex == instructions.size())
         {
-            cout << " hooray!" << endl;
             return {true, accumulatorValue};
         }
-        cout << " opCode: " << instructions[instructionIndex].opCode << " argument: " << instructions[instructionIndex].argument << " alreadyExecuted: " << instructions[instructionIndex].alreadyExecuted << endl;
         if (instructions[instructionIndex].alreadyExecuted)
         {
-            cout << " infinite loop" << endl;
             return {false, -1};
         }
         const auto opCode = instructions[instructionIndex].opCode;
@@ -73,7 +68,6 @@ int main()
     }
 
     bool foundSuccessfulChange = false;
-    int instructionIndex = 0;
     int64_t finalAccumulatorValue = -1;
     for (auto& instruction : instructions)
     {
@@ -84,10 +78,7 @@ int main()
         else if (instruction.opCode == "nop")
             instruction.opCode = "jmp";
 
-        if (instruction.opCode != originalOpCode)
-            cout << "Changing instruction at index " << instructionIndex << " from " << originalOpCode << " to " << instruction.opCode << endl;
-
-        const auto executionResult = terminatesCorrectly(instructions);
+        const auto executionResult = runInstructions(instructions);
         if (executionResult.first)
         {
             assert(!foundSuccessfulChange);
@@ -97,7 +88,6 @@ int main()
 
 
         instruction.opCode = originalOpCode;
-        instructionIndex++;
     }
     assert(foundSuccessfulChange);
     cout << finalAccumulatorValue << endl;
