@@ -11,7 +11,7 @@ struct Rule
     vector<pair<int64_t, int64_t>> validRangesInclusive;
 };
 
-void findValidRuleOrder(const vector<vector<int>>& ruleIndexCouldBeFieldIndex, int fieldNumber, vector<int>& unusedRuleIndices, vector<int>& currentRuleIndices, vector<int>& ruleIndexForFieldIndex)
+void findValidRuleOrder(const vector<vector<int>>& ruleIndexCouldBeFieldIndex, int fieldNumber, vector<int>& unusedRuleIndices, int firstUnusedRuleIndexPos, vector<int>& currentRuleIndices, vector<int>& ruleIndexForFieldIndex)
 {
     static int largestFieldNumber = -1;
     const int numRulesAndFields = ruleIndexCouldBeFieldIndex.size();
@@ -28,19 +28,19 @@ void findValidRuleOrder(const vector<vector<int>>& ruleIndexCouldBeFieldIndex, i
         cout << "found" << endl;
         return;
     }
-    for (int i = 0; i < unusedRuleIndices.size(); i++)
+    for (int i = firstUnusedRuleIndexPos; i < unusedRuleIndices.size(); i++)
     {
-        const int thisRuleIndex = unusedRuleIndices.back();
-        unusedRuleIndices.pop_back();
+        const int thisRuleIndex = unusedRuleIndices[i];
 
         if (ruleIndexCouldBeFieldIndex[thisRuleIndex][fieldNumber])
         {
             currentRuleIndices.push_back(thisRuleIndex);
-            findValidRuleOrder(ruleIndexCouldBeFieldIndex, fieldNumber + 1, unusedRuleIndices, currentRuleIndices, ruleIndexForFieldIndex);
+            swap(unusedRuleIndices[firstUnusedRuleIndexPos], unusedRuleIndices[i]);
+            findValidRuleOrder(ruleIndexCouldBeFieldIndex, fieldNumber + 1, unusedRuleIndices, firstUnusedRuleIndexPos + 1, currentRuleIndices, ruleIndexForFieldIndex);
+            swap(unusedRuleIndices[firstUnusedRuleIndexPos], unusedRuleIndices[i]);
             currentRuleIndices.pop_back();
         }
 
-        unusedRuleIndices.insert(unusedRuleIndices.begin(), thisRuleIndex);
     }
 }
 
@@ -160,7 +160,7 @@ int main()
             ruleIndexCouldBeFieldIndex[ruleIndex][fieldIndex] = allFieldValuesMatchRule;
         }
     }
-    findValidRuleOrder(ruleIndexCouldBeFieldIndex, 0, unusedRuleIndices, currentRuleIndices, ruleIndexForFieldIndex);
+    findValidRuleOrder(ruleIndexCouldBeFieldIndex, 0, unusedRuleIndices, 0, currentRuleIndices, ruleIndexForFieldIndex);
     assert(!ruleIndexForFieldIndex.empty());
     cout << "fields in order:" << endl;
     int64_t departureValuesProduct = 1;
