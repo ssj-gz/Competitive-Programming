@@ -86,7 +86,7 @@ void findMetaTileArrangement(const vector<TileConfig>& tileConfigs, vector<vecto
         cout << "found" << endl;
         return;
     }
-    cout << "nextTileRow: " << nextTileRow << " nextTileCol: " << nextTileCol << endl;
+    //cout << "nextTileRow: " << nextTileRow << " nextTileCol: " << nextTileCol << endl;
 
     vector<int> candidateTileConfigs;
     if (nextTileRow == 0 && nextTileCol == 0)
@@ -111,11 +111,11 @@ void findMetaTileArrangement(const vector<TileConfig>& tileConfigs, vector<vecto
     candidateTileConfigs.erase(remove_if(candidateTileConfigs.begin(), candidateTileConfigs.end(), [&isTileIdUsed,&tileConfigs](const int tileConfigId)
                 {
                 
-                    cout << " used? " << " tile id: " << tileConfigs[tileConfigId].tileId << isTileIdUsed[tileConfigs[tileConfigId].tileId] << endl;
+                    //cout << " used? " << " tile id: " << tileConfigs[tileConfigId].tileId << isTileIdUsed[tileConfigs[tileConfigId].tileId] << endl;
                     return isTileIdUsed[tileConfigs[tileConfigId].tileId];
                 }),
                 candidateTileConfigs.end());
-    cout << " after erasing used: " << candidateTileConfigs.size() << endl;
+    //cout << " after erasing used: " << candidateTileConfigs.size() << endl;
     if (nextTileRow != 0)
     {
         candidateTileConfigs.erase(remove_if(candidateTileConfigs.begin(), candidateTileConfigs.end(), [&tileArrangement,&tileConfigs,nextTileRow, nextTileCol](const int tileConfigId)
@@ -125,7 +125,7 @@ void findMetaTileArrangement(const vector<TileConfig>& tileConfigs, vector<vecto
                     }),
                 candidateTileConfigs.end());
     }
-    cout << " after erasing due to above: " << candidateTileConfigs.size() << endl;
+    //cout << " after erasing due to above: " << candidateTileConfigs.size() << endl;
     if (nextTileCol != 0)
     {
         candidateTileConfigs.erase(remove_if(candidateTileConfigs.begin(), candidateTileConfigs.end(), [&tileArrangement,&tileConfigs,nextTileRow, nextTileCol](const int tileConfigId)
@@ -135,9 +135,9 @@ void findMetaTileArrangement(const vector<TileConfig>& tileConfigs, vector<vecto
                     }),
                 candidateTileConfigs.end());
     }
-    cout << " after erasing due to left: " << candidateTileConfigs.size() << endl;
+    //cout << " after erasing due to left: " << candidateTileConfigs.size() << endl;
 
-    cout << " # candidates: " << candidateTileConfigs.size() << endl;
+    //cout << " # candidates: " << candidateTileConfigs.size() << endl;
 
     for (const auto tileConfigId : candidateTileConfigs)
     {
@@ -342,6 +342,7 @@ int main()
             if (otherTileConfig.tileDef.front() == tileConfig.tileDef.back())
             {
                 tileConfig.tileConfigsThatFitBelow.push_back(otherTileConfigId);
+#if 0
                 cout << "Vertical match tiles: " << endl;
                 for(const auto& patternLine : tileConfig.tileDef)
                 {
@@ -352,28 +353,33 @@ int main()
                 {
                     cout << patternLine << endl;
                 }
+#endif
             }
             if (flippedHorizontally(rotated90DegClockwise(otherTileConfig.tileDef)).front() == rotated90DegClockwise(tileConfig.tileDef, 3).front())
             {
                 tileConfig.tileConfigsThatFitToRight.push_back(otherTileConfigId);
+#if 0
                 cout << "Horizontal match tiles: " << endl;
                 for (int row = 0; row < tileHeight; row++)
                 {
                     cout << tileConfig.tileDef[row] + "-" + otherTileConfig.tileDef[row] << endl;
                 }
                 cout << "--" << endl;
+#endif
             }
         }
-        cout << "Tile config has " << tileConfig.tileConfigsThatFitBelow.size() << " configs that fit below it and " << tileConfig.tileConfigsThatFitToRight.size() << " that fit to its right " << endl;
+        //cout << "Tile config has " << tileConfig.tileConfigsThatFitBelow.size() << " configs that fit below it and " << tileConfig.tileConfigsThatFitToRight.size() << " that fit to its right " << endl;
     }
 
 
+    cout << "Looking for tile arrangement ... " << endl;
     vector<vector<int>> tileArrangement(metaTileSize, vector<int>(metaTileSize, -1));
     map<int, bool> isTileIdUsed;
     vector<vector<int>> destTileArrangement;
     findMetaTileArrangement(tileConfigs, tileArrangement, 0, 0, isTileIdUsed, metaTileSize, destTileArrangement);
     //assert(!destTileArrangement.empty());
     assert(!destTileArrangement.empty());
+    cout << " ... done" << endl;
      // Strip borders.
     for (auto& tileConfig : tileConfigs)
     {
