@@ -115,17 +115,8 @@ int main()
         assert(drawnNumbersStream.eof() || dummyChar == ',');
     }
 
-    cout << "Drawn numbers: " << endl;
-    for (const auto x : drawNumbers)
-    {
-        cout << x << " ";
-    }
-    cout << endl;
-
     vector<vector<vector<int>>> bingoBoards;
 
-    const int bingoBoardWidth = 5;
-    const int bingoBoardHeight = 5;
     while (cin)
     {
         vector<vector<int>> bingoBoard(bingoBoardHeight, vector<int>(bingoBoardWidth, -1));
@@ -140,24 +131,5 @@ int main()
             bingoBoards.push_back(bingoBoard);
     }
 
-    cout << "Bingo boards: " << endl;
-    for (const auto& bingoBoard : bingoBoards)
-    {
-        for (int row = 0; row < bingoBoardHeight; row++)
-        {
-            for (int col = 0; col < bingoBoardWidth; col++)
-            {
-
-                cout << bingoBoard[row][col] << " ";
-            }
-            cout << endl;
-        }
-        cout << " -- " << endl;
-    }
-
     cout << findResult(bingoBoards, drawNumbers) << endl;
-
-
-
-
 }
