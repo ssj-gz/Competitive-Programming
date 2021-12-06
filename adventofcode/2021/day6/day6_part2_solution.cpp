@@ -13,17 +13,10 @@ int main()
     std::replace(countdownsLine.begin(), countdownsLine.end(), ',', ' ');
     istringstream countdownsStream(countdownsLine);
 
-    vector<int64_t> listOfLanternFishCountdowns;
-    int64_t countdown = -1;
-    while (countdownsStream >> countdown)
-    {
-        listOfLanternFishCountdowns.push_back(countdown);
-    }
-    cout << "# blah" << listOfLanternFishCountdowns.size() << endl;
-
     const int maxCountdown = 8;
     vector<int64_t> numFishWithCountdown(maxCountdown + 1, 0);
-    for (const auto countdown : listOfLanternFishCountdowns)
+    int64_t countdown = -1;
+    while (countdownsStream >> countdown)
     {
         numFishWithCountdown[countdown]++;
     }
