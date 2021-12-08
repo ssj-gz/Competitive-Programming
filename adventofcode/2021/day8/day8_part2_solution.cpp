@@ -4,6 +4,31 @@
 
 using namespace std;
 
+string applyPermutationAndNormalise(const string& original, const string& permutation)
+{
+    string result;
+    for (const auto& wire : original)
+    {
+        const char digitSegment = permutation[wire - 'a'];
+        result.push_back(digitSegment);
+    }
+    // Normalise.
+    sort(result.begin(), result.end());
+    return result;
+}
+
+int getMatchingDigitIndex(const string& digitSegments, const vector<string>& allDigits)
+{
+    for (int digitIndex = 0; digitIndex < allDigits.size(); digitIndex++)
+    {
+        if (allDigits[digitIndex] == digitSegments)
+        {
+            return digitIndex;
+        }
+    } 
+    return -1;
+}
+
 int main()
 {
     const string digit0 = "abcefg";
@@ -38,14 +63,13 @@ int main()
     int result = 0;
     while (true)
     {
-        vector<string> onWires;
+        vector<string> onWiresList;
         for (int i = 0; i < 10; i++)
         {
 
             string onWire;
             cin >> onWire;
-            onWires.push_back(onWire);
-            cout << "onWire: " << onWire << endl;
+            onWiresList.push_back(onWire);
         }
         if (!cin)
             break;
@@ -57,6 +81,7 @@ int main()
         for (auto& displayDigit: display)
         {
             cin >> displayDigit;
+            // Normalise.
             sort(displayDigit.begin(), displayDigit.end());
         }
         assert(cin);
@@ -66,54 +91,33 @@ int main()
         do
         {
             next_permutation(permutation.begin(), permutation.end());
-            //cout << "permutation: " << permutation << endl;
-            bool isDigitUsed[allDigits.size()] = {};
+            bool isDigitMatched[allDigits.size()] = {};
+            int numDigitsMatched = 0;
             int digitSegmentForWireIndex[allDigits.size()] = {};
-            int numDigitsUsed = 0;
             for (int wireIndex = 0; wireIndex < allDigits.size(); wireIndex++)
             {
-                const auto& onWire = onWires[wireIndex];
-                string candidateOnSegments;
-                for (const auto& wire : onWire)
-                {
-                    const char digitSegment = permutation[wire - 'a'];
-                    candidateOnSegments.push_back(digitSegment);
-                }
-                sort(candidateOnSegments.begin(), candidateOnSegments.end());
-                //cout << "candidateOnSegments: " << candidateOnSegments << endl;
+                const auto& onWires = onWiresList[wireIndex];
+                const string digitSegmentsForOnWires = applyPermutationAndNormalise(onWires, permutation);
 
-                for (int digitIndex = 0; digitIndex < allDigits.size(); digitIndex++)
+                const int matchingDigitIndex = getMatchingDigitIndex(digitSegmentsForOnWires, allDigits);
+                if (matchingDigitIndex != -1 && !isDigitMatched[matchingDigitIndex])
                 {
-                    if (allDigits[digitIndex] == candidateOnSegments && !isDigitUsed[digitIndex])
-                    {
-                        isDigitUsed[digitIndex] = true;
-                        digitSegmentForWireIndex[wireIndex] = digitIndex;
-                        numDigitsUsed++;
-                    }
+                    isDigitMatched[matchingDigitIndex] = true;
+                    digitSegmentForWireIndex[wireIndex] = matchingDigitIndex;
+                    numDigitsMatched++;
                 }
-                //cout << "numDigitsUsed: " << numDigitsUsed << endl;
-                if (numDigitsUsed == allDigits.size())
+
+                if (numDigitsMatched == allDigits.size())
                 {
                     cout << "Found: Display digits: " << endl;
 
                     string outputDigits;
                     for (const auto& displayDigitWires : display)
                     {
-                        string displayDigit;
-                        for (const auto& wire : displayDigitWires)
-                        {
-                            const char digitSegment = permutation[wire - 'a'];
-                            displayDigit.push_back(digitSegment);
-                        }
-                        sort(displayDigit.begin(), displayDigit.end());
-
-                        for (int digitIndex = 0; digitIndex < allDigits.size(); digitIndex++)
-                        {
-                            if (allDigits[digitIndex] == displayDigit)
-                            {
-                                outputDigits.push_back('0' + digitIndex);
-                            }
-                        } 
+                        const string displayDigitSegments = applyPermutationAndNormalise(displayDigitWires, permutation);
+                        const int matchingDigitIndex = getMatchingDigitIndex(displayDigitSegments, allDigits);
+                        assert(matchingDigitIndex != -1);
+                        outputDigits.push_back('0' + matchingDigitIndex);
                     }
                     cout << outputDigits << endl;
                     assert(outputDigits.size() == 4);
