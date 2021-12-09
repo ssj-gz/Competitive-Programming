@@ -101,6 +101,24 @@ int main()
         }
         cout << endl;
     }
+    vector<string> blah(width, string(height, '.'));
+    for (const auto [lowPointX, lowPointY] : lowPoints)
+    {
+        blah[lowPointX][lowPointY] = 'X';
+    }
+    for (int x = 0; x < width; x++)
+    {
+        for (int y = 0; y < height; y++)
+        {
+            if (heightMap[x][y] == '9')
+            {
+                blah[x][y] = '#';
+            }
+        }
+    }
+    for (const auto b : blah)
+        cout << b << endl;
+    cout << lowPoints.size() << endl;
     sort(basinSizes.begin(), basinSizes.end(), std::greater<>());
     cout << "basin sizes: " << endl;
     for (const auto size : basinSizes)
