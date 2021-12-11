@@ -54,38 +54,27 @@ int main()
     }
     vector<vector<int>> grid(maxX + 1, vector<int>(maxY + 1, 0));
 
+    auto sgn = [](int x)
+    {
+        if (x > 0)
+            return 1;
+        else if (x < 0)
+            return -1;
+        return 0;
+    };
+
     for (const auto& line : lines)
     {
-        if (line.x1 == line.x2)
+        int x = line.x1;
+        int y = line.y1;
+        while (true)
         {
-            for (int y = min(line.y1, line.y2); y <= max(line.y1, line.y2); y++)
-            {
-                grid[line.x1][y]++;
-            }
+            grid[x][y]++;
+            if (x == line.x2 && y == line.y2)
+                break;
+            x += sgn(line.x2 - line.x1);
+            y += sgn(line.y2 - line.y1);
         }
-        else if (line.y1 == line.y2)
-        {
-            for (int x = min(line.x1, line.x2); x <= max(line.x1, line.x2); x++)
-            {
-                grid[x][line.y1]++;
-            }
-        }
-        else
-        {
-            cout << "woo!" << endl;
-            assert(abs(line.x1 - line.x2) == abs(line.y1 - line.y2));
-            int x = line.x1;
-            int y = line.y1;
-            while (true)
-            {
-                grid[x][y]++;
-                if (x == line.x2 && y == line.y2)
-                    break;
-                x += (line.x2 - line.x1 > 0 ? 1 : -1);
-                y += (line.y2 - line.y1 > 0 ? 1 : -1);
-            }
-        }
-
     }
 
     for (int y = 0; y <= maxY; y++)
