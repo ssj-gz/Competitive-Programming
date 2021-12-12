@@ -10,53 +10,43 @@ using namespace std;
 
 struct Node
 {
-    bool isEndNode = false;
-    int maxVisitCount = -1;
-    vector<Node*> neighbours;
     string nodeName;
+    bool isEndNode = false;
+    vector<Node*> neighbours;
 
+    int maxVisitCount = -1;
     int visitCount = 0;
 };
 
-void countPaths(Node* currentNode, vector<Node*>& nodeStack, int64_t& numPathsFound, bool canRevisitSmallCave)
+void countPaths(Node* currentNode, int64_t& numPathsFound, bool canRevisitSmallCave)
 {
     currentNode->visitCount++;
-    nodeStack.push_back(currentNode);
+
+    bool exploreFromThisNode = true;
+
     const bool isSmallCave = (currentNode->maxVisitCount == 2);
-    bool skipNode = false;
     if (isSmallCave && currentNode->visitCount == currentNode->maxVisitCount)
     {
         if (!canRevisitSmallCave)
-            skipNode = true;
+            exploreFromThisNode = false;
         canRevisitSmallCave = false;
     }
-    if (!skipNode)
+    if (currentNode->maxVisitCount != -1 && currentNode->visitCount > currentNode->maxVisitCount)
+        exploreFromThisNode = false;
+    if (currentNode->isEndNode)
     {
-        if (currentNode->isEndNode)
+        numPathsFound++;
+        exploreFromThisNode = false;
+    }
+
+    if (exploreFromThisNode)
+    {
+        for (auto neighbour : currentNode->neighbours)
         {
-            numPathsFound++;
-            cout << "path: ";
-            for (const auto node : nodeStack)
-            {
-                cout << node->nodeName;
-                if (node != currentNode)
-                    cout << "->";
-            }
-            cout << endl;
-        }
-        else if (currentNode->maxVisitCount != -1 && currentNode->visitCount > currentNode->maxVisitCount)
-        {
-            // Do nothing.
-        }
-        else
-        {
-            for (auto neighbour : currentNode->neighbours)
-            {
-                countPaths(neighbour, nodeStack, numPathsFound, canRevisitSmallCave);
-            }
+            countPaths(neighbour, numPathsFound, canRevisitSmallCave);
         }
     }
-    nodeStack.pop_back();
+
     currentNode->visitCount--;
     return;
 }
@@ -73,7 +63,7 @@ int main()
             {
                 if (nodesByName.find(nodeName) == nodesByName.end())
                 {
-                    nodes.push_back({false, false, {}, nodeName});
+                    nodes.push_back({nodeName});
                     auto newNode = &(nodes.back());
                     nodesByName[nodeName] = newNode;
                     newNode->maxVisitCount = any_of(nodeName.begin(), nodeName.end(), static_cast<int(*)(int)>(isupper)) ? -1 : 2;
@@ -86,7 +76,6 @@ int main()
     {
         static regex pathDescRegex(R"((\w+)-(\w+)\s*)");
         std::smatch pathDescMatch;
-        cout << "Line: " << pathDescLine << endl;
         if (regex_match(pathDescLine, pathDescMatch, pathDescRegex))
         {
             const string& nodeName1 = pathDescMatch[1];
@@ -101,24 +90,16 @@ int main()
             assert(false);
         }
     }
+
     auto startNode = getNode("start");
-    auto endNode = getNode("end");
     startNode->maxVisitCount = 1;
+
+    auto endNode = getNode("end");
     endNode->isEndNode = true;
     endNode->maxVisitCount = 1;
 
-    for (const auto& node : nodes)
-    {
-        cout << "node: " << node.nodeName << " maxVisitCount: " << node.maxVisitCount << endl;
-        for (const auto& neighbour : node.neighbours)
-        {
-            cout << " " << neighbour->nodeName << endl;
-        }
-    }
-
-    vector<Node*> nodeStack;
     int64_t numPathsFound = 0;
-    countPaths(startNode, nodeStack, numPathsFound, true);
+    countPaths(startNode, numPathsFound, true);
     cout << numPathsFound << endl;
     
 }
