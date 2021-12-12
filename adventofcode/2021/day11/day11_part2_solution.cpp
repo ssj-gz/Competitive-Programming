@@ -69,9 +69,9 @@ int main()
                             {
                                 if (neighbourRow == rowIndex && neighbourCol == colIndex)
                                     continue;
-                                if (neighbourCol < 0 || neighbourCol >= height)
+                                if (neighbourCol < 0 || neighbourCol >= width)
                                     continue;
-                                if (neighbourRow < 0 || neighbourRow >= width)
+                                if (neighbourRow < 0 || neighbourRow >= height)
                                     continue;
                                 octopusGrid[neighbourRow][neighbourCol]++;
                             }
