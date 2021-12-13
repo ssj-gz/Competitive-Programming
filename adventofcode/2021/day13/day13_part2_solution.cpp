@@ -1,5 +1,6 @@
 #include <iostream>
 #include <regex>
+#include <ranges>
 #include <cassert>
 
 using namespace std;
@@ -79,8 +80,6 @@ int main()
 
     vector<FoldInstruction> foldInstructions;
     string foldInstructionLine;
-    int maxXFold = 0;
-    int maxYFold = 0;
     while (getline(cin, foldInstructionLine))
     {
         static regex foldInstructionRegex(R"(fold along (.)=(\d+)\s*)");
@@ -90,18 +89,21 @@ int main()
             const auto foldDirection = foldInstructionMatch[1] == "x"s ? FoldInstruction::RightToLeft : FoldInstruction::BottomToTop;
             const int foldAtCoord = stoi(foldInstructionMatch[2]);
             foldInstructions.push_back({foldDirection, foldAtCoord});
-            if (foldDirection == FoldInstruction::BottomToTop)
-                maxYFold = max(maxYFold, foldAtCoord);
-            else if (foldDirection == FoldInstruction::RightToLeft)
-                maxXFold = max(maxXFold, foldAtCoord);
         }
         else
         {
             assert(false);
         }
     }
-    const int width = 2 * maxXFold + 1;
-    const int height = 2 * maxYFold + 1;
+    const int height = 1 + 2 * std::ranges::max(foldInstructions 
+            | std::views::filter([](const FoldInstruction& foldInstruction) { return foldInstruction.foldDirection == FoldInstruction::BottomToTop; })
+            | std::views::transform([](const FoldInstruction& foldInstruction) { return foldInstruction.foldAtCoord; }));
+    const int width = 1 + 2 * std::ranges::max(foldInstructions 
+            | std::views::filter([](const FoldInstruction& foldInstruction) { return foldInstruction.foldDirection == FoldInstruction::RightToLeft; })
+            | std::views::transform([](const FoldInstruction& foldInstruction) { return foldInstruction.foldAtCoord; }));
+
+    cout << "width: " << width << " height: " << height << endl;
+
 
     vector<vector<char>> paper(width, vector<char>(height, '.'));
     auto printPaper = [](const vector<vector<char>>& paper)
@@ -117,7 +119,7 @@ int main()
             cout << endl;
         }
     };
-    
+
     for (const auto dotCoord : dotCoords)
     {
         paper[dotCoord.x][dotCoord.y] = '#';
