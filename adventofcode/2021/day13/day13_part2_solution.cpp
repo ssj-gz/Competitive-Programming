@@ -59,8 +59,6 @@ int main()
         int y = -1;
     };
     vector<Coord> dotCoords;
-    int width = 0;
-    int height = 0;
     string dotCoordLine;
     while (getline(cin, dotCoordLine))
     {
@@ -72,9 +70,6 @@ int main()
             const int y = stoi(dotCoordMatch[2]);
 
             dotCoords.push_back({x, y});
-
-            width = max(width, x + 1);
-            height = max(height, y + 1);
         }
         else
         {
@@ -84,19 +79,29 @@ int main()
 
     vector<FoldInstruction> foldInstructions;
     string foldInstructionLine;
+    int maxXFold = 0;
+    int maxYFold = 0;
     while (getline(cin, foldInstructionLine))
     {
         static regex foldInstructionRegex(R"(fold along (.)=(\d+)\s*)");
         std::smatch foldInstructionMatch;
         if (regex_match(foldInstructionLine, foldInstructionMatch, foldInstructionRegex))
         {
-            foldInstructions.push_back({foldInstructionMatch[1] == "x"s ? FoldInstruction::RightToLeft : FoldInstruction::BottomToTop, stoi(foldInstructionMatch[2])});
+            const auto foldDirection = foldInstructionMatch[1] == "x"s ? FoldInstruction::RightToLeft : FoldInstruction::BottomToTop;
+            const int foldAtCoord = stoi(foldInstructionMatch[2]);
+            foldInstructions.push_back({foldDirection, foldAtCoord});
+            if (foldDirection == FoldInstruction::BottomToTop)
+                maxYFold = max(maxYFold, foldAtCoord);
+            else if (foldDirection == FoldInstruction::RightToLeft)
+                maxXFold = max(maxXFold, foldAtCoord);
         }
         else
         {
             assert(false);
         }
     }
+    const int width = 2 * maxXFold + 1;
+    const int height = 2 * maxYFold + 1;
 
     vector<vector<char>> paper(width, vector<char>(height, '.'));
     auto printPaper = [](const vector<vector<char>>& paper)
