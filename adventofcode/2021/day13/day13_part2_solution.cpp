@@ -64,9 +64,6 @@ int main()
     string dotCoordLine;
     while (getline(cin, dotCoordLine))
     {
-        if (dotCoordLine.empty())
-            break;
-
         static regex dotCoordRegex(R"((\d+),(\d+)\s*)");
         std::smatch dotCoordMatch;
         if (regex_match(dotCoordLine, dotCoordMatch, dotCoordRegex))
@@ -81,7 +78,7 @@ int main()
         }
         else
         {
-            assert(false);
+            break;
         }
     }
 
