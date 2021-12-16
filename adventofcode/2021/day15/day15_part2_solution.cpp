@@ -2,6 +2,7 @@
 #include <vector>
 #include <limits>
 #include <queue>
+#include <deque>
 
 using namespace std;
 
@@ -67,12 +68,12 @@ int main()
 
     vector<vector<int>> shortestPathLenTo(height, vector<int>(width, std::numeric_limits<int>::max()));
 
-    queue<CoordInfo> toExplore ( {start} );
+    deque<CoordInfo> toExplore ( {start} );
 
     while (!toExplore.empty())
     {
         const auto coordInfo = toExplore.front();
-        toExplore.pop();
+        toExplore.pop_front();
 
         if (shortestPathLenTo[coordInfo.row][coordInfo.col] > coordInfo.shortestTo)
         {
@@ -89,7 +90,7 @@ int main()
                 const int neighbourCol = coordInfo.col - dx;
                 if (neighbourRow >= 0 && neighbourRow < height && neighbourCol >= 0 && neighbourCol < width)
                 {
-                    toExplore.push({neighbourRow, neighbourCol, coordInfo.shortestTo + riskGrid[neighbourRow][neighbourCol]});
+                    toExplore.push_back({neighbourRow, neighbourCol, coordInfo.shortestTo + riskGrid[neighbourRow][neighbourCol]});
                 }
             }
         }
