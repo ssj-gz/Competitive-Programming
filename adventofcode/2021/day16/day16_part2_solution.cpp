@@ -9,18 +9,12 @@ using namespace std;
 
 int64_t binToDec(const string& bits)
 {
-    //cout << "binToDec bits: " << bits << endl;
     return stol(bits, nullptr, 2);
 }
 
-pair<int64_t, int> parse(const string& bitStream, int pos, int end, string indent, int64_t& versionSum)
+pair<int64_t, int> parse(const string& bitStream, int pos)
 {
-    cout << indent << "parsing: " << bitStream << " from " << pos << endl;
-    cout << indent << "         " << string(pos, ' ') << "^" << endl;
-    const int startPos = pos;
-    const auto version = binToDec(bitStream.substr(pos, 3));
-    versionSum += version;
-    cout << indent << "version: " << version << endl;
+    const auto version [[maybe_unused]] = binToDec(bitStream.substr(pos, 3));
     pos += 3;
     const auto type = binToDec(bitStream.substr(pos, 3));
     pos += 3;
@@ -29,18 +23,11 @@ pair<int64_t, int> parse(const string& bitStream, int pos, int end, string inden
     {
         // Literal value.
         string valueBin;
-        cout << "literal value; blocks begin at pos " << pos << endl;
         do
         {
             valueBin += bitStream.substr(pos + 1, 4);
             pos += 5;
-            cout << indent << "pos now:" << pos << " startPos: " << startPos << endl;
         } while (bitStream[pos - 5] != '0');
-        cout << indent << "parsed literal value: " << binToDec(valueBin) << endl;
-        cout << indent << "         " << string(pos, ' ') << "^ original end here" << endl;
-        //while ((pos - startPos) % 4 != 0)
-            //pos++;
-        //cout << indent << "         " << string(pos, ' ') << "^ padded end here" << endl;
 
         return {binToDec(valueBin), pos};
     }
@@ -54,11 +41,10 @@ pair<int64_t, int> parse(const string& bitStream, int pos, int end, string inden
         {
             const auto subPacketsLength = binToDec(bitStream.substr(pos, 15));
             pos += 15;
-            cout << indent << "Operator; subPacketsLength: " << subPacketsLength << endl;
             const int subPacketsStartPos = pos;
             do
             {
-                const auto [value, newPos] = parse(bitStream, pos,  -1, indent + " ", versionSum);
+                const auto [value, newPos] = parse(bitStream, pos);
                 subPacketValues.push_back(value);
                 pos = newPos;
             } while (pos != subPacketsStartPos + subPacketsLength);
@@ -66,11 +52,10 @@ pair<int64_t, int> parse(const string& bitStream, int pos, int end, string inden
         else
         {
             auto numSubPackets = binToDec(bitStream.substr(pos, 11));
-            cout << indent << "Operator; numSubPackets: " << numSubPackets << endl;
             pos += 11;
             while (numSubPackets-- > 0)
             {
-                const auto [value, newPos] = parse(bitStream, pos, end, indent + " ", versionSum);
+                const auto [value, newPos] = parse(bitStream, pos);
                 subPacketValues.push_back(value);
                 pos = newPos;
             }
@@ -146,12 +131,7 @@ int main()
         bitStream += bitsForHex[hex[i]];
         bitStream += bitsForHex[hex[i+1]];
     }
-    cout << "bitStream: " << bitStream << endl;
-    int64_t versionSum = 0;
-    const auto [value, newPos] = parse(bitStream, 0, -1, "", versionSum);
-
-    cout << "bitStream size: " << bitStream.size() << " endPos: " << newPos << endl;
-
+    const auto [value, newPos] = parse(bitStream, 0);
 
     cout << value << endl;
 
