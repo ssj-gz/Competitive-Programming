@@ -14,33 +14,38 @@ int64_t binToDec(const string& bits)
 
 pair<int64_t, int> parse(const string& bitStream, int pos)
 {
-    const auto version [[maybe_unused]] = binToDec(bitStream.substr(pos, 3));
-    pos += 3;
-    const auto type = binToDec(bitStream.substr(pos, 3));
-    pos += 3;
+    auto consumeNextBitsAsDec = [&bitStream, &pos](int numBits)
+    {
+        auto bitsAsDec = binToDec(bitStream.substr(pos, numBits));
+        pos += numBits;
+        return bitsAsDec;
+    };
+
+    const auto version [[maybe_unused]] = consumeNextBitsAsDec(3);
+    const auto type = consumeNextBitsAsDec(3);
 
     if (type == 4)
     {
         // Literal value.
         string valueBin;
+        bool isLastBlock = false;
         do
         {
-            valueBin += bitStream.substr(pos + 1, 4);
-            pos += 5;
-        } while (bitStream[pos - 5] != '0');
+            isLastBlock = (consumeNextBitsAsDec(1) == 0);
+            valueBin += bitStream.substr(pos, 4);
+            pos += 4;
+        } while (!isLastBlock);
 
         return {binToDec(valueBin), pos};
     }
     else
     {
         // Operator.
-        const auto lengthTypeId = binToDec(""s + bitStream[pos]);
-        pos++;
+        const auto lengthTypeId = consumeNextBitsAsDec(1);
         vector<int64_t> subPacketValues;
         if (lengthTypeId == 0)
         {
-            const auto subPacketsLength = binToDec(bitStream.substr(pos, 15));
-            pos += 15;
+            const auto subPacketsLength = consumeNextBitsAsDec(15);
             const int subPacketsStartPos = pos;
             do
             {
@@ -51,8 +56,7 @@ pair<int64_t, int> parse(const string& bitStream, int pos)
         }
         else
         {
-            auto numSubPackets = binToDec(bitStream.substr(pos, 11));
-            pos += 11;
+            auto numSubPackets = consumeNextBitsAsDec(11);
             while (numSubPackets-- > 0)
             {
                 const auto [value, newPos] = parse(bitStream, pos);
