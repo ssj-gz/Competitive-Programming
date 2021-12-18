@@ -12,15 +12,15 @@ struct SnailFishNumber
 
     int64_t value = -1;
 
-    std::pair<SnailFishNumber*, SnailFishNumber*> pair = {nullptr, nullptr};
+    SnailFishNumber* pair[2] = {nullptr, nullptr};
     SnailFishNumber *parent = nullptr;
 
     ~SnailFishNumber()
     {
         if (type == Pair)
         {
-            delete pair.first;
-            delete pair.second;
+            delete pair[0];
+            delete pair[1];
         }
     }
 };
@@ -51,11 +51,11 @@ SnailFishNumber* parse(const string& snailString)
         assert(topLevelCommaPos != -1);
         assert(nestingDepth == 1);
 
-        snailFishNumber->pair.first = parse(snailString.substr(1, topLevelCommaPos - 1));
-        snailFishNumber->pair.second = parse(snailString.substr(topLevelCommaPos + 1, snailString.size() - 1 - topLevelCommaPos - 1));
+        snailFishNumber->pair[0] = parse(snailString.substr(1, topLevelCommaPos - 1));
+        snailFishNumber->pair[1] = parse(snailString.substr(topLevelCommaPos + 1, snailString.size() - 1 - topLevelCommaPos - 1));
 
-        snailFishNumber->pair.first->parent = snailFishNumber;
-        snailFishNumber->pair.second->parent = snailFishNumber;
+        snailFishNumber->pair[0]->parent = snailFishNumber;
+        snailFishNumber->pair[1]->parent = snailFishNumber;
     }
     else
     {
@@ -68,8 +68,8 @@ void listAllRegularNumbersLeftToRight(SnailFishNumber* root, vector<SnailFishNum
 {
     if (root->type == SnailFishNumber::Pair)
     {
-        listAllRegularNumbersLeftToRight(root->pair.first, destParts);
-        listAllRegularNumbersLeftToRight(root->pair.second, destParts);
+        listAllRegularNumbersLeftToRight(root->pair[0], destParts);
+        listAllRegularNumbersLeftToRight(root->pair[1], destParts);
     }
     else
     {
@@ -120,11 +120,10 @@ void printFlat(SnailFishNumber* snailFishNumber)
     if (snailFishNumber->type == SnailFishNumber::Pair)
     {
         cout << "[";
-        printFlat(snailFishNumber->pair.first);
+        printFlat(snailFishNumber->pair[0]);
         cout << ",";
-        printFlat(snailFishNumber->pair.second);
+        printFlat(snailFishNumber->pair[1]);
         cout << "]";
-
     }
     else
     {
@@ -137,24 +136,24 @@ bool doExplode(SnailFishNumber* snailFishNumber, int nestingDepth = 0)
     assert(nestingDepth <= 4);
     if (nestingDepth == 4 && snailFishNumber->type == SnailFishNumber::Pair)
     {
-        assert(snailFishNumber->pair.first->type == SnailFishNumber::RegularNumber);
-        assert(snailFishNumber->pair.second->type == SnailFishNumber::RegularNumber);
-        SnailFishNumber* regularNumberToLeft = findRegularNumberToLeft(snailFishNumber->pair.first);
-        SnailFishNumber* regularNumberToRight = findRegularNumberToRight(snailFishNumber->pair.second);
+        assert(snailFishNumber->pair[0]->type == SnailFishNumber::RegularNumber);
+        assert(snailFishNumber->pair[1]->type == SnailFishNumber::RegularNumber);
+        SnailFishNumber* regularNumberToLeft = findRegularNumberToLeft(snailFishNumber->pair[0]);
+        SnailFishNumber* regularNumberToRight = findRegularNumberToRight(snailFishNumber->pair[1]);
         assert(regularNumberToLeft != snailFishNumber);
         assert(regularNumberToRight != snailFishNumber);
         if (regularNumberToLeft)
         {
-            regularNumberToLeft->value += snailFishNumber->pair.first->value;
+            regularNumberToLeft->value += snailFishNumber->pair[0]->value;
         }
         if (regularNumberToRight)
         {
-            regularNumberToRight->value += snailFishNumber->pair.second->value;
+            regularNumberToRight->value += snailFishNumber->pair[1]->value;
         }
-        delete snailFishNumber->pair.first;
-        snailFishNumber->pair.first = nullptr;
-        delete snailFishNumber->pair.second;
-        snailFishNumber->pair.second = nullptr;
+        delete snailFishNumber->pair[0];
+        snailFishNumber->pair[0] = nullptr;
+        delete snailFishNumber->pair[1];
+        snailFishNumber->pair[1] = nullptr;
         snailFishNumber->type = SnailFishNumber::RegularNumber;
         snailFishNumber->value = 0;
 
@@ -162,10 +161,11 @@ bool doExplode(SnailFishNumber* snailFishNumber, int nestingDepth = 0)
     }
     if (snailFishNumber->type == SnailFishNumber::Pair)
     {
-        if (doExplode(snailFishNumber->pair.first, nestingDepth + 1))
-            return true;
-        if (doExplode(snailFishNumber->pair.second, nestingDepth + 1))
-            return true;
+        for (const auto pairElement : snailFishNumber->pair)
+        {
+            if (doExplode(pairElement, nestingDepth + 1))
+                return true;
+        }
     }
 
     return false;
@@ -180,21 +180,22 @@ bool doSplit(SnailFishNumber* snailFishNumber)
             snailFishNumber->type = SnailFishNumber::Pair;
             const int originalValue = snailFishNumber->value;
             snailFishNumber->value = -1;
-            snailFishNumber->pair.first = new SnailFishNumber();
-            snailFishNumber->pair.first->value = originalValue / 2;
-            snailFishNumber->pair.first->parent = snailFishNumber;
-            snailFishNumber->pair.second = new SnailFishNumber();
-            snailFishNumber->pair.second->value = originalValue / 2 + ((originalValue % 2 == 1) ? 1 : 0);
-            snailFishNumber->pair.second->parent = snailFishNumber;
+            snailFishNumber->pair[0] = new SnailFishNumber();
+            snailFishNumber->pair[0]->value = originalValue / 2;
+            snailFishNumber->pair[0]->parent = snailFishNumber;
+            snailFishNumber->pair[1] = new SnailFishNumber();
+            snailFishNumber->pair[1]->value = originalValue / 2 + ((originalValue % 2 == 1) ? 1 : 0);
+            snailFishNumber->pair[1]->parent = snailFishNumber;
             return true;
         }
     }
     else if (snailFishNumber->type == SnailFishNumber::Pair)
     {
-        if (doSplit(snailFishNumber->pair.first))
-            return true;
-        if (doSplit(snailFishNumber->pair.second))
-            return true;
+        for (const auto pairElement : snailFishNumber->pair)
+        {
+            if (doSplit(pairElement))
+                return true;
+        }
     }
 
     return false;
@@ -205,8 +206,8 @@ SnailFishNumber* add(SnailFishNumber* left, SnailFishNumber* right)
 {
     SnailFishNumber* result = new SnailFishNumber;
     result->type = SnailFishNumber::Pair;
-    result->pair.first = left;
-    result->pair.second = right;
+    result->pair[0] = left;
+    result->pair[1] = right;
     left->parent = result;
     right->parent = result;
 
@@ -250,7 +251,7 @@ int64_t calcMagnitude(SnailFishNumber* root)
     }
     else
     {
-        return 3 * calcMagnitude(root->pair.first) + 2 * calcMagnitude(root->pair.second);
+        return 3 * calcMagnitude(root->pair[0]) + 2 * calcMagnitude(root->pair[1]);
     }
 }
 
