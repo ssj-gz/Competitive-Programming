@@ -14,11 +14,19 @@ struct SnailFishNumber
 
     std::pair<SnailFishNumber*, SnailFishNumber*> pair = {nullptr, nullptr};
     SnailFishNumber *parent = nullptr;
+
+    ~SnailFishNumber()
+    {
+        if (type == Pair)
+        {
+            delete pair.first;
+            delete pair.second;
+        }
+    }
 };
 
 SnailFishNumber* parse(const string& snailString)
 {
-    cout << "parsing: " << snailString << endl;
     SnailFishNumber* snailFishNumber = new SnailFishNumber();
     if (snailString.front() == '[')
     {
@@ -56,12 +64,12 @@ SnailFishNumber* parse(const string& snailString)
     return snailFishNumber;
 }
 
-void listAllRegularNumbersInOrder(SnailFishNumber* root, vector<SnailFishNumber*>& destParts)
+void listAllRegularNumbersLeftToRight(SnailFishNumber* root, vector<SnailFishNumber*>& destParts)
 {
     if (root->type == SnailFishNumber::Pair)
     {
-        listAllRegularNumbersInOrder(root->pair.first, destParts);
-        listAllRegularNumbersInOrder(root->pair.second, destParts);
+        listAllRegularNumbersLeftToRight(root->pair.first, destParts);
+        listAllRegularNumbersLeftToRight(root->pair.second, destParts);
     }
     else
     {
@@ -69,54 +77,44 @@ void listAllRegularNumbersInOrder(SnailFishNumber* root, vector<SnailFishNumber*
     }
 }
 
-SnailFishNumber* findRegularNumberToLeft(SnailFishNumber* snailFishNumber)
+vector<SnailFishNumber*> findAllRegularNumbersLeftToRightInNumContaining(SnailFishNumber* containedSnailFishNumber)
 {
-    SnailFishNumber* topLevel = snailFishNumber;
+    SnailFishNumber* topLevel = containedSnailFishNumber;
     while (topLevel->parent != nullptr)
         topLevel = topLevel->parent;
 
-    vector<SnailFishNumber*> allRegularNumbersInOrder;
-    listAllRegularNumbersInOrder(topLevel, allRegularNumbersInOrder);
+    vector<SnailFishNumber*> allRegularNumbersLeftToRight;
+    listAllRegularNumbersLeftToRight(topLevel, allRegularNumbersLeftToRight);
 
-    cout << "allRegularNumbersInOrder (numbers): " << endl;
-    for (auto* part : allRegularNumbersInOrder)
-    {
-        assert(part->type == SnailFishNumber::RegularNumber);
-        cout << part->value << " ";
-    }
-    cout << endl;
+    return allRegularNumbersLeftToRight;
+}
 
+SnailFishNumber* findFirstBefore(SnailFishNumber* before, const vector<SnailFishNumber*>& list)
+{
     SnailFishNumber *result = nullptr;
-    for (auto* regularNumber : allRegularNumbersInOrder)
+    for (auto* regularNumber : list)
     {
-        if (regularNumber == snailFishNumber)
+        if (regularNumber == before)
             return result;
         result = regularNumber;
     }
     return nullptr;
+}
 
+SnailFishNumber* findRegularNumberToLeft(SnailFishNumber* snailFishNumber)
+{
+    const auto allRegularNumbersLeftToRight = findAllRegularNumbersLeftToRightInNumContaining(snailFishNumber);
+    return findFirstBefore(snailFishNumber, allRegularNumbersLeftToRight);
 }
 
 SnailFishNumber* findRegularNumberToRight(SnailFishNumber* snailFishNumber)
 {
-    SnailFishNumber* topLevel = snailFishNumber;
-    while (topLevel->parent != nullptr)
-        topLevel = topLevel->parent;
 
-    vector<SnailFishNumber*> allRegularNumbersInOrder;
-    listAllRegularNumbersInOrder(topLevel, allRegularNumbersInOrder);
-
-    reverse(allRegularNumbersInOrder.begin(), allRegularNumbersInOrder.end());
-
-    SnailFishNumber *result = nullptr;
-    for (auto* regularNumber : allRegularNumbersInOrder)
-    {
-        if (regularNumber == snailFishNumber)
-            return result;
-        result = regularNumber;
-    }
-    return nullptr;
+    auto allRegularNumbersLeftToRight = findAllRegularNumbersLeftToRightInNumContaining(snailFishNumber);
+    reverse(allRegularNumbersLeftToRight.begin(), allRegularNumbersLeftToRight.end());
+    return findFirstBefore(snailFishNumber, allRegularNumbersLeftToRight);
 }
+
 
 void printFlat(SnailFishNumber* snailFishNumber)
 {
@@ -296,8 +294,9 @@ int main()
             cout << endl;
             printFlat(rightSnailFishNum);
             cout << endl;
-            cout << "Magnitude: " << calcMagnitude(add(leftSnailFishNum, rightSnailFishNum)) << endl;
-            largestMagnitudeOfSum = max(largestMagnitudeOfSum, calcMagnitude(add(leftSnailFishNum, rightSnailFishNum)));
+            auto* sum = add(leftSnailFishNum, rightSnailFishNum);
+            largestMagnitudeOfSum = max(largestMagnitudeOfSum, calcMagnitude(sum));
+            delete sum;
         }
     }
     cout << "largestMagnitudeOfSum:" << largestMagnitudeOfSum << endl;
