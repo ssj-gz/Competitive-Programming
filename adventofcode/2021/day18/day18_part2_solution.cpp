@@ -137,8 +137,6 @@ bool doExplode(SnailFishNumber* snailFishNumber, int nestingDepth = 0)
     assert(nestingDepth <= 4);
     if (nestingDepth == 4 && snailFishNumber->type == SnailFishNumber::Pair)
     {
-        printFlat(snailFishNumber);
-        cout << endl;
         assert(snailFishNumber->pair.first->type == SnailFishNumber::RegularNumber);
         assert(snailFishNumber->pair.second->type == SnailFishNumber::RegularNumber);
         SnailFishNumber* regularNumberToLeft = findRegularNumberToLeft(snailFishNumber->pair.first);
@@ -186,7 +184,7 @@ bool doSplit(SnailFishNumber* snailFishNumber)
             snailFishNumber->pair.first->value = originalValue / 2;
             snailFishNumber->pair.first->parent = snailFishNumber;
             snailFishNumber->pair.second = new SnailFishNumber();
-            snailFishNumber->pair.second->value = (originalValue / 2) + ((originalValue % 2 == 1) ? 1 : 0);
+            snailFishNumber->pair.second->value = originalValue / 2 + ((originalValue % 2 == 1) ? 1 : 0);
             snailFishNumber->pair.second->parent = snailFishNumber;
             return true;
         }
@@ -211,31 +209,35 @@ SnailFishNumber* add(SnailFishNumber* left, SnailFishNumber* right)
     result->pair.second = right;
     left->parent = result;
     right->parent = result;
-    cout << "After initial add: " << endl;
+
+    cout << "after addition: ";
     printFlat(result);
     cout << endl;
+
     // Reduce.
     bool changeMade = false;
     do
     {
-        cout << " beginning iteration: " << endl;
-        printFlat(result);
-        cout << endl;
         changeMade = false;
         if (doExplode(result))
         {
             changeMade = true;
-            cout << "Exploded" << endl;
+            cout << "after explode:  ";
+            printFlat(result);
+            cout << endl;
             continue;
         }
         if (doSplit(result))
         {
             changeMade = true;
-            cout << "Split" << endl;
+            cout << "after split  :  ";
+            printFlat(result);
+            cout << endl;
+
             continue;
         }
     } while(changeMade);
-    
+
 
     return result;
 }
