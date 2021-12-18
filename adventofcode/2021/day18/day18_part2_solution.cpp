@@ -89,7 +89,7 @@ vector<SnailFishNumber*> findAllRegularNumbersLeftToRightInNumContaining(SnailFi
     return allRegularNumbersLeftToRight;
 }
 
-SnailFishNumber* findFirstBefore(SnailFishNumber* before, const vector<SnailFishNumber*>& list)
+SnailFishNumber* findLastBefore(SnailFishNumber* before, const vector<SnailFishNumber*>& list)
 {
     SnailFishNumber *result = nullptr;
     for (auto* regularNumber : list)
@@ -104,7 +104,7 @@ SnailFishNumber* findFirstBefore(SnailFishNumber* before, const vector<SnailFish
 SnailFishNumber* findRegularNumberToLeft(SnailFishNumber* snailFishNumber)
 {
     const auto allRegularNumbersLeftToRight = findAllRegularNumbersLeftToRightInNumContaining(snailFishNumber);
-    return findFirstBefore(snailFishNumber, allRegularNumbersLeftToRight);
+    return findLastBefore(snailFishNumber, allRegularNumbersLeftToRight);
 }
 
 SnailFishNumber* findRegularNumberToRight(SnailFishNumber* snailFishNumber)
@@ -112,9 +112,8 @@ SnailFishNumber* findRegularNumberToRight(SnailFishNumber* snailFishNumber)
 
     auto allRegularNumbersLeftToRight = findAllRegularNumbersLeftToRightInNumContaining(snailFishNumber);
     reverse(allRegularNumbersLeftToRight.begin(), allRegularNumbersLeftToRight.end());
-    return findFirstBefore(snailFishNumber, allRegularNumbersLeftToRight);
+    return findLastBefore(snailFishNumber, allRegularNumbersLeftToRight);
 }
-
 
 void printFlat(SnailFishNumber* snailFishNumber)
 {
