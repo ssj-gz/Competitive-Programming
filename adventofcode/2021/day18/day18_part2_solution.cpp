@@ -138,15 +138,12 @@ bool doExplode(SnailFishNumber* snailFishNumber, int nestingDepth = 0)
     assert(nestingDepth <= 4);
     if (nestingDepth == 4 && snailFishNumber->type == SnailFishNumber::Pair)
     {
-        cout << "Exploding: ";
         printFlat(snailFishNumber);
         cout << endl;
         assert(snailFishNumber->pair.first->type == SnailFishNumber::RegularNumber);
         assert(snailFishNumber->pair.second->type == SnailFishNumber::RegularNumber);
         SnailFishNumber* regularNumberToLeft = findRegularNumberToLeft(snailFishNumber->pair.first);
         SnailFishNumber* regularNumberToRight = findRegularNumberToRight(snailFishNumber->pair.second);
-        cout << "regularNumberToLeft: " << (regularNumberToLeft ? to_string(regularNumberToLeft->value) : "none") << endl;
-        cout << "regularNumberToRight: " << (regularNumberToRight ? to_string(regularNumberToRight->value) : "none") << endl;
         assert(regularNumberToLeft != snailFishNumber);
         assert(regularNumberToRight != snailFishNumber);
         if (regularNumberToLeft)
@@ -155,11 +152,12 @@ bool doExplode(SnailFishNumber* snailFishNumber, int nestingDepth = 0)
         }
         if (regularNumberToRight)
         {
-            cout << "Adding " << snailFishNumber->pair.second->value << " to " << regularNumberToRight->value << endl;
             regularNumberToRight->value += snailFishNumber->pair.second->value;
         }
         delete snailFishNumber->pair.first;
+        snailFishNumber->pair.first = nullptr;
         delete snailFishNumber->pair.second;
+        snailFishNumber->pair.second = nullptr;
         snailFishNumber->type = SnailFishNumber::RegularNumber;
         snailFishNumber->value = 0;
 
@@ -205,21 +203,6 @@ bool doSplit(SnailFishNumber* snailFishNumber)
     return false;
 }
 
-
-void print(SnailFishNumber* snailFishNumber, string indent = "")
-{
-    if (snailFishNumber->type == SnailFishNumber::Pair)
-    {
-        cout << indent << "Pair: " << endl;
-        print(snailFishNumber->pair.first, indent + " ");
-        print(snailFishNumber->pair.second, indent + " ");
-
-    }
-    else
-    {
-        cout << indent << "Regular Number:  "  << snailFishNumber->value << endl;
-    }
-}
 
 SnailFishNumber* add(SnailFishNumber* left, SnailFishNumber* right)
 {
@@ -289,11 +272,6 @@ int main()
                 continue;
             auto* leftSnailFishNum = parse(snailFishLines[leftIndex]);
             auto* rightSnailFishNum = parse(snailFishLines[rightIndex]);
-            cout << "Adding: " << endl;
-            printFlat(leftSnailFishNum);
-            cout << endl;
-            printFlat(rightSnailFishNum);
-            cout << endl;
             auto* sum = add(leftSnailFishNum, rightSnailFishNum);
             largestMagnitudeOfSum = max(largestMagnitudeOfSum, calcMagnitude(sum));
             delete sum;
