@@ -91,26 +91,23 @@ std::pair<vector<Coord>, Coord> attemptMatch(const vector<Coord>& knownPositions
             for (int numXZRotations = 0; numXZRotations < 4; numXZRotations++)
             {
                 vector<Coord> unknownTransformed(unknownPositionsOriginal);
-                for (auto& coord : unknownTransformed)
+                auto transformToMatchKnown = [=](auto& coord)
                 {
                     coord.translate(-unknownCoord);
                     coord.rotateClockwiseXY(numXYRotations);
                     coord.rotateClockwiseYZ(numYZRotations);
                     coord.rotateClockwiseXZ(numXZRotations);
                     coord.translate(knownCoord);
+                };
+                for (auto& coord : unknownTransformed)
+                {
+                    transformToMatchKnown(coord);
                 }
-                //cout << " num common beacons: " << countIntersections(knownPositions, unknownTransformed) << endl;
                 if (countIntersections(knownPositions, unknownTransformed) >= 12)
                 {
-                    //assert(result.empty());
-                    result.first = unknownTransformed;
                     Coord scannerPos{0,0,0};
-                    scannerPos.translate(-unknownCoord);
-                    scannerPos.rotateClockwiseXY(numXYRotations);
-                    scannerPos.rotateClockwiseYZ(numYZRotations);
-                    scannerPos.rotateClockwiseXZ(numXZRotations);
-                    scannerPos.translate(knownCoord);
-                    cout << "Scanner pos:" << scannerPos.x << "," << scannerPos.y << "," << scannerPos.z << endl;
+                    transformToMatchKnown(scannerPos);
+                    result.first = unknownTransformed;
                     result.second = scannerPos;
 
                 }
@@ -130,7 +127,6 @@ std::pair<vector<Coord>, Coord> findOverlapping(const vector<Coord>& knownPositi
             const auto matchResult = attemptMatch(knownPositions, unknownPositions, knownCoord, unknownCoord);
             if (!matchResult.first.empty())
             {
-                //assert(result.empty());
                 result = matchResult;
             }
         }
@@ -156,13 +152,9 @@ int main()
             currentScannerId = stoi(scannerIdMatch[1]);
             assert(currentScannerId == static_cast<int>(coordsForScanners.size()));
             coordsForScanners.push_back(vector<Coord>());
-
-            cout << "New scanner Id: " << currentScannerId << endl;
         }
         else if (regex_match(line, coordMatch, coordRegex))
         {
-
-            cout << "Coord: " << stoi(coordMatch[1]) << ", " << stoi(coordMatch[2]) << ", " << stoi(coordMatch[3]) << endl;
             coordsForScanners.back().emplace_back(stoi(coordMatch[1]), stoi(coordMatch[2]), stoi(coordMatch[3]));
         }
         else
@@ -190,7 +182,7 @@ int main()
                     knownBeaconPositions.push_back(result.first);
                     unknownBeaconPositions.erase(unknownBeaconPositions.begin() + i);
                     scannerPositions.push_back(result.second);
-                    cout << "Woohoo" << endl;
+                    cout << "Mapped an unknown scanner into known scanner's frame of reference!" << endl;
                     break;
                 }
             }
@@ -213,11 +205,9 @@ int main()
     {
         for (const auto scannerB : scannerPositions)
         {
-            int64_t distance = abs(scannerA.x - scannerB.x) + 
-                               abs(scannerA.y - scannerB.y) + 
-                               abs(scannerA.z - scannerB.z);
-            cout << "scannerA: " << scannerA << " scannerB: " << scannerB << endl;
-            cout << "distance: " << distance << endl;
+            const int64_t distance = abs(scannerA.x - scannerB.x) + 
+                                     abs(scannerA.y - scannerB.y) + 
+                                     abs(scannerA.z - scannerB.z);
             maxScannerDistance = max(maxScannerDistance, distance);
         }
     }
