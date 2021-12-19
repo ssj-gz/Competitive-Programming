@@ -173,6 +173,7 @@ int main()
         cout << "# unknownBeaconPositions: " << unknownBeaconPositions.size() << endl;
         for (const auto& knownPositions : knownBeaconPositions)
         {
+            bool changeMade = false;
             for (int i = 0; i < static_cast<int>(unknownBeaconPositions.size()); i++)
             {
                 cout << "Trying with unknown coords: " << i << endl;
@@ -183,9 +184,12 @@ int main()
                     unknownBeaconPositions.erase(unknownBeaconPositions.begin() + i);
                     scannerPositions.push_back(result.second);
                     cout << "Mapped an unknown scanner into known scanner's frame of reference!" << endl;
+                    changeMade = true;
                     break;
                 }
             }
+            if (changeMade)
+                break;
         }
     }
     vector<Coord> uniqueBeaconCoords;
