@@ -10,12 +10,13 @@ int main()
     string enhancementAlgorithm;
     cin >> enhancementAlgorithm;
     assert(enhancementAlgorithm.size() == 512);
+    cout << "enhancementAlgorithm: " << enhancementAlgorithm << endl;
+
     vector<string> grid;
     string row;
     while(cin >> row)
         grid.push_back(row);
 
-    cout << "enhancementAlgorithm: " << enhancementAlgorithm << endl;
     auto printGrid = [](const vector<string>& grid)
     {
         for (const auto& row : grid)
@@ -24,63 +25,7 @@ int main()
     cout << "grid: " << endl;
     printGrid(grid);
 
-    auto gridNeedsExpanding = [](const vector<string>& grid)
-    {
-        const int width = static_cast<int>(grid.front().size());
-        const int height = static_cast<int>(grid.size());
-        //for (int col : {0, 1, width - 1, width - 2})
-        for (int col : {0, width - 1})
-        {
-            for (int row = 0; row < height; row++)
-            {
-                if (grid[row][col] == '#')
-                    return true;
-            }
-        }
-        //for (int row : {0, 1, height - 1, height - 2})
-        for (int row : {0, height - 1})
-        {
-            for (int col = 0; col < width; col++)
-            {
-                if (grid[row][col] == '#')
-                    return true;
-            }
-        }
-        return false;
-    };
-    auto expanded = [](const vector<string>& grid)
-    {
-        const int width = static_cast<int>(grid.front().size());
-        const int height = static_cast<int>(grid.size());
-#if 0
-        vector<string> expanded = grid;
-        expanded.insert(expanded.begin(), height / 2, string(width, '.'));
-        expanded.insert(expanded.end(), height / 2,string(width, '.'));
-        for (auto& row : expanded)
-        {
-            row = string(width / 2, '.') + row + string(width / 2, '.');
-        }
-#elif 0
-        vector<string> expanded = grid;
-        expanded.insert(expanded.begin(), string(width, '.'));
-        expanded.insert(expanded.end(), string(width, '.'));
-        for (auto& row : expanded)
-        {
-            row = '.' + row + '.';
-        }
-#else
-        vector<string> expanded = grid;
-        expanded.insert(expanded.begin(), 20, string(width, '.'));
-        expanded.insert(expanded.end(), 20,string(width, '.'));
-        for (auto& row : expanded)
-        {
-            row = string(20, '.') + row + string(20, '.');
-        }
-#endif
-
-        return expanded;
-    };
-    auto surroundedWithStars = [](const vector<string>& grid)
+    auto surroundedWithStarBoundary = [](const vector<string>& grid)
     {
         const int width = static_cast<int>(grid.front().size());
         const int height = static_cast<int>(grid.size());
@@ -94,27 +39,18 @@ int main()
 
         return expanded;
     };
+
     int numIterations = 0;
-    grid = surroundedWithStars(grid);
-    bool offBlocksToggle = false;
+    grid = surroundedWithStarBoundary(grid);
+    bool infiniteBlocksToggle = false;
     if (enhancementAlgorithm[0] == '#')
     {
         assert(enhancementAlgorithm.back() == '.');
-        offBlocksToggle = true;
+        infiniteBlocksToggle = true;
     }
     while (numIterations < 50)
     {
-#if 0
-        while (gridNeedsExpanding(grid))
-        {
-            cout << "needs expanding!" << endl;
-            grid = expanded(grid);
-            //assert(!gridNeedsExpanding(grid));
-            cout << "Expanded: " << endl;
-            printGrid(grid);
-        }
-#endif
-        grid = surroundedWithStars(grid);
+        grid = surroundedWithStarBoundary(grid);
         cout << "Begin iteration: " << endl;
         printGrid(grid);
         const int width = static_cast<int>(grid.front().size());
@@ -140,7 +76,13 @@ int main()
                                 binaryString += '0';
                                 break;
                             case '*':
-                                if (offBlocksToggle)
+                                // The '*' char represents the boundary between the portion of the grid
+                                // we're interested in, and "the rest of it" i.e. the infinite expanse 
+                                // of grid in all directions.
+                                // If infiniteBlocksToggle is true, the "rest of it" will be all '.''s 
+                                // on even iterations (starting from 0) and all '#'s on odd iterations.
+                                // If infiniteBlocksToggle is false, the "rest of it" is always all '.'s.
+                                if (infiniteBlocksToggle)
                                     binaryString += (numIterations % 2 == 0) ? '0' : '1';
                                 else
                                     binaryString += '0';
@@ -148,7 +90,6 @@ int main()
                         }
                     }
                 }
-                //cout << "binaryString: " << binaryString << endl;
                 const int asDecimal = stoi(binaryString, nullptr, 2);
                 assert(asDecimal >=0 && asDecimal < 512);
                 nextGrid[row][col] = enhancementAlgorithm[asDecimal];
