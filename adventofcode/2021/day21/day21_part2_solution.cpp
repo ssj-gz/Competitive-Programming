@@ -1,3 +1,4 @@
+// KingFlerple, 2021-12-21, Advent of Code 2021 Day 21: "Dirac Dice", Part 2.
 #include <iostream>
 #include <vector>
 #include <deque>
@@ -9,7 +10,7 @@
 using namespace std;
 
 constexpr auto winningScore = 21;
-const int largestSquareNum = 10;
+constexpr auto largestSquareNum = 10;
 
 struct GameState
 {
@@ -92,9 +93,9 @@ int main()
     numUniversesReachingGameStateLookup[initialGameState] = 1;
 
     // Build the list of "predecessor states" for all reachable states.
-    // For each state S, this is a list of "predecessor states" P that can reach S by having P's current player take a turn.
-    // Such P will occur in predecessorStates[S] as many times as there are turns from P that reach S: Could be optimised 
-    // so that there is a count of P instead of just duplicating P, but oh well :)
+    // For each state S, this is a list of states P that can reach S by having P's current player take a turn.
+    // Such P will occur in predecessorStates[S] as many times as there are turns from P that reach S: could be optimised 
+    // so that there is a _count_ of P instead of just duplicating P, but oh well :)
     // S and P will alway be states that are reachable from the initialGameState via valid turns.
     map<GameState, vector<GameState>> predecessorStates;
     set<GameState> seenStates = { initialGameState };
