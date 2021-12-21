@@ -18,22 +18,8 @@ struct GameState
     int playerPositions[2] = {-1, -1}; // 1 ... 10.
     int currentPlayerTurn = -1; // {0, 1}
 
-    bool operator<(const GameState& other) const
-    {
-        // Impose some arbitrary ordering for use in set/ maps.
-        // Would be nice to use operator<=>, but oh well.
-        if (currentPlayerTurn != other.currentPlayerTurn)
-            return currentPlayerTurn < other.currentPlayerTurn;
-        for (const auto playerId : {0, 1})
-        {
-            if (playerScores[playerId] != other.playerScores[playerId])
-                return playerScores[playerId] < other.playerScores[playerId];
-            if (playerPositions[playerId] != other.playerPositions[playerId])
-                return playerPositions[playerId] < other.playerPositions[playerId];
-        }
-
-        return false;
-    }
+    // Impose some arbitrary ordering for use in set/ maps.
+    auto operator<=>(const GameState& other) const = default;
 };
 
 ostream& operator<<(ostream& os, const GameState& gameState)
