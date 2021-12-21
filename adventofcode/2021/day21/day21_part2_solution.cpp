@@ -15,46 +15,12 @@ struct GameState
 {
     int playerScores[2] = {-1,-1};
     int playerPositions[2] = {-1, -1}; // 1 ... 10.
-    int currentPlayerTurn = -1;
-    bool isValid() const
-    {
-        for (const auto score : playerScores)
-        {
-            if (score < 0)
-                return false;
-        }
-        assert(currentPlayerTurn == 0 || currentPlayerTurn == 1);
-        for (const auto playerPosition : playerPositions)
-        {
-            assert(1 <= playerPosition && playerPosition <= largestSquareNum);
-        }
+    int currentPlayerTurn = -1; // {0, 1}
 
-
-        for (const auto playerId : {0, 1})
-        {
-            if (playerScores[playerId] >= winningScore)
-            {
-                const int previousPlayer = 1 - playerId;
-                const int previousPlayerScore = playerScores[previousPlayer] - playerPositions[previousPlayer];
-                if (previousPlayerScore >= winningScore)
-                    return false;
-
-            }
-        }
-        return true;
-    }
-    bool isEnd() const
-    {
-        for (const auto score : playerScores)
-        {
-            if (score >= winningScore)
-                return true;
-        }
-        return false;
-
-    }
     bool operator<(const GameState& other) const
     {
+        // Impose some arbitrary ordering for use in set/ maps.
+        // Would be nice to use operator<=>, but oh well.
         if (currentPlayerTurn != other.currentPlayerTurn)
             return currentPlayerTurn < other.currentPlayerTurn;
         for (const auto playerId : {0, 1})
@@ -77,14 +43,10 @@ ostream& operator<<(ostream& os, const GameState& gameState)
 
 int newPos(int pos, int diceRoll)
 {
-    if (diceRoll == 0)
-        return pos;
+    assert(diceRoll > 0);
     pos += diceRoll;
     while (pos > largestSquareNum)
         pos -= largestSquareNum;
-    while (pos < 1)
-        pos += largestSquareNum;
-    assert(1 <= pos && pos <= largestSquareNum);
     return pos;
 }
 
@@ -93,9 +55,6 @@ int64_t numUniversesReachingGameState(const GameState& gameState, map<GameState,
     if (numUniversesReachingGameStateLookup.contains(gameState))
         return numUniversesReachingGameStateLookup[gameState];
 
-    cout << "numUniversesReachingGameState: " << gameState << endl;
-
-    assert(gameState.isValid());
     int64_t result = 0;
 
     for (const auto& predecessor : predecessorStates[gameState])
@@ -106,42 +65,16 @@ int64_t numUniversesReachingGameState(const GameState& gameState, map<GameState,
     numUniversesReachingGameStateLookup[gameState] = result;
     cout << "numUniversesReachingGameState: " << gameState << " result: " << result << endl;
     return result;
-#if 0
-    if (!gameState.isValid())
-        return 0;
-
-    const int previousPlayer = 1 - gameState.currentPlayerTurn;
-    GameState previousGameState(gameState);
-    previousGameState.currentPlayerTurn = previousPlayer;
-    const int scorePreviousPlayerGained = gameState.playerPositions[previousPlayer];
-    previousGameState.playerScores[previousPlayer] -= scorePreviousPlayerGained;
-    for (int prevDice1 : {1, 2, 3})
-    {
-        for (int prevDice2 : {1, 2, 3})
-        {
-            for (int prevDice3 : {1, 2, 3})
-            {
-                previousGameState.playerPositions[previousPlayer] = newPos(gameState.playerPositions[previousPlayer], -(prevDice1 + prevDice2 + prevDice3));
-                result += numUniversesReachingGameState(previousGameState, numUniversesReachingGameStateLookup);
-            }
-        }
-    }
-
-    numUniversesReachingGameStateLookup[gameState] = result;
-    cout << "numUniversesReachingGameState: " << gameState << " result: " << result << endl;
-    return result;
-#endif
-
 }
 
 
 int main()
 {
     const string playerStartPosPrefix = "Player X starting position: ";
+
     string player1StartPosLine;
     getline(cin, player1StartPosLine);
     const int player1StartPos = stoi(player1StartPosLine.substr(playerStartPosPrefix.size()));
-
 
     string player2StartPosLine;
     getline(cin, player2StartPosLine);
@@ -158,7 +91,11 @@ int main()
     };
     numUniversesReachingGameStateLookup[initialGameState] = 1;
 
-
+    // Build the list of "predecessor states" for all reachable states.
+    // For each state S, this is a list of "predecessor states" P that can reach S by having P's current player take a turn.
+    // Such P will occur in predecessorStates[S] as many times as there are turns from P that reach S: Could be optimised 
+    // so that there is a count of P instead of just duplicating P, but oh well :)
+    // S and P will alway be states that are reachable from the initialGameState via valid turns.
     map<GameState, vector<GameState>> predecessorStates;
     set<GameState> seenStates = { initialGameState };
     deque<GameState> toProcess = { initialGameState };
@@ -166,10 +103,12 @@ int main()
     {
         const auto gameState = toProcess.front();
         toProcess.pop_front();
-        const int numWinningPlayers = count_if(begin(gameState.playerScores), end(gameState.playerScores), [](const auto score) { return score >= winningScore; });
+        const int numWinningPlayers = static_cast<int>(count_if(begin(gameState.playerScores), end(gameState.playerScores), [](const auto score) { return score >= winningScore; }));
         assert(numWinningPlayers == 0 || numWinningPlayers == 1);
         if (numWinningPlayers == 1)
             continue;
+        // Take all possible turns from gameState.
+        // Again, could be optimised (many dice outcomes are "redundant" i.e. have the same diceSum), but don't care :p
         for (int valDice1 : {1, 2, 3})
         {
             for (int valDice2 : {1, 2, 3})
@@ -192,103 +131,24 @@ int main()
             }
         }
     }
-    for (const auto& [blah, predecessors] : predecessorStates)
-    {
-        cout << "state: " << blah << " predecessors (includes duplicate states): " << predecessors.size() << endl;
-    }
 
-    {
-        GameState nose(initialGameState);
-        nose.currentPlayerTurn = 1;
-        nose.playerScores[0] = 10;
-        nose.playerPositions[0] = 10;
-        cout << "glarp:" << nose << ":" << numUniversesReachingGameState(nose, numUniversesReachingGameStateLookup, predecessorStates) << endl;
-        //return 0;
-    }
-
+    // Now do the dynamic programming step to compute, for all valid states S, the number of universes in which S is reached.
+    // While we are are it, decide if each such S is a Win for either player, and update numUniversesInWhichPlayerWins accordingly.
     int64_t numUniversesInWhichPlayerWins[2] = {0,0};
-    for (const auto& [blah, predecessors] : predecessorStates)
-    {
-        assert(blah.isValid());
-        for (int currentPlayerTurn : {0, 1})
-        {
-            if (blah.playerScores[currentPlayerTurn] >= winningScore)
-            {
-                numUniversesInWhichPlayerWins[currentPlayerTurn] += numUniversesReachingGameState(blah, numUniversesReachingGameStateLookup, predecessorStates);
-            }
-        }
-    }
-        for (int currentPlayerTurn : {0, 1})
-        {
-            cout << "player:" << currentPlayerTurn << " numUniversesInWhichPlayerWins: " << numUniversesInWhichPlayerWins[currentPlayerTurn] << endl;
-        }
-        cout << *max_element(begin(numUniversesInWhichPlayerWins), end(numUniversesInWhichPlayerWins)) << endl;
-
-#if 0
-    int64_t result = 0;
-    for (int player1Score = 0; player1Score <= winningScore; player1Score++)
-    {
-        for (int player2Score = 0; player2Score <= winningScore; player2Score++)
-        {
-            for (int player1Position = 1; player1Position <= largestSquareNum; player1Position++)
-            {
-                for (int player2Position = 1; player2Position <= largestSquareNum; player2Position++)
-                {
-                    for (int currentPlayerTurn : {0, 1})
-                    {
-                        GameState blah = {
-                            {player1Score, player2Score},
-                            {player1Position, player2Position},
-                            currentPlayerTurn
-                        };
-                        const int64_t numWaysToReachState = numUniversesReachingGameState(blah, numUniversesReachingGameStateLookup);
-                        if (blah.isValid() && blah.playerScores[0] >= winningScore)
-                        {
-                            result += numWaysToReachState;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    cout << "result: " << result << endl;
-#endif
-
-
-
-
-#if 0
-    int64_t playerScores[2] = {0,0};
-    int64_t playerPositions[2] = {player1StartPos, player2StartPos};
-    int64_t numTurnsPlayed = 0;
-    int64_t nextDiceRoll = 1;
-
-    bool gameEnded = false;
-    while (!gameEnded)
+    for (const auto& [state, predecessors] : predecessorStates)
     {
         for (int playerId : {0, 1})
         {
-            const int64_t diceSum = nextDiceRoll + (nextDiceRoll + 1) + (nextDiceRoll + 2);
-            nextDiceRoll += 3;
-            numTurnsPlayed++;
-
-            playerPositions[playerId] = (playerPositions[playerId] + diceSum) % 10;
-            playerScores[playerId] += (playerPositions[playerId] + 1);
-
-            cout << "Player " << playerId << " rolled: " << diceSum << " moving to " << (playerPositions[playerId] + 1) << " ending up with score: " << playerScores[playerId] << endl;
-
-            if (playerScores[playerId] >= 1000)
+            if (state.playerScores[playerId] >= winningScore)
             {
-                const int64_t losingPlayerScore = playerScores[1 - playerId];
-                cout << "Losing player score: " << playerScores[1 - playerId] << endl;
-                cout << "numTurnsPlayed: " << numTurnsPlayed << endl;
-                const int64_t result = (3 * numTurnsPlayed) * losingPlayerScore;
-                cout << "result: " << result << endl;
-                gameEnded = true;
-                break;
+                numUniversesInWhichPlayerWins[playerId] += numUniversesReachingGameState(state, numUniversesReachingGameStateLookup, predecessorStates);
             }
         }
     }
-#endif
+    for (int playerId : {0, 1})
+    {
+        cout << "player:" << playerId << " numUniversesInWhichPlayerWins: " << numUniversesInWhichPlayerWins[playerId] << endl;
+    }
+    cout << *max_element(begin(numUniversesInWhichPlayerWins), end(numUniversesInWhichPlayerWins)) << endl;
 }
 
