@@ -325,16 +325,13 @@ std::pair<vector<Cuboid>, vector<Cuboid>> split(const Cuboid& cuboidA, const Cub
     return {aPieces, bPieces};
 }
 
-void handleInstruction(const Instruction& originalInstruction, map<Cuboid, bool>& currentRegions)
+void handleInstruction(const Instruction& instruction, map<Cuboid, bool>& currentRegions)
 {
-    list<Instruction> toAdd = { originalInstruction };
-    while (!toAdd.empty())
+    bool currentRegionsUnprocessed = false;
+    do
     {
-        //cout << "currentRegions.size(): " << currentRegions.size() << " toAdd: " << toAdd.size() << endl;
-        const auto instruction = toAdd.front();
-        toAdd.pop_front();
+        currentRegionsUnprocessed = false;
 
-        bool shatterOccurred = false;
         for (auto& [existingCuboid, value]: currentRegions)
         {
             const auto overlapType = overlap(existingCuboid, instruction.cuboid);
@@ -345,20 +342,13 @@ void handleInstruction(const Instruction& originalInstruction, map<Cuboid, bool>
             }
             else if (overlapType == Overlap::Partial)
             {
-#if 1
                 if (instruction.cuboid.contains(existingCuboid))
                 {
                     // No need to shatter - just remove existing cuboid - we'll overwrite it later.
                     currentRegions.erase(existingCuboid);
-                    // Can't keep iterating, though.
-                    toAdd.push_back(instruction);
-                    break;
                 }
                 else
-#endif
                 {
-                    shatterOccurred = true;
-
                     const auto [oldPieces, newPieces] = split(existingCuboid, instruction.cuboid);
 
                     currentRegions.erase(existingCuboid);
@@ -370,26 +360,20 @@ void handleInstruction(const Instruction& originalInstruction, map<Cuboid, bool>
                             currentRegions[oldPiece] = value;
                         }
                     }
-#if 0
-                    for (const auto& newPiece : newPieces)
-                    {
-                        toAdd.push_back({instruction.switchOn, newPiece});
-                    }
-#endif
-                    // Didn't add successfully - schedule for re-try.
-                    toAdd.push_back(instruction);
-
                 }
 
+                // We changed currentRegions, so can't continue iterating over it.
+                currentRegionsUnprocessed = true;
                 break;
             }
         }
 
-        if (!shatterOccurred)
+        if (!currentRegionsUnprocessed)
         {
             currentRegions[instruction.cuboid] = instruction.switchOn;
         }
     }
+    while (currentRegionsUnprocessed);
 }
 
 
