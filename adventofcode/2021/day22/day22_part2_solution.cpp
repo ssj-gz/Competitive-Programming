@@ -10,23 +10,6 @@
 
 using namespace std;
 
-constexpr int maxXDbg = 101;
-constexpr int maxYDbg = maxXDbg;
-constexpr int maxZDbg = maxXDbg;
-
-vector<vector<vector<string>>> generateDbgTestGrid()
-{
-    vector<vector<vector<string>>> result(maxXDbg + 1, vector<vector<string>>(maxYDbg + 1, vector<string>(maxZDbg + 1)));
-    return result;
-}
-
-enum Overlap
-{
-    None,
-    Total,
-    Partial
-};
-
 class Cuboid
 {
     public:
@@ -145,6 +128,13 @@ class Cuboid
         }
 };
 
+enum Overlap
+{
+    None,
+    Total,
+    Partial
+};
+
 Overlap overlap(const Cuboid& cuboidA, const Cuboid& cuboidB)
 {
     if (cuboidA == cuboidB)
@@ -169,21 +159,6 @@ ostream& operator<<(ostream& os, const Cuboid& cuboid)
     return os;
 }
 
-void debugWriteCuboid(vector<vector<vector<string>>>& grid, const Cuboid& cuboid, char letter)
-{
-    cuboid.assertNormalised();
-    for (int x = cuboid.xBegin; x <= cuboid.xEnd; x++)
-    {
-        for (int y = cuboid.yBegin; y <= cuboid.yEnd; y++)
-        {
-            for (int z = cuboid.zBegin; z <= cuboid.zEnd; z++)
-            {
-                grid[x][y][z] += letter;
-            }
-        }
-    }
-}
-
 std::tuple<bool, vector<Cuboid>, vector<Cuboid>> sliceDisjointXY(const Cuboid& cuboidA, const Cuboid& cuboidB)
 {
     std::tuple<bool, vector<Cuboid>, vector<Cuboid>> result{};
@@ -206,13 +181,7 @@ std::tuple<bool, vector<Cuboid>, vector<Cuboid>> sliceDisjointXY(const Cuboid& c
     zCoords.push_back(cuboidB.zEnd + 1);
     sort(zCoords.begin(), zCoords.end());
     zCoords.erase(unique(zCoords.begin(), zCoords.end()), zCoords.end());
-#if 0
-    cout << "z coords: " << endl;
-    for(const auto z :zCoords)
-    {
-        cout << " " << z << endl;
-    }
-#endif
+
     for (int i = 1; i < static_cast<int>(zCoords.size()); i++)
     {
         if (cuboidA.zBegin <= zCoords[i - 1] && cuboidA.zEnd >= zCoords[i] - 1)
@@ -232,7 +201,6 @@ std::tuple<bool, vector<Cuboid>, vector<Cuboid>> sliceDisjointXY(const Cuboid& c
         }
     }
 
-
     return {true, slicesA, slicesB};
 }
 
@@ -242,7 +210,7 @@ struct Instruction
     Cuboid cuboid;
 };
 
-std::pair<vector<Cuboid>, vector<Cuboid>> split(const Cuboid& cuboidA, const Cuboid& cuboidB)
+std::pair<vector<Cuboid>, vector<Cuboid>> shatter(const Cuboid& cuboidA, const Cuboid& cuboidB)
 {
     assert(overlap(cuboidA, cuboidB) == Overlap::Partial);
     vector<Cuboid> aPieces = { cuboidA };
@@ -349,7 +317,7 @@ void handleInstruction(const Instruction& instruction, map<Cuboid, bool>& curren
                 }
                 else
                 {
-                    const auto [oldPieces, newPieces] = split(existingCuboid, instruction.cuboid);
+                    const auto [oldPieces, newPieces] = shatter(existingCuboid, instruction.cuboid);
 
                     currentRegions.erase(existingCuboid);
                     for (const auto& oldPiece : oldPieces)
@@ -396,151 +364,13 @@ int64_t doInstructions(const vector<Instruction>& instructions)
     return count;
 }
 
-int64_t doInstructionsBruteForce(const vector<Instruction>& instructions)
+
+int main()
 {
-    vector<vector<vector<bool>>> grid(maxXDbg + 1, vector<vector<bool>>(maxYDbg + 1, vector<bool>(maxZDbg + 1, false)));
-    for (const auto& instruction : instructions)
-    {
-        const auto cuboid = instruction.cuboid;
-            for (int x = cuboid.xBegin; x <= cuboid.xEnd; x++)
-            {
-                for (int y = cuboid.yBegin; y <= cuboid.yEnd; y++)
-                {
-                    for (int z = cuboid.zBegin; z <= cuboid.zEnd; z++)
-                    {
-                        grid[x][y][z] = instruction.switchOn;
-                    }
-                }
-            }
-    }
-
-    int64_t count = 0;
-    for (int x = 0; x <= maxXDbg; x++)
-    {
-        for (int y = 0; y <= maxYDbg; y++)
-        {
-            for (int z = 0; z <= maxZDbg; z++)
-            {
-                if (grid[x][y][z] )
-                    count++;
-            }
-        }
-    }
-    return count;
-}
-
-int main(int argc, char* argv[])
-{
-    ios::sync_with_stdio(false);
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand(static_cast<unsigned int>((time.tv_sec * 1000) + (time.tv_usec / 1000)));
-
-        auto genRandomCuboid = []()
-        {
-            return Cuboid(
-                    rand() % maxXDbg,
-                    rand() % maxXDbg,
-                    rand() % maxYDbg,
-                    rand() % maxYDbg,
-                    rand() % maxZDbg,
-                    rand() % maxZDbg
-                    );
-        };
-
-        auto cuboidA = genRandomCuboid();
-        auto cuboidB = genRandomCuboid();
-        //Cuboid cuboidA = Cuboid(2, 4, 5,7,2,9);
-        //Cuboid cuboidB = Cuboid(0, 9, 3,8,5,7);
-
-
-        cout << "cuboidA: " << cuboidA << endl;
-        cout << "cuboidB: " << cuboidB << endl;
-
-        auto correctTestGrid = generateDbgTestGrid();
-        debugWriteCuboid(correctTestGrid, cuboidA, 'A');
-        debugWriteCuboid(correctTestGrid, cuboidB, 'B');
-
-#if 0
-        const auto [sliceOccurred, slicedA, slicedB] = sliceDisjointXY(cuboidA, cuboidB);
-        if (sliceOccurred)
-        {
-            cout << "slice occurred!" << endl;
-            auto actualTestGrid = generateDbgTestGrid();
-            for (const auto& sliceA : slicedA)
-            {
-                debugWriteCuboid(actualTestGrid, sliceA, 'A');
-                cout << " sliceA: " << sliceA << endl;
-            }
-            for (const auto& sliceB : slicedB)
-            {
-                debugWriteCuboid(actualTestGrid, sliceB, 'B');
-                cout << " sliceB: " << sliceB << endl;
-            }
-            assert(correctTestGrid == actualTestGrid);
-
-            vector<Cuboid> all(slicedA);
-            all.insert(all.end(), slicedB.begin(), slicedB.end());
-            for (const auto x : all)
-            {
-                for (const auto y : all)
-                {
-                    assert(!get<0>(sliceDisjointXY(x, y)));
-                }
-            }
-
-        }
-        else
-        {
-            cout << "slice did *not* occur!" << endl;
-        }
-#endif
-        if (overlap(cuboidA, cuboidB) != Overlap::Partial)
-        {
-            cout << "Didn't bother to split" << endl;
-        }
-        else
-        {
-            const auto [aPieces, bPieces] = split(cuboidA, cuboidB);
-            auto actualTestGrid = generateDbgTestGrid();
-            for (const auto& sliceA : aPieces)
-            {
-                debugWriteCuboid(actualTestGrid, sliceA, 'A');
-                cout << " sliceA: " << sliceA << endl;
-            }
-            for (const auto& sliceB : bPieces)
-            {
-                debugWriteCuboid(actualTestGrid, sliceB, 'B');
-                cout << " sliceB: " << sliceB << endl;
-            }
-            assert(correctTestGrid == actualTestGrid);
-            vector<Cuboid> all(aPieces);
-            all.insert(all.end(), bPieces.begin(), bPieces.end());
-            for (const auto x : all)
-            {
-                for (const auto y : all)
-                {
-                    assert(overlap(x, y) != Overlap::Partial);
-                }
-            }
-            cout << "Split into " << all.size() << " pieces" << endl;
-
-        }
-
-
-
-        return 0;
-    }
-
     static regex instructionRegex(R"((on|off)\s*x=([-\d]+)\.\.([-\d]+),y=([-\d]+)\.\.([-\d]+),z=([-\d]+)\.\.([-\d]+).*)");
 
     std::smatch instructionMatch;
     string instructionLine;
-    const int maxCoord = 50;
-    vector<vector<vector<bool>>> grid(2 * maxCoord + 1, vector<vector<bool>>(2 * maxCoord + 1, vector<bool>(2 * maxCoord + 1, false)));
-    int minX = numeric_limits<int>::max(), minY = numeric_limits<int>::max(), minZ = numeric_limits<int>::max();
 
     vector<Instruction> instructions;
 
@@ -565,22 +395,6 @@ int main(int argc, char* argv[])
             const int zEnd = stoi(instructionMatch[7]);
             assert(zBegin <= zEnd);
 
-            minX = min(minX, xBegin);
-            minY = min(minY, yBegin);
-            minZ = min(minZ, zBegin);
-
-#if 0
-            for (int x = xBegin; x <= xEnd; x++)
-            {
-                for (int y = yBegin; y <= yEnd; y++)
-                {
-                    for (int z = zBegin; z <= zEnd; z++)
-                    {
-                        grid[x + maxCoord][y + maxCoord][z + maxCoord] = on;
-                    }
-                }
-            }
-#endif
             instructions.push_back({on, {xBegin, xEnd, yBegin, yEnd, zBegin, zEnd}});
 
         }
@@ -591,53 +405,6 @@ int main(int argc, char* argv[])
 
     }
 
-    for (auto& instruction : instructions)
-    {
-        instruction.cuboid.translate(-minX, -minY, -minZ);
-    }
-    for (auto& instruction : instructions)
-    {
-        cout << "switch " << (instruction.switchOn ? "on" : "off") << " cuboid: " << instruction.cuboid << endl;
-        instruction.cuboid.assertNormalised();
-    }
-
-    //const auto resultBruteForce = doInstructionsBruteForce(instructions);
-    //cout << "brute force: " << resultBruteForce << endl;
-    const auto resultOptimised = doInstructions(instructions);
-    cout << "optimised  : " << resultOptimised << endl;
-
-#if 0
-    int64_t count = 0;
-    for (int x = -maxCoord; x <= maxCoord; x++)
-    {
-        for (int y = -maxCoord; y <= maxCoord; y++)
-        {
-            for (int z = -maxCoord; z <= maxCoord; z++)
-            {
-                if (grid[x + maxCoord][y + maxCoord][z + maxCoord] )
-                    count++;
-            }
-        }
-    }
-    cout << count << endl;
-#endif
-
-#if 0
-    struct Blah
-    {
-        vector<int> blee;
-    };
-
-    cout << "Doing stuff" << endl;
-    for (int i = 0; i < 456533; i++)
-    {
-        vector<vector<Blah>> bloo(1'000, vector<Blah>(1'000));
-        bloo[0][0].blee.resize(rand() % 500);
-        cout << "i:" << i << " - " << bloo[0][0].blee.size() << endl;
-    }
-    cout << "Done" << endl;
-#endif
-
-
+    cout << doInstructions(instructions) << endl;
 }
 
