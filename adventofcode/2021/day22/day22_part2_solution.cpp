@@ -5,7 +5,6 @@
 #include <regex>
 #include <limits>
 #include <tuple>
-#include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
 #include <cassert>
 
 using namespace std;
@@ -83,25 +82,12 @@ class Cuboid
             rotated.normalise();
             return rotated;
         }
-        void translate(int dx, int dy, int dz)
-        {
-            xBegin += dx;
-            yBegin += dy;
-            zBegin += dz;
-
-            xEnd += dx;
-            yEnd += dy;
-            zEnd += dz;
-            assertNormalised();
-        }
         int64_t volume() const
         {
             return (int64_t(abs(xEnd - xBegin)) + 1) * 
                    (abs(yEnd - yBegin) + 1) * 
                    (abs(zEnd - zBegin) + 1);
         }
-
-        
 
         int xBegin = -1;
         int xEnd = -1;
@@ -119,14 +105,15 @@ class Cuboid
             if (zBegin > zEnd)
                 swap(zBegin, zEnd);
         }
-        
-        void assertNormalised() const
-        {
-            assert(xBegin <= xEnd);
-            assert(yBegin <= yEnd);
-            assert(zBegin <= zEnd);
-        }
 };
+
+ostream& operator<<(ostream& os, const Cuboid& cuboid)
+{
+    os << " x: " << cuboid.xBegin << ".." << cuboid.xEnd << "," << 
+          " y: " << cuboid.yBegin << ".." << cuboid.yEnd << "," << 
+          " z: " << cuboid.zBegin << ".." << cuboid.zEnd;
+    return os;
+}
 
 enum Overlap
 {
@@ -148,15 +135,6 @@ Overlap overlap(const Cuboid& cuboidA, const Cuboid& cuboidB)
         return Overlap::None;
 
     return Overlap::Partial;
-}
-
-
-ostream& operator<<(ostream& os, const Cuboid& cuboid)
-{
-    os << " x: " << cuboid.xBegin << ".." << cuboid.xEnd << "," << 
-          " y: " << cuboid.yBegin << ".." << cuboid.yEnd << "," << 
-          " z: " << cuboid.zBegin << ".." << cuboid.zEnd;
-    return os;
 }
 
 std::tuple<bool, vector<Cuboid>, vector<Cuboid>> sliceDisjointXY(const Cuboid& cuboidA, const Cuboid& cuboidB)
@@ -189,7 +167,6 @@ std::tuple<bool, vector<Cuboid>, vector<Cuboid>> sliceDisjointXY(const Cuboid& c
             slicesA.push_back({cuboidA.xBegin, cuboidA.xEnd,
                     cuboidA.yBegin, cuboidA.yEnd,
                     zCoords[i - 1], zCoords[i] - 1});
-            slicesA.back().assertNormalised();
         }
 
         if (cuboidB.zBegin <= zCoords[i - 1] && cuboidB.zEnd >= zCoords[i] - 1)
@@ -197,7 +174,6 @@ std::tuple<bool, vector<Cuboid>, vector<Cuboid>> sliceDisjointXY(const Cuboid& c
             slicesB.push_back({cuboidB.xBegin, cuboidB.xEnd,
                     cuboidB.yBegin, cuboidB.yEnd,
                     zCoords[i - 1], zCoords[i] - 1});
-            slicesB.back().assertNormalised();
         }
     }
 
@@ -226,7 +202,7 @@ std::pair<vector<Cuboid>, vector<Cuboid>> shatter(const Cuboid& cuboidA, const C
                 if (overlap(*aIter, *bIter) == Overlap::Partial)
                 {
                     {
-                        // Do these ned to be sliced in the X-Y Plane?
+                        // Do these need to be sliced in the X-Y Plane?
                         const auto [sliceOccurred, slicedA, slicedB] = sliceDisjointXY(*aIter, *bIter);
                         if (sliceOccurred)
                         {
@@ -239,7 +215,7 @@ std::pair<vector<Cuboid>, vector<Cuboid>> shatter(const Cuboid& cuboidA, const C
                         }
                     }
                     {
-                        // No - but how about X-Z?
+                        // No - but how one of the other two remaining planes?
                         const auto aPieceRotated = aIter->rotatedClockwiseXZ(1);
                         const auto bPieceRotated = bIter->rotatedClockwiseXZ(1);
                         const auto [sliceOccurred, slicedA, slicedB] = sliceDisjointXY(aPieceRotated, bPieceRotated);
@@ -281,8 +257,6 @@ std::pair<vector<Cuboid>, vector<Cuboid>> shatter(const Cuboid& cuboidA, const C
                         }
                     }
 
-                    
-
                     break;
                 }
             }
@@ -310,27 +284,18 @@ void handleInstruction(const Instruction& instruction, map<Cuboid, bool>& curren
             }
             else if (overlapType == Overlap::Partial)
             {
-                if (instruction.cuboid.contains(existingCuboid))
+                const auto [oldPieces, newPieces] = shatter(existingCuboid, instruction.cuboid);
+                for (const auto& oldPiece : oldPieces)
                 {
-                    // No need to shatter - just remove existing cuboid - we'll overwrite it later.
-                    currentRegions.erase(existingCuboid);
-                }
-                else
-                {
-                    const auto [oldPieces, newPieces] = shatter(existingCuboid, instruction.cuboid);
-
-                    currentRegions.erase(existingCuboid);
-                    for (const auto& oldPiece : oldPieces)
+                    if (!instruction.cuboid.contains(oldPiece))
                     {
-                        if (!instruction.cuboid.contains(oldPiece))
-                        {
-                            // Preserve this old piece.
-                            currentRegions[oldPiece] = value;
-                        }
+                        // Preserve this old piece.
+                        currentRegions[oldPiece] = value;
                     }
                 }
 
                 // We changed currentRegions, so can't continue iterating over it.
+                currentRegions.erase(existingCuboid);
                 currentRegionsUnprocessed = true;
                 break;
             }
