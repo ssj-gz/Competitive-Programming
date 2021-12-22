@@ -370,10 +370,15 @@ void handleInstruction(const Instruction& originalInstruction, map<Cuboid, bool>
                             currentRegions[oldPiece] = value;
                         }
                     }
+#if 0
                     for (const auto& newPiece : newPieces)
                     {
                         toAdd.push_back({instruction.switchOn, newPiece});
                     }
+#endif
+                    // Didn't add successfully - schedule for re-try.
+                    toAdd.push_back(instruction);
+
                 }
 
                 break;
