@@ -349,7 +349,6 @@ int main()
 
             const int xBegin = stoi(instructionMatch[2]);
             const int xEnd = stoi(instructionMatch[3]);
-            cout << "xBegin: " << xBegin << " xEnd: " << xEnd << endl;
             assert(xBegin <= xEnd);
 
             const int yBegin = stoi(instructionMatch[4]);
