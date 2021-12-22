@@ -269,44 +269,40 @@ std::pair<vector<Cuboid>, vector<Cuboid>> shatter(const Cuboid& cuboidA, const C
 
 void handleInstruction(const Instruction& instruction, map<Cuboid, bool>& currentRegions)
 {
-    bool currentRegionsUnprocessed = false;
-    do
+    for (auto existingCuboidIter = currentRegions.begin(); existingCuboidIter != currentRegions.end();)
     {
-        currentRegionsUnprocessed = false;
-
-        for (auto& [existingCuboid, value]: currentRegions)
+        auto& [existingCuboid, value] = *existingCuboidIter;
+        const auto overlapType = overlap(existingCuboid, instruction.cuboid);
+        if (overlapType == Overlap::Total)
         {
-            const auto overlapType = overlap(existingCuboid, instruction.cuboid);
-            if (overlapType == Overlap::Total)
-            {
-                // No need to shatter; just update.
-                value = instruction.switchOn;
-            }
-            else if (overlapType == Overlap::Partial)
-            {
-                const auto [oldPieces, newPieces] = shatter(existingCuboid, instruction.cuboid);
-                for (const auto& oldPiece : oldPieces)
-                {
-                    if (!instruction.cuboid.contains(oldPiece))
-                    {
-                        // Preserve this old piece.
-                        currentRegions[oldPiece] = value;
-                    }
-                }
+            // No need to shatter; just update.
+            value = instruction.switchOn;
+            existingCuboidIter++;
+        }
+        else if (overlapType == Overlap::Partial)
+        {
+            const auto [oldPieces, newPieces] = shatter(existingCuboid, instruction.cuboid);
 
-                // We changed currentRegions, so can't continue iterating over it.
-                currentRegions.erase(existingCuboid);
-                currentRegionsUnprocessed = true;
-                break;
+            existingCuboidIter = currentRegions.erase(existingCuboidIter);
+
+            for (const auto& oldPiece : oldPieces)
+            {
+                if (!instruction.cuboid.contains(oldPiece))
+                {
+                    // Preserve this old piece.  It is safe to add this to currentRegions while iterating over it
+                    // (whether it ends up "behind" existingCuboidIter, or "after").
+                    currentRegions[oldPiece] = value;
+                }
             }
         }
-
-        if (!currentRegionsUnprocessed)
+        else
         {
-            currentRegions[instruction.cuboid] = instruction.switchOn;
+            // No intersecion - do nothing.
+            existingCuboidIter++;
         }
     }
-    while (currentRegionsUnprocessed);
+
+    currentRegions[instruction.cuboid] = instruction.switchOn;
 }
 
 
@@ -316,7 +312,7 @@ int64_t doInstructions(const vector<Instruction>& instructions)
     const int numInstructions = static_cast<int>(instructions.size());
     for (int i = 0; i < numInstructions; i++)
     {
-        cout << "Handling instruction #" << i << " of " << numInstructions << endl;
+        cout << "Handling instruction #" << i << " of " << numInstructions << " currentRegions.size: " << currentRegions.size() << endl;
         const auto& instruction = instructions[i];
         handleInstruction(instruction, currentRegions);
     }
