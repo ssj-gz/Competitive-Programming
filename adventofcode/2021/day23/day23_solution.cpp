@@ -98,8 +98,16 @@ struct State
     }
 };
 
-int main()
+int main(int argc, char* argv[])
 {
+    if (argc != 2)
+    {
+        cerr << "Expected: " << argv[0] << " <1|2>" << endl;
+        return EXIT_FAILURE;
+    }
+    const int partNumber = stoi(argv[1]);
+    assert((partNumber == 1) || (partNumber == 2));
+
     BoardScheme boardScheme;
 
     int width = -1;
@@ -109,8 +117,11 @@ int main()
     {
         configRows.push_back(configRow);
     }
-    configRows.insert(configRows.begin() + 3, "  #D#C#B#A#  ");
-    configRows.insert(configRows.begin() + 4, "  #D#B#A#C#  ");
+    if (partNumber == 2)
+    {
+        configRows.insert(configRows.begin() + 3, "  #D#C#B#A#  ");
+        configRows.insert(configRows.begin() + 4, "  #D#B#A#C#  ");
+    }
     State initialState;
     int rowIndex = 0;
     for (const auto& configRow : configRows)
@@ -305,7 +316,6 @@ int main()
         const auto stateGrid = stateAsGrid(state);
         for (int amphipodTypeIndex = 0; amphipodTypeIndex < numAmphiPodTypes; amphipodTypeIndex++)
         {
-            const char ampidLetter = static_cast<char>('A' + amphipodTypeIndex);
             for (const auto startCoord : state.coordsForAmphipodType[amphipodTypeIndex])
             {
                 auto reachableCells = getReachableCells(startCoord, stateGrid);
