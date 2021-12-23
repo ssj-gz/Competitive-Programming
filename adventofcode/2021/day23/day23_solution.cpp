@@ -36,7 +36,7 @@ struct Coord
 {
     int row = -1;
     int col = -1;
-    // Impose arbitrary ordering.
+    // Impose arbitrary ordering for normalisation of States.
     auto operator<=>(const Coord& other) const = default;
 };
 
@@ -109,15 +109,12 @@ int main()
     {
         configRows.push_back(configRow);
     }
-#if 1
     configRows.insert(configRows.begin() + 3, "  #D#C#B#A#  ");
     configRows.insert(configRows.begin() + 4, "  #D#B#A#C#  ");
-#endif
     State initialState;
     int rowIndex = 0;
     for (const auto& configRow : configRows)
     {
-        cout << "configRow: " << configRow << endl;
         assert(width == -1 || static_cast<int>(configRow.size()) == width);
         width = static_cast<int>(configRow.size());
 
@@ -293,8 +290,6 @@ int main()
         const auto state = toExplore.front();
         toExplore.pop_front();
 
-        //cout << "State:" << endl;
-        //printState(state);
         cout << "# toExplore: " << toExplore.size() << " # states seen:" << bestCostForState.size() << " bestCostForEndState:" << bestCostForEndState << endl;
 
         if (state == endState)
@@ -313,98 +308,74 @@ int main()
             const char ampidLetter = static_cast<char>('A' + amphipodTypeIndex);
             for (const auto startCoord : state.coordsForAmphipodType[amphipodTypeIndex])
             {
-                //cout << "Moving " << ampidLetter << " starting at " << startCoord << " initial reachable cells:" << endl;
                 auto reachableCells = getReachableCells(startCoord, stateGrid);
-#if 0
-                auto reachableStateGrid = stateGrid;
-                for (const auto [cell, numStepsToReach] : reachableCells)
-                {
-                    reachableStateGrid[cell.row][cell.col] = static_cast<char>('0' + numStepsToReach);
-                }
-                for (const auto& row : reachableStateGrid)
-                {
-                    cout << row << endl;
-                }
-#endif
                 reachableCells.erase(remove_if(reachableCells.begin(), reachableCells.end(),
                             [&](const ReachableCell& reachableCell)
                             {
-                                const auto endCell = reachableCell.cell;
-                                const auto endType = boardScheme.scheme[endCell.row][endCell.col];
-                                if (endType == Hall &&
+                            const auto endCell = reachableCell.cell;
+                            const auto endType = boardScheme.scheme[endCell.row][endCell.col];
+                            if (endType == Hall &&
                                     boardScheme.isRoom(Coord{endCell.row + 1, endCell.col}))
-                                {
-                                    // Don't stop just outside any rooms.
-                                    return true;
-                                }
+                            {
+                            // Don't stop just outside any rooms.
+                            return true;
+                            }
 
-                                if (boardScheme.scheme[startCoord.row][startCoord.col] == Hall &&
-                                        !boardScheme.isRoom(endCell))
-                                {
-                                    // If we start off in the hall, we can only end up in a room.
-                                    return true;
-                                }
+                            if (boardScheme.scheme[startCoord.row][startCoord.col] == Hall &&
+                                    !boardScheme.isRoom(endCell))
+                            {
+                            // If we start off in the hall, we can only end up in a room.
+                            return true;
+                            }
 
-                                if (boardScheme.isRoom(endCell))
-                                {
-                                    const auto amphidTypeForRoom = boardScheme.amphidTypeForRoom(endCell);
-                                    const bool enteredRoom = (boardScheme.scheme[startCoord.row][startCoord.col] == Hall) 
+                            if (boardScheme.isRoom(endCell))
+                            {
+                                const auto amphidTypeForRoom = boardScheme.amphidTypeForRoom(endCell);
+                                const bool enteredRoom = (boardScheme.scheme[startCoord.row][startCoord.col] == Hall) 
                                     || amphidTypeForRoom != boardScheme.amphidTypeForRoom(startCoord);
-                                    if (enteredRoom)
-                                    {
-                                        // Amphipods of this type cannot enter this particular room.
-                                        if (boardScheme.amphidTypeForRoom(endCell) != amphiPodTypes[amphipodTypeIndex])
-                                            return true;
+                                if (enteredRoom)
+                                {
+                                    // Amphipods of this type cannot enter this particular room.
+                                    if (boardScheme.amphidTypeForRoom(endCell) != amphiPodTypes[amphipodTypeIndex])
+                                        return true;
 
-                                        // Allowed to enter room type - but is there an "alien" Amphipod in there already?
-                                        int highestAvailableRoomRow = -1;
-                                        for (const auto roomCoord : boardScheme.roomCoordsForAmphidType[amphidTypeForRoom])
-                                        {
-                                            const auto letterInRoom = stateGrid[roomCoord.row][roomCoord.col];
-                                            if (letterInRoom != '.')
-                                            {
-                                                assert(letterInRoom >= 'A' && letterInRoom <= 'D');
-                                                if (A + (letterInRoom - 'A') != amphidTypeForRoom)
-                                                {
-                                                    return true;
-                                                }
-                                            }
-                                            else
-                                            {
-                                                highestAvailableRoomRow = roomCoord.row;
-                                            }
-                                        }
-                                        // Insist that we enter the "lowest" (i.e. highest available) empty cell in the room only:
-                                        // this amphipod is in the room in needs to be in, so make room for the others!
-                                        if (endCell.row != highestAvailableRoomRow)
-                                            return true;
-                                    }
-                                    else
+                                    // Allowed to enter room type - but is there an "alien" Amphipod in there already?
+                                    int highestAvailableRoomRow = -1;
+                                    for (const auto roomCoord : boardScheme.roomCoordsForAmphidType[amphidTypeForRoom])
                                     {
-                                        if (boardScheme.amphidTypeForRoom(endCell) == boardScheme.amphidTypeForRoom(startCoord))
+                                        const auto letterInRoom = stateGrid[roomCoord.row][roomCoord.col];
+                                        if (letterInRoom != '.')
                                         {
-                                            // Starting off in a room but ending up in the same room is a wasted move.
-                                            return true;
+                                            assert(letterInRoom >= 'A' && letterInRoom <= 'D');
+                                            if (A + (letterInRoom - 'A') != amphidTypeForRoom)
+                                            {
+                                                return true;
+                                            }
                                         }
+                                        else
+                                        {
+                                            highestAvailableRoomRow = roomCoord.row;
+                                        }
+                                    }
+                                    // Insist that we enter the "lowest" (i.e. highest available) empty cell in the room only:
+                                    // this amphipod is in the room in needs to be in, so make room for the others!
+                                    if (endCell.row != highestAvailableRoomRow)
+                                        return true;
+                                }
+                                else
+                                {
+                                    if (boardScheme.amphidTypeForRoom(endCell) == boardScheme.amphidTypeForRoom(startCoord))
+                                    {
+                                        // Starting off in a room but ending up in the same room is a wasted move.
+                                        return true;
                                     }
                                 }
+                            }
 
-                                return false;
+                            return false;
 
                             }
-                            ), reachableCells.end());
-#if 0
-                cout << "After filtering:" << endl;
-                reachableStateGrid = stateGrid;
-                for (const auto [cell, numStepsToReach] : reachableCells)
-                {
-                    reachableStateGrid[cell.row][cell.col] = static_cast<char>('0' + numStepsToReach);
-                }
-                for (const auto& row : reachableStateGrid)
-                {
-                    cout << row << endl;
-                }
-#endif
+                ), reachableCells.end());
                 for (const auto reachableCell : reachableCells)
                 {
                     State nextState = state;
@@ -417,21 +388,6 @@ int main()
 
                     if (!bestCostForState.contains(nextState) || costToReachNextState < bestCostForState[nextState])
                     {
-#if 0
-                        cout << "Next state:" << endl;
-                        for (const auto& row : stateAsGrid(nextState))
-                        {
-                            cout << row << endl;
-                        }
-                        if (!bestCostForState.contains(nextState))
-                        {
-                            cout << "Brand new state!" << endl;
-                        }
-                        else
-                        {
-                            cout << "Cheaper state: was " << bestCostForState[nextState] << " now " << costToReachNextState << endl; 
-                        }
-#endif
                         bestCostForState[nextState] = costToReachNextState;
                         previousState[nextState] = state;
                         toExplore.push_back({nextState});
@@ -443,23 +399,24 @@ int main()
     }
 
     assert(bestCostForState.contains(endState));
-    vector<State> blah;
+    vector<State> statePath;
     auto currentState = endState;
     while (true)
     {
-        blah.push_back(currentState);
+        statePath.push_back(currentState);
         if (!previousState.contains(currentState))
             break;
         currentState = previousState[currentState];
     }
-    reverse(blah.begin(), blah.end());
+    reverse(statePath.begin(), statePath.end());
     cout << "Backtracking:" << endl;
-    for (const auto& state : blah)
+    for (const auto& state : statePath)
     {
         cout << bestCostForState[state] << endl;
         printState(state);
         cout << "---" << endl;
     }
 
+    cout << bestCostForEndState << endl;
 
 }
