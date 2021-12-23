@@ -5,6 +5,7 @@
 #include <set>
 #include <algorithm>
 #include <limits>
+#include <fstream>
 #include <cassert>
 
 using namespace std;
@@ -100,6 +101,50 @@ struct State
 
 int main(int argc, char* argv[])
 {
+
+#if 0
+    {
+        const string originaBlah =  "AABBCCDD";
+        const vector<string> sausage = {
+            "#############",
+            "#...........#",
+            "###X#X#X#X###",
+            "  #X#X#X#X#  ",
+            "  #########  "
+        };
+        string blah = originaBlah;
+        set<vector<string>> blee;
+        do
+        {
+            int blahIndex = 0;
+            auto newSausage = sausage;
+            for (auto& row : newSausage)
+            {
+                for (auto& cell : row)
+                {
+                    if (cell == 'X')
+                        cell = blah[blahIndex++];
+                }
+            }
+            blee.insert(newSausage);
+
+            next_permutation(blah.begin(), blah.end());
+        } while (blah != originaBlah);
+
+        int wee = 0;
+        for (const auto& s : blee)
+        {
+            ofstream out("exhaustive_inputs_" + to_string(wee) + ".txt");
+            assert(out.is_open());
+            for (const auto& row : s)
+                out << row << endl;
+
+            wee++;
+        }
+        cout << "blee.size(): " << blee.size() << endl;
+        return 0;
+    }
+#endif
     if (argc != 2)
     {
         cerr << "Expected: " << argv[0] << " <1|2>" << endl;
@@ -367,7 +412,7 @@ int main(int argc, char* argv[])
                                             highestAvailableRoomRow = roomCoord.row;
                                         }
                                     }
-                                    // Insist that we enter the "lowest" (i.e. highest available) empty cell in the room only:
+                                    // Optimisation: Insist that we enter the "lowest" (i.e. highest available) empty cell in the room only:
                                     // this amphipod is in the room in needs to be in, so make room for the others!
                                     if (endCell.row != highestAvailableRoomRow)
                                         return true;
@@ -376,7 +421,7 @@ int main(int argc, char* argv[])
                                 {
                                     if (boardScheme.amphidTypeForRoom(endCell) == boardScheme.amphidTypeForRoom(startCoord))
                                     {
-                                        // Starting off in a room but ending up in the same room is a wasted move.
+                                        // Optimisation: Starting off in a room but ending up in the same room is always a wasted move.
                                         return true;
                                     }
                                 }
