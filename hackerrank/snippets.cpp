@@ -1067,7 +1067,7 @@ BigNum operator*(const BigNum& lhs, const BigNum& rhs)
 
 ostream& operator<<(ostream& os, const BigNum& toPrint)
 {
-    os << toPrint.toString() << endl;
+    os << toPrint.toString();
     return os;
 }
 
