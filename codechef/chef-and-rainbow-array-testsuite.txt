@@ -64,7 +64,7 @@ Q: 3 lines
 7 6 5 4 3 2 1 2 3 4 5 6 7
 A: 1 lines
 no
-Q: 8 lines
+Q: 7 lines
 3
 14
 1 2 3 4 5 6 7 6 5 4 3 2 1 1
@@ -72,7 +72,6 @@ Q: 8 lines
 1 2 3 4 5 6 8 6 5 4 3 2 1
 19
 1 2 3 4 4 5 6 6 6 7 6 6 6 5 4 4 3 2 1
-
 A: 3 lines
 no
 no
@@ -101,11 +100,10 @@ Q: 3 lines
 1 2 3 4 5 6 8 7 6 5 4 3 2 1
 A: 1 lines
 no
-Q: 4 lines
+Q: 3 lines
 1
 17
 1 2 3 4 5 6 7 6 7 6 7 6 5 4 3 2 1
-
 A: 1 lines
 no
 Q: 3 lines
