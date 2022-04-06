@@ -22,9 +22,7 @@ const int64_t mod = 998'244'353;
 
 int64_t solveOptimised(const string& S)
 {
-    int64_t result = 0;
     const int N = static_cast<int>(S.size());
-    int64_t powerOf2 = 1;
     vector<int> num1sAtEvenIndicesUpTo(N);
     int num1sAtEvenIndices = 0;
     for (int i = 0; i < N; i++)
@@ -35,6 +33,8 @@ int64_t solveOptimised(const string& S)
     }
     // NB: bitIndex counts from the *least significant bit*, so
     // bitIndex == 0 is the "rightmost" bit in the binary representation.
+    int64_t result = 0;
+    int64_t powerOf2 = 1;
     for (int bitIndex = 0; bitIndex < N; bitIndex++)
     {
         // For a substring T to have its bitIndex'th bit set to 1, T's end 
