@@ -16,6 +16,6 @@ Some were written during live [contests](contests/), but the majority are Practi
 
 This repo also contains some of [my own problems](my-own-problems/), including ones that have been published ([Chef and Gordon Ramsay 2](my-own-problems/equilateral-treeangles/) (née "Equilateral Treeangles"), [Move the Coins 2!](my-own-problems/counters-on-a-tree/) and [Move the Coins - Creating Tests](my-own-problems/move-the-coins-2-test/)), and others that (sadly) ended up [not being workable](my-own-problems/abandoned/).  Most also contain Testcase Generators (and shared helper utils), Problem Statements, Editorials, Python-based [manim](https://github.com/3b1b/manim) [animations](my-own-problems/counters-on-a-tree/markdown/animation-manim-source/) etc so you can see how much work goes into creating the things (2426 commits worth, apparently! ;))
 
-The whole repo contains ~74k lines of C++ code (after stripping whitespace and comments), according to [tokei](https://github.com/XAMPPRocky/tokei).
+The whole repo contains **~74k lines of C++** code (after stripping whitespace and comments), according to [tokei](https://github.com/XAMPPRocky/tokei).
 
 
