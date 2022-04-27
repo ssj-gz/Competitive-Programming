@@ -48,8 +48,12 @@ class Testcase
         template <typename... Types>
         void writeLine(Types... toPrint)
         {
-            writeLineHelper(toPrint...);
+            static_assert(sizeof...(toPrint) >= 1);
 
+            ((m_contents << toPrint << " "), ...);
+
+            m_contents.seekp(m_contents.tellp() - 1); // Pop the superflous trailing " ".
+            m_contents << std::endl;
         }
         template <typename FwdIter>
         void writeObjectsAsLine(FwdIter begin, FwdIter end)
@@ -78,20 +82,6 @@ class Testcase
         // generate on e.g. windows.
         std::ostringstream m_contents{std::ios_base::out | std::ios_base::binary};
         std::string m_description;
-
-        template <typename Head, typename... Tail>
-        void writeLineHelper(const Head& head, Tail... tail)
-        {
-            m_contents << head << " ";
-            writeLine(tail...);
-
-        }
-        template<typename Head>
-        void writeLineHelper(const Head& head)
-        {
-            m_contents << head << std::endl;
-        }
-
 };
 
 template <typename SubtaskInfo>
