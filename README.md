@@ -10,7 +10,7 @@ For the uninitiated, CP Problems require you to write code to perform some compu
 
 All but the most trivial Problems adhere to the following pattern: "there is an algorithm that solves the Problem that is _simple but too slow_, and to succeed you must create an algorithm that is _(worst-case asymptotically) optimal_."  The difficulty of creating this algorithm ranges from "easy" to "_very_ hard!" :)
 
-All Solutions in this repo received perfect scores.  Most are *reasonably* well-written, with [some](contests/codechef-october-2019a/bacterial-reproduction.cpp) having "Editorial"-style high level overviews (the asymptotically-optimal algorithms can be decidedly non-obvious).  Many are ... not as high quality, though :)
+All (non-Contest) Solutions in this repo received perfect scores.  Most are *reasonably* well-written, with [some](contests/codechef-october-2019a/bacterial-reproduction.cpp) having "Editorial"-style high level overviews (the asymptotically-optimal algorithms can be decidedly non-obvious).  Many are ... not as high quality, though :)
 
 Some were written during live [contests](contests/), but the majority are Practice problems that can be done at your own pace.
 
