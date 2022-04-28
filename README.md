@@ -3,7 +3,7 @@
 My solutions to over 350+ Competitive Programming (CP) Problems, drawn from:
 
 * [Hackerrank](hackerrank/) (my [account](https://www.hackerrank.com/ssjgz?hr_r=1); top 0.4%)
-* [Codechef](codechef/); and (my [account](https://www.codechef.com/users/ssjgz/); 6\*-Rating)
+* [Codechef](codechef/) (my [account](https://www.codechef.com/users/ssjgz/); 6\*-Rating); and 
 * [Advent of Code](adventofcode/)
 
 For the uninitiated, CP Problems require you to write code to perform some computation on a range of _test inputs_ and output the results.  Submitting your Solution (constrained to a single source file) uploads it to the _Online Judge_, which automatically compiles it and feeds it the prepared test inputs.  A Solution is given a perfect score only if each outputted result is correct, _and_ (the tricky bit!) completes its processing within the allotted time (typically, 2 seconds per test input).
