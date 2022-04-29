@@ -46,11 +46,11 @@ class Testcase
             m_description = testcaseInfo.description();
         }
         template <typename... Types>
-        void writeLine(Types... toPrint)
+        void writeLine(Types&&... toPrint)
         {
             static_assert(sizeof...(toPrint) >= 1);
 
-            ((m_contents << toPrint << " "), ...);
+            ((m_contents << std::forward<Types>(toPrint) << " "), ...);
 
             m_contents.seekp(m_contents.tellp() - 1); // Pop the superflous trailing " ".
             m_contents << std::endl;
