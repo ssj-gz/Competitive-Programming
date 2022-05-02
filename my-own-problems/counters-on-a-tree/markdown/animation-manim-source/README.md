@@ -16,6 +16,6 @@ Need to install:
 
     python3.7-minimal libpython3.7 libcairo2-dev texlive-latex-extra texlive texlive-fonts-extra texlive-science
 
-For convert the saved pngs into .gif, navigate the directory containing them and:
+To convert the saved pngs into .gif, navigate the directory containing them and:
 
     convert *.png -layers OptimizeFrame output.gif
