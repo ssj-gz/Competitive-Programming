@@ -1,0 +1,7 @@
+This was eventually published as the **Division 1** exclusive "Move the Coins 2" (**MOVCOIN2**) in Codechef's **SEPT20A** Long Challenge ([link](https://www.codechef.com/SEPT20A/problems/MOVCOIN2)) where it was the **hardest Problem** of the Contest, with only **21** successful completions and just **2.2%** Success Rate, making it my favourite of the three Problems I've had accepted!
+
+I originally came up with the concept and solution in **March 2018**, shortly after coming up with what was the _original_ "Move the Coins 2" (which ended up being [abandoned](../abandoned/move-the-coins-2), alas), which was a sequel of sorts to Hackerrank's [Move the Coins](https://www.hackerrank.com/challenges/move-the-coins/problem) Problem.  
+
+**MOVCOIN2** was originally called, not very originally, "Move the Coins 3", but when the [original "Move the Coins 2"](../abandoned/move-the-coins-2) ended up getting abandoned (a few short days before it was scheduled to go live, also in **SEPT20A**!), this Problem was renamed to "Move the Coins 2" and drafted in to take its place.  I honestly can't remember why the directory is named "counters-on-a-tree"!
+
+I used the Python-based [manim](https://github.com/3b1b/manim) library to [create](./markdown/animation-manim-source) the [animations](https://vps2.etotheipiplusone.com:30176/public_html/codechef/editorials/MOVCOIN2/videos/) used in the [Editorial](https://discuss.codechef.com/t/movcoin2-editorial/75290).
