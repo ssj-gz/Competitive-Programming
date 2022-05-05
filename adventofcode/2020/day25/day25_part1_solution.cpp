@@ -9,7 +9,7 @@ int64_t calcLoopSize(int64_t publicKey)
 {
     constexpr int subjectNumber = 7;
     int64_t value = 1;
-    int loopSize = 0;
+    int64_t loopSize = 0;
     while (value != publicKey)
     {
         value = (value * subjectNumber) % Mod;
