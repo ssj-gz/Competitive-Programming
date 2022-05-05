@@ -148,6 +148,8 @@ int main()
         }
     }
 
+    cout << "Part 1 solution: " << blackTiles.size() << endl;
+
     for (int day = 1; day <= 100; day++)
     {
         auto coordsOfAdjacentTiles = [&tileInDirection](const Coord& tileCoord)
