@@ -7,12 +7,12 @@ constexpr int64_t Mod = 20201227;
 
 int64_t calcLoopSize(int64_t publicKey)
 {
-    int64_t subjectNumber = 1;
+    constexpr int subjectNumber = 7;
+    int64_t value = 1;
     int loopSize = 0;
-    while (subjectNumber != publicKey)
+    while (value != publicKey)
     {
-        //cout << "subjectNumber: " << subjectNumber << " loopSize: " << loopSize << " publicKey: " << publicKey << endl;
-        subjectNumber = (subjectNumber * 7) % Mod;
+        value = (value * subjectNumber) % Mod;
         loopSize++;
     }
     return loopSize;
