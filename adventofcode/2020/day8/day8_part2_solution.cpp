@@ -17,8 +17,8 @@ pair<bool, int> runInstructions(vector<Instruction> instructions)
     int64_t accumulatorValue = 0;
     while (true)
     {
-        assert(0 <= instructionIndex && instructionIndex <= instructions.size());
-        if (instructionIndex == instructions.size())
+        assert(0 <= instructionIndex && instructionIndex <= static_cast<int>(instructions.size()));
+        if (instructionIndex == static_cast<int>(instructions.size()))
         {
             return {true, accumulatorValue};
         }
