@@ -71,6 +71,9 @@ int main()
     int64_t finalAccumulatorValue = -1;
     for (auto& instruction : instructions)
     {
+        // For each instruction that is a "jmp" or "nop": toggle it to
+        // "nop" or jmp (resp); run all instructions to see if they
+        // terminate normally with this toggle; undo the toggle.
         const string originalOpCode = instruction.opCode;
 
         if (instruction.opCode == "jmp")
