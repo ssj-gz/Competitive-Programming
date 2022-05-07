@@ -78,11 +78,10 @@ int main()
         else if (instruction.opCode == "nop")
             instruction.opCode = "jmp";
 
-        const auto executionResult = runInstructions(instructions);
-        if (executionResult.first)
+        if (const auto [terminatedNormally, accumulatorValue] = runInstructions(instructions); terminatedNormally)
         {
             assert(!foundSuccessfulChange);
-            finalAccumulatorValue = executionResult.second;
+            finalAccumulatorValue = accumulatorValue;
             foundSuccessfulChange = true;
         }
 
