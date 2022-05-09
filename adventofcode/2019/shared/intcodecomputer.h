@@ -154,6 +154,12 @@ class IntCodeComputer
         {
             m_inputs.push_back(input);
         }
+        std::vector<int64_t> takeOutput()
+        {
+            const auto output = m_output;
+            m_output.clear();
+            return output;
+        }
         std::vector<int64_t> output() const
         {
             return m_output;
