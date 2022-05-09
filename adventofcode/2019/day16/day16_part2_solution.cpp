@@ -56,17 +56,13 @@ int main()
             // basePattern[baseIndex], which is always 0, -1 or 1.
             // Use prefix sums to perform the addition of these blocks.
             int i = 0;
-            int countdownToNextBase = timesToRepeat - 1;
+            int blockSize = timesToRepeat - 1; // Arrange to drop the very first repetition of 
+                                               // the base pattern, as requested.
             int baseIndex = 0;
             int outputVal = 0;
             while (i < inputLength)
             {
-                if (countdownToNextBase == 0)
-                {
-                    baseIndex = (baseIndex + 1) % size(basePattern);
-                    countdownToNextBase = timesToRepeat;
-                }
-                const int amountToAdd = prefixSum[min(i + countdownToNextBase, inputLength)] - prefixSum[i];
+                const int amountToAdd = prefixSum[min(i + blockSize, inputLength)] - prefixSum[i];
 
                 switch(basePattern[baseIndex])
                 {
@@ -79,9 +75,12 @@ int main()
                         outputVal -= amountToAdd;
                         break;
                 }
-                i += countdownToNextBase;
-                countdownToNextBase = 0;
-
+                i += blockSize;
+                // Done this block, all multiplied by the basePattern[baseIndex];
+                // move onto the next block, which will use the next base pattern.
+                baseIndex = (baseIndex + 1) % size(basePattern);
+                // Drop no more repetitions of the base pattern.
+                blockSize = timesToRepeat;
             }
 
             output.push_back(abs(outputVal) % 10);
