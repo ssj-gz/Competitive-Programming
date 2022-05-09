@@ -49,9 +49,8 @@ int main()
             cout << "Done" << endl;
             break;
         }
-        auto output = intCodeComputer.output();
+        const auto output = intCodeComputer.takeOutput();
         const int outputSize = static_cast<int>(output.size());
-        intCodeComputer.clearOutput();
         cout << "outputSize: " << outputSize << endl;
         assert(outputSize == 2);
 
