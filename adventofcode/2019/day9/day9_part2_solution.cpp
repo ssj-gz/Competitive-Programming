@@ -2,11 +2,6 @@
 
 #include <iostream>
 #include <vector>
-#include <deque>
-#include <map>
-#include <iterator>
-#include <algorithm>
-#include <limits>
 #include <cassert>
 
 using namespace std;
