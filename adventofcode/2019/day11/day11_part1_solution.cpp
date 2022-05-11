@@ -3,8 +3,6 @@
 #include <iostream>
 #include <vector>
 #include <map>
-#include <iterator>
-#include <algorithm>
 #include <cassert>
 
 using namespace std;
@@ -86,17 +84,7 @@ int main()
                     break;
             }
             cout << " new coord: " << robotCoord.x << "," << robotCoord.y << endl;
-            //output.erase(output.begin());
-            //output.erase(output.begin());
-
         }
-#if 0
-        else
-        {
-            assert(false);
-            cout << "Got no output; not moving robot" << endl;
-        }
-#endif
     }
     cout << "Painted: " << coordColour.size() << " cells!" << endl;
 }
