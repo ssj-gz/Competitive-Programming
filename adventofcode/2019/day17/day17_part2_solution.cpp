@@ -155,8 +155,14 @@ struct Command
 
 constexpr int maxFunctionCalls = 10;
 int largestVisitCount = 0;
+int numThings = 0;
 void blah(int depth, const vector<string>& worldMap, map<Coord, int>& visitCount, map<string, vector<Command>>& movementFunctions, vector<Command>& pendingMovementFunctionDef, const string& pendingMovementFnName, vector<string>& functionsExecuted, const Coord& currentCoord, const int direction)
 {
+    if (pendingMovementFnName == "B")
+    {
+        numThings++;
+        return;
+    }
     const string indent = string(depth, ' ');
     const int height = static_cast<int>(worldMap.size());
     const int width = static_cast<int>(worldMap[0].size());
@@ -202,9 +208,17 @@ void blah(int depth, const vector<string>& worldMap, map<Coord, int>& visitCount
         return coordInDirection;
     };
     const auto dbgVisitCount = visitCount;
+#if 0
+    for (const auto [coord, numTimesVisited] : visitCount)
+    {
+        if (numTimesVisited > 0)
+            cout << indent << " visited " << coord.x << "," << coord.y << " " << numTimesVisited << " times" << endl;
+    }
+#endif
 
     visitCount[currentCoord]++;
 
+#if 0
     cout << indent << "Blee: pendingMovementFnName: " << pendingMovementFnName << "#" << pendingMovementFunctionDef.size() << " dir: " << direction << " pos: " << currentCoord.x << "," << currentCoord.y << endl;
     cout << "Executed " << functionsExecuted.size() << " fns: ";
     for (const auto x : functionsExecuted)
@@ -212,6 +226,7 @@ void blah(int depth, const vector<string>& worldMap, map<Coord, int>& visitCount
         cout << x << " ";
     }
     cout << endl;
+#endif
     auto printCommands = [](const vector<Command>& commands)
     {
         cout << commands.size() << " commands: ";
@@ -270,6 +285,7 @@ void blah(int depth, const vector<string>& worldMap, map<Coord, int>& visitCount
 
     };
 #if 1
+#if 0
     int distinctVisited = 0;
     int needToVisit = 0;
     for (int row = 0; row < height; row++)
@@ -303,19 +319,26 @@ void blah(int depth, const vector<string>& worldMap, map<Coord, int>& visitCount
         cout << "New largestVisitCount: " << largestVisitCount << " (need " << needToVisit << ")" << endl;
     }
 #endif
+#endif
 
+#if 0
+    vector<std::pair<string, vector<Command>>> allFunctions;
+    for (const auto& [fnName, fnDef] : movementFunctions)
+    {
+        allFunctions.push_back({fnName, fnDef});
+    }
+    if (!pendingMovementFnName.empty())
+    {
+        allFunctions.push_back({pendingMovementFnName, pendingMovementFunctionDef});
+    }
+    for (const auto& [fnName, fnDef] : allFunctions)
+    {
+        cout << indent << fnName << ": ";
+        printCommands(fnDef);
+    }
 
     if (movementFunctions.size() == 3)
     {
-        vector<std::pair<string, vector<Command>>> allFunctions;
-        for (const auto& [fnName, fnDef] : movementFunctions)
-        {
-            allFunctions.push_back({fnName, fnDef});
-        }
-        if (!pendingMovementFnName.empty())
-        {
-            allFunctions.push_back({pendingMovementFnName, pendingMovementFunctionDef});
-        }
         vector<std::tuple<string, int, int>> fnNameAndMaxReach;
         for (const auto& [fnName, fnDef] : allFunctions)
         {
@@ -391,7 +414,8 @@ void blah(int depth, const vector<string>& worldMap, map<Coord, int>& visitCount
         totalAmountForwardForAllFns += totalAmountForward(fndef);
     }
     totalAmountForwardForAllFns += totalAmountForward(pendingMovementFunctionDef);
-    if (!pendingMovementFnName.empty() && !pendingMovementFunctionDef.empty() && pendingMovementFunctionHasForward && (maxFunctionCalls * totalAmountForwardForAllFns >= needToVisit - distinctVisited)   )
+#endif
+    if (!pendingMovementFnName.empty() && !pendingMovementFunctionDef.empty()/* && pendingMovementFunctionHasForward && (maxFunctionCalls * totalAmountForwardForAllFns >= needToVisit - distinctVisited)*/   )
     {
 #if 0
         bool isWorkable = true;
@@ -443,7 +467,7 @@ void blah(int depth, const vector<string>& worldMap, map<Coord, int>& visitCount
         if (true)
         {
             // Store this movement function definition.
-            cout << indent << "Storing " << pendingMovementFnName << " with " << pendingMovementFunctionDef.size() << " movements";
+            //cout << indent << "Storing " << pendingMovementFnName << " with " << pendingMovementFunctionDef.size() << " movements";
             movementFunctions[pendingMovementFnName] = pendingMovementFunctionDef;
             functionsExecuted.push_back(pendingMovementFnName);
             // Recurse.
@@ -467,7 +491,7 @@ void blah(int depth, const vector<string>& worldMap, map<Coord, int>& visitCount
             if (pendingMovementFunctionDef.empty() || pendingMovementFunctionDef.back().cmd == Command::Forward)
             {
                 // Turn Left (once, then twice) and recurse (then pop).
-                cout << indent << "Adding 'left' to " << pendingMovementFnName << endl;
+                //cout << indent << "Adding 'left' to " << pendingMovementFnName << endl;
 
                 pendingMovementFunctionDef.push_back({Command::Left});
                 blah(depth + 1, worldMap, visitCount, movementFunctions, pendingMovementFunctionDef, pendingMovementFnName, functionsExecuted, currentCoord, (direction + 4 - 1) % 4);
@@ -482,7 +506,7 @@ void blah(int depth, const vector<string>& worldMap, map<Coord, int>& visitCount
             if (pendingMovementFunctionDef.empty() || pendingMovementFunctionDef.back().cmd == Command::Forward)
             {
                 // Turn Right and recurse (then pop).
-                cout << indent << "Adding 'right' to " << pendingMovementFnName << endl;
+                //cout << indent << "Adding 'right' to " << pendingMovementFnName << endl;
 
                 pendingMovementFunctionDef.push_back({Command::Right});
                 blah(depth + 1, worldMap, visitCount, movementFunctions, pendingMovementFunctionDef, pendingMovementFnName, functionsExecuted, currentCoord, (direction + 1) % 4);
@@ -529,7 +553,7 @@ void blah(int depth, const vector<string>& worldMap, map<Coord, int>& visitCount
                 {
 
                     pendingMovementFunctionDef.push_back({Command::Forward, amountForward});
-                    cout << indent << "Adding 'forward, " << amountForward << "' to " << pendingMovementFnName << endl;
+                    //cout << indent << "Adding 'forward, " << amountForward << "' to " << pendingMovementFnName << endl;
                     blah(depth + 1, worldMap, visitCount, movementFunctions, pendingMovementFunctionDef, pendingMovementFnName, functionsExecuted, nextCoord, direction);
                     // Pop.
                     pendingMovementFunctionDef.pop_back();
@@ -572,7 +596,8 @@ void blah(int depth, const vector<string>& worldMap, map<Coord, int>& visitCount
     }
     visitCount[currentCoord]--;
 
-    assert(visitCount == dbgVisitCount);
+    //cout << "visitCount: " << visitCount.size() << " dbgVisitCount: " << dbgVisitCount.size() << endl;
+    //assert(visitCount == dbgVisitCount);
 }
 
 int main()
@@ -625,11 +650,29 @@ int main()
     assert(mainPrompt == "Main:");
     cout << "mainPrompt: " << mainPrompt << endl;
 
-    map<Coord, int> visitCount;
-    map<string, vector<Command>> movementFunctions;
-    vector<Command> pendingMovementFunctionDef;
-    vector<string> functionsExecuted;
-    blah(0, worldMap, visitCount, movementFunctions, pendingMovementFunctionDef, "A", functionsExecuted, robotCoord, 0);
+
+    int largestNumThings = 0;
+    for (int x = 0; x < width; x++)
+    {
+        for (int y = 0; y < height; y++)
+        {
+            if (worldMap[y][x] == '#')
+            {
+                for (int direction = 0; direction < 4; direction++)
+                {
+                    map<Coord, int> visitCount;
+                    map<string, vector<Command>> movementFunctions;
+                    vector<Command> pendingMovementFunctionDef;
+                    vector<string> functionsExecuted;
+                    numThings = 0;
+                    blah(0, worldMap, visitCount, movementFunctions, pendingMovementFunctionDef, "A", functionsExecuted, {x, y}, direction);
+                    cout << "x: " << x << " y: " << y << " dir: " << direction << " numThings: " << numThings << endl;
+                    largestNumThings = max(largestNumThings, numThings);
+                }
+            }
+        }
+    }
+    cout << "largestNumThings: " << largestNumThings << endl;
 
 }
 
