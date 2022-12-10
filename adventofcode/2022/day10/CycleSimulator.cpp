@@ -39,7 +39,6 @@ void CycleSimulator::computeNextCycle()
         if ( m_currentCycleNum == m_cycleNumAfterWhichAddFinishes )
         {
             m_registerValue += m_numberToAdd;
-            std::cout << "added " << m_numberToAdd << " to register after cycle: " << m_currentCycleNum << " to give: " << m_registerValue << std::endl;
 
             m_isProcessingAdd = false;
             m_cycleNumAfterWhichAddFinishes = -1;
