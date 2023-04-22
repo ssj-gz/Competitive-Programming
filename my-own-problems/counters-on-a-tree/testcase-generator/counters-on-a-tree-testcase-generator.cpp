@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <set>
+#include <limits>
 
 constexpr int maxNodesOverAllTestcases = 300'000;
 constexpr int maxCounters = 16;
