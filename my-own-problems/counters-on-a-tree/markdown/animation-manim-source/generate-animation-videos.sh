@@ -36,14 +36,13 @@ readarray -t ALL_SCENE_NAMES < <(python -c "${FIND_SCENE_NAMES_SCRIPT}")
 declare -p ALL_SCENE_NAMES
 echo "ALL_SCENE_NAMES: ${ALL_SCENE_NAMES[*]}"
 ALL_MAKE_TARGETS=""
+MAKE_BODY=""
 for SCENE_NAME in ${ALL_SCENE_NAMES[*]}; do
-    echo "Woo: >${SCENE_NAME}<"
     MAKE_TARGET="./media/videos/editorial-animations/1440p60/${SCENE_NAME}.mp4" 
-    echo "${MAKE_TARGET}:" >> Makefile
-    echo -e "\t${MANIM_EXECUTABLE} ${EDITORIAL_MANIMS_BASENAME}.py ${SCENE_NAME}" >> Makefile
+    MAKE_BODY="${MAKE_BODY}\n${MAKE_TARGET}:\n"
+    MAKE_BODY="${MAKE_BODY}\t${MANIM_EXECUTABLE} ${EDITORIAL_MANIMS_BASENAME}.py ${SCENE_NAME}\n" >> Makefile
     ALL_MAKE_TARGETS="${ALL_MAKE_TARGETS} ${MAKE_TARGET}"
 done
 echo -e "all: ${ALL_MAKE_TARGETS}\n\techo 'Making all'" >> Makefile
-
-
-
+echo -e "${MAKE_BODY}" >> Makefile
+echo "Makefile generated.  Please run 'make'"
