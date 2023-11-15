@@ -33,8 +33,6 @@ EOF`
 rm -f Makefile
 echo "export PYTHONPATH := ${PYTHONPATH}" >> Makefile
 readarray -t ALL_SCENE_NAMES < <(python -c "${FIND_SCENE_NAMES_SCRIPT}")
-declare -p ALL_SCENE_NAMES
-echo "ALL_SCENE_NAMES: ${ALL_SCENE_NAMES[*]}"
 ALL_MAKE_TARGETS=""
 MAKE_BODY=""
 for SCENE_NAME in ${ALL_SCENE_NAMES[*]}; do
