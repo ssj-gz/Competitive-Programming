@@ -777,6 +777,102 @@ class Function
         int m_numCellsCovered = 0;
 };
 
+void thing(const RobotState state, map<Coord, int>& numTimesVisitedCell, set<Function*>& functionsUsed, vector<Function*>& functionsCalled, const int numCellsRemaining, map<RobotState, set<Function*>>& isFunctionRunnableFromStateLookup,  map<RobotState, vector<Function*>>& orderedFunctionsRunnableFromState)
+{
+    std::cout << "pos: " << state.coord.x << "," << state.coord.y << " # functionsUsed: " << functionsUsed.size() << " #functionsCalled: " << functionsCalled.size() << " numCellsRemaining: " << numCellsRemaining << std::endl;
+    std::cout << "functions: " << std::endl;
+    for (auto* function : functionsUsed)
+    {
+        std::cout << " numCellsCovered: " << function->numCellsCovered() << " numStatesRunnableFrom: " << function->numStatesRunnableFrom() << std::endl;
+    }
+
+    if (functionsCalled.size() >= 10)
+        return;
+    static int minNumCellsRemaining = std::numeric_limits<int>::max();
+    if (numCellsRemaining < minNumCellsRemaining)
+    {
+        minNumCellsRemaining = numCellsRemaining;
+        std::cout << "New minNumCellsRemaining: " << minNumCellsRemaining << std::endl;
+    }
+    if (numCellsRemaining == 0)
+    {
+        std::cout << "Hallelujah!" << std::endl;
+        return;
+    }
+    // First, try and call a function again.
+    if (!functionsUsed.empty())
+    {
+        for (auto* function : functionsUsed)
+        {
+            if (isFunctionRunnableFromStateLookup[state].contains(function))
+            {
+                const auto cellsCovered = ::cellsCovered(state, function->commandList());
+                RobotState newState = state;
+                for (const auto& command : function->commandList())
+                    newState.applyCommand(command);
+                int newNumCellsRemaining = numCellsRemaining;
+                for (const auto& visitedCell : cellsCovered)
+                {
+                    if (numTimesVisitedCell[visitedCell] == 0)
+                    {
+                        newNumCellsRemaining--;
+                    }
+                    numTimesVisitedCell[visitedCell]++;
+                }
+                //std::cout << "newNumCellsRemaining after re-calling function with score " << function->score() << " - "  << newNumCellsRemaining << std::endl;
+                // Recurse.
+                functionsCalled.push_back(function);
+                thing(newState, numTimesVisitedCell, functionsUsed, functionsCalled, newNumCellsRemaining, isFunctionRunnableFromStateLookup, orderedFunctionsRunnableFromState);
+                functionsCalled.pop_back();;
+                for (const auto& visitedCell : cellsCovered)
+                {
+                    numTimesVisitedCell[visitedCell]--;
+                    assert(numTimesVisitedCell[visitedCell] >= 0);
+                }
+            }
+
+        }
+    }
+    // Now try a new function.
+    if (functionsUsed.size() < 3)
+    {
+        for (auto* function : orderedFunctionsRunnableFromState[state])
+        {
+            if (functionsUsed.contains(function))
+                continue;
+
+            std::cout << " trying new function with score: " << function->score() << " pos: " << state.coord.x << "," << state.coord.y << " # functionsUsed: " << functionsUsed.size() << " #functionsCalled: " << functionsCalled.size()  << " numCellsRemaining: " << numCellsRemaining << std::endl;
+
+            const auto cellsCovered = ::cellsCovered(state, function->commandList());
+            RobotState newState = state;
+            for (const auto& command : function->commandList())
+                newState.applyCommand(command);
+
+            int newNumCellsRemaining = numCellsRemaining;
+            for (const auto& visitedCell : cellsCovered)
+            {
+                if (numTimesVisitedCell[visitedCell] == 0)
+                {
+                    newNumCellsRemaining--;
+                }
+                numTimesVisitedCell[visitedCell]++;
+            }
+            //std::cout << "newNumCellsRemaining after calling *new* function with score " << function->score() << " - "  << newNumCellsRemaining << std::endl;
+            // Recurse.
+            functionsCalled.push_back(function);
+            functionsUsed.insert(function);
+            thing(newState, numTimesVisitedCell, functionsUsed, functionsCalled, newNumCellsRemaining, isFunctionRunnableFromStateLookup, orderedFunctionsRunnableFromState);
+            functionsUsed.erase(function);
+            functionsCalled.pop_back();;
+            for (const auto& visitedCell : cellsCovered)
+            {
+                numTimesVisitedCell[visitedCell]--;
+            }
+        }
+    }
+}
+
+
 int main()
 {
     vector<int64_t> program;
@@ -914,7 +1010,32 @@ int main()
                     return lhsFunction->score() > rhsFunction->score();
                 });
         std::cout << "state: (" << robotState.coord.x << "," << robotState.coord.y << ") dir: " << robotState.direction << " best Function score: " << runnableFunctions.front()->score() << " - " << toString(runnableFunctions.front()->commandList()) << " " << runnableFunctions.front()->numStatesRunnableFrom() << "x" << runnableFunctions.front()->numCellsCovered() << " # functions:" << runnableFunctions.size() << std::endl;
+        for (auto* function : runnableFunctions)
+            isFunctionRunnableFromStateLookup[robotState].insert(function);
     }
+
+    vector<const Function*> allFunctions;
+    for (const auto& [unused, function] : functionForCommandList)
+    {
+        allFunctions.push_back(&function);
+    }
+    sort(allFunctions.begin(), allFunctions.end(), [](const auto* lhsFunction, const auto* rhsFunction)
+            {
+            return lhsFunction->score() > rhsFunction->score();
+            });
+    std::cout << "All functions by score: " << std::endl;
+    int fnIndex = 0;
+    for (const auto* function : allFunctions)
+    {
+        std::cout << " # " << fnIndex << ": score: " << function->score() << " - " << function->numStatesRunnableFrom() << "x" << function->numCellsCovered() << std::endl;
+        fnIndex++;
+    }
+
+    map<Coord, int> numTimesVisitedCell;
+    set<Function*> functionsUsed;
+    vector<Function*> functionsCalled;
+    std::cout << "Running thing" << std::endl;
+    thing(RobotState{robotCoord, RobotState::Direction::Up}, numTimesVisitedCell, functionsUsed, functionsCalled, numCells, isFunctionRunnableFromStateLookup,  functionsRunnableFromState);
 
 #if 0
     int largestNumThings = 0;
