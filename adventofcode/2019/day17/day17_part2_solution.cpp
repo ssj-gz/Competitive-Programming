@@ -677,11 +677,11 @@ struct Outcome
 {
     set<Coord> cellsCovered;
     RobotState endingState;
-    //auto operator<=>(const Outcome&) const = default;
-    bool operator<(const Outcome& other) const
-    {
-        return cellsCovered < other.cellsCovered;
-    }
+    auto operator<=>(const Outcome&) const = default;
+    //bool operator<(const Outcome& other) const
+    //{
+    //    return cellsCovered < other.cellsCovered;
+    //}
 };
 
 Outcome outcomeForCommands(const vector<Command>& commands)
@@ -896,13 +896,11 @@ int main()
 
     for (auto& [robotState, runnableFunctions] : functionsRunnableFromState)
     {
-#if 0
+        sort(runnableFunctions.begin(), runnableFunctions.end());
         sort(runnableFunctions.begin(), runnableFunctions.end(), [](const auto* lhsFunction, const auto* rhsFunction)
                 {
                     return lhsFunction->score() > rhsFunction->score();
                 });
-#endif
-        sort(runnableFunctions.begin(), runnableFunctions.end());
         runnableFunctions.erase(std::unique(runnableFunctions.begin(), runnableFunctions.end()), runnableFunctions.end());
         std::cout << "state: (" << robotState.coord.x << "," << robotState.coord.y << ") dir: " << robotState.direction << " best Function score: " << runnableFunctions.front()->score() << " - " << toString(runnableFunctions.front()->commandList()) << " " << runnableFunctions.front()->numStatesRunnableFrom() << "x" << runnableFunctions.front()->numCellsCovered() << " # functions:" << runnableFunctions.size() << std::endl;
     }
