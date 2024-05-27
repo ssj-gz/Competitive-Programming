@@ -657,8 +657,19 @@ set<Coord> cellsCovered(const RobotState& startingState, const vector<Command>& 
     set<Coord> cellsCovered = {state.coord};
     for (const auto& command : commands)
     {
-        state.applyCommand(command);
-        cellsCovered.insert(state.coord);
+        if (command.cmd == Command::Forward)
+        {
+            for (int i = 0; i < command.amount; i++)
+            {
+                state.applyCommand(Command{Command::Forward, 1});
+                cellsCovered.insert(state.coord);
+            }
+        }
+        else
+        {
+            state.applyCommand(command);
+            cellsCovered.insert(state.coord);
+        }
     }
     return cellsCovered;
 }
@@ -696,27 +707,41 @@ map<RobotState, vector<vector<Command>>> buildValidCommandListForAllStates(const
                     sort(destCommandList.begin(), destCommandList.end(), [](const auto& lhsCommandList, const auto& rhsCommandList) {
                                 return lhsCommandList.size() < rhsCommandList.size();
                             });
+                    //destCommandList.clear();
+                    //destCommandList.push_back({Command{Command::Forward, 7}, Command{Command::Left}, Command{Command::Left}, Command{Command::Forward, 6}});
+                    //destCommandList.push_back({Command{Command::Forward, 7}, Command{Command::Left}, Command{Command::Left}, Command{Command::Forward, 4}, Command{Command::Left}, Command{Command::Left}, Command{Command::Forward, 1}, Command{Command::Left}, Command{Command::Left}, Command{Command::Forward, 3}});
+                    std::cout << "Computing reducedCommandList" << std::endl;
                     vector<vector<Command>> reducedCommandList;
                     for (const auto& commands : destCommandList)
                     {
-                        RobotState state;
-                        state.coord = {x, y};
-                        state.direction = static_cast<RobotState::Direction>(direction);
-
-                        set<Coord> cellsCovered = {state.coord};
-                        for (const auto& command : commands)
-                        {
-                            state.applyCommand(command);
-                            cellsCovered.insert(state.coord);
-                        }
+                        const RobotState state{{x,y}, static_cast<RobotState::Direction>(direction)};
 
                         Outcome outcome;
-                        outcome.cellsCovered = cellsCovered;
+                        outcome.cellsCovered = cellsCovered(state, commands);
                         outcome.endingState = state;
 
+                        for (const auto& command : commands)
+                        {
+                            outcome.endingState.applyCommand(command);
+                        }
+
+
+                        //std::cout << "Commands: " << toString(commands) << std::endl;
+                        //std::cout << "endingState: " << outcome.endingState.coord.x << "," << outcome.endingState.coord.y << " dir:" << outcome.endingState.direction << std::endl;
+                        //std::cout << "cells: " << std::endl;
+                        //for (const auto cell : outcome.cellsCovered)
+                        //{
+                            //std::cout << " " << cell.x << "," << cell.y << std::endl;
+                        //}
                         if (!commandListOutcomes.contains(outcome)) {
+                            //std::cout << " are new; adding" << std::endl;
                             reducedCommandList.push_back(commands);
                             commandListOutcomes.insert(outcome);
+                        }
+                        else
+                        {
+                            //std::cout << " are redundant; skipping" << std::endl;
+
                         }
 
 
