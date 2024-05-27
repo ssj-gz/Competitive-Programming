@@ -749,6 +749,20 @@ class Function
             assert(m_numCellsCovered != 0);
             return m_numCellsCovered * std::min(maxFunctionCalls, m_numStatesRunnableFrom);
         }
+        vector<Command> commandList() const
+        {
+            return m_commandList;
+        }
+
+        int numStatesRunnableFrom() const
+        {
+            return m_numStatesRunnableFrom;
+        }
+
+        int numCellsCovered() const
+        {
+            return m_numCellsCovered;
+        }
         Function() = default;
     private:
         vector<Command> m_commandList;
@@ -801,6 +815,7 @@ int main()
         cout << endl;
     }
     assert(robotCoord.x != -1 && robotCoord.y != -1);
+    std::cout << "Robot starts at " << robotCoord.x << "," << robotCoord.y << std::endl;
 
     const string mainPrompt = mapAndPrompt.back();
     assert(mainPrompt == "Main:");
@@ -832,7 +847,7 @@ int main()
                 {
                     return lhsFunction->score() > rhsFunction->score();
                 });
-        std::cout << "state: (" << robotState.coord.x << "," << robotState.coord.y << ") dir: " << robotState.direction << " best Function score: " << runnableFunctions.front()->score() << std::endl;
+        std::cout << "state: (" << robotState.coord.x << "," << robotState.coord.y << ") dir: " << robotState.direction << " best Function score: " << runnableFunctions.front()->score() << " - " << toString(runnableFunctions.front()->commandList()) << " " << runnableFunctions.front()->numStatesRunnableFrom() << "x" << runnableFunctions.front()->numCellsCovered() << std::endl;
     }
 
 #if 0
