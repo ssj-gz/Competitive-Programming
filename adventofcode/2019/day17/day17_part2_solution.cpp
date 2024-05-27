@@ -523,10 +523,10 @@ string toString(const vector<Command>& commandList)
                 asStr += "R";
                 break;
             case Command::Forward:
-                asStr += "F";
+                asStr += to_string(command.amount);
                 break;
         }
-        asStr += std::to_string(command.amount) + ",";
+        asStr += ",";
     }
     asStr.pop_back();
     return asStr;
@@ -536,7 +536,7 @@ string toString(const vector<Command>& commandList)
 void buildValidCommandList(RobotState& state, vector<Command>& commandsFollowed, int& commandsFollowedStringLen, vector<vector<Command>>& destCommandList, const vector<string>& worldMap)
 {
     //std::cout << "commandsFollowed: >" << toString(commandsFollowed) << "< size: " << toString(commandsFollowed).size() << " commandsFollowedStringLen: " << commandsFollowedStringLen << std::endl;
-    //assert(toString(commandsFollowed).size() == commandsFollowedStringLen);
+    assert(toString(commandsFollowed).size() == commandsFollowedStringLen);
     if (commandsFollowedStringLen > 20)
         return;
     if (worldMap[state.coord.y][state.coord.x] != '#')
@@ -544,33 +544,21 @@ void buildValidCommandList(RobotState& state, vector<Command>& commandsFollowed,
 
     if (!commandsFollowed.empty())
     {
-        //std::cout << " adding command list: " << toString(commandsFollowed) << std::endl;
+        std::cout << " adding command list: " << toString(commandsFollowed) << std::endl;
         destCommandList.push_back(commandsFollowed);
     }
 
     const int leadingCommaLen = (commandsFollowed.empty() ? 0 : 1);
 
-    if (commandsFollowed.empty() || (commandsFollowed.back().cmd == Command::Forward))
+    if (commandsFollowed.empty() || (commandsFollowed.back().cmd == Command::Forward || (commandsFollowed.back().cmd == Command::Left ))  )
     {
-        for (int leftAmount = 1; leftAmount <= 2; leftAmount++)
+        if (commandsFollowed.size() < 2 || (commandsFollowed.back().cmd != Command::Left || commandsFollowed[commandsFollowed.size() - 2].cmd != Command::Left))
         {
+            // Left.
             RobotState newState = state;
-            newState.direction = static_cast<RobotState::Direction>((newState.direction + 4 - leftAmount) % 4);
-            commandsFollowed.push_back(Command{Command::Left, leftAmount});
-            const int increaseInStrLen = leadingCommaLen + 1 + 1;
-            commandsFollowedStringLen += increaseInStrLen;
-
-            buildValidCommandList(newState, commandsFollowed, commandsFollowedStringLen, destCommandList, worldMap);
-
-            commandsFollowedStringLen -= increaseInStrLen;
-            commandsFollowed.pop_back();
-        }
-        for (int rightAmount = 1; rightAmount <= 2; rightAmount++)
-        {
-            RobotState newState = state;
-            newState.direction = static_cast<RobotState::Direction>((newState.direction + rightAmount) % 4);
-            commandsFollowed.push_back(Command{Command::Right, rightAmount});
-            const int increaseInStrLen = leadingCommaLen + 1 + 1;
+            newState.direction = static_cast<RobotState::Direction>((newState.direction + 4 - 1) % 4);
+            commandsFollowed.push_back(Command{Command::Left, 1});
+            const int increaseInStrLen = leadingCommaLen + 1;
             commandsFollowedStringLen += increaseInStrLen;
 
             buildValidCommandList(newState, commandsFollowed, commandsFollowedStringLen, destCommandList, worldMap);
@@ -580,8 +568,25 @@ void buildValidCommandList(RobotState& state, vector<Command>& commandsFollowed,
         }
     }
 
+
+    // Right.
+    if (commandsFollowed.empty() || (commandsFollowed.back().cmd == Command::Forward))
+    {
+        RobotState newState = state;
+        newState.direction = static_cast<RobotState::Direction>((newState.direction + 1) % 4);
+        commandsFollowed.push_back(Command{Command::Right, 1});
+        const int increaseInStrLen = leadingCommaLen + 1;
+        commandsFollowedStringLen += increaseInStrLen;
+
+        buildValidCommandList(newState, commandsFollowed, commandsFollowedStringLen, destCommandList, worldMap);
+
+        commandsFollowedStringLen -= increaseInStrLen;
+        commandsFollowed.pop_back();
+    }
+
     if (commandsFollowed.empty() || (commandsFollowed.back().cmd != Command::Forward))
     {
+        // Forward.
         int amount = 1;
         while (true)
         {
@@ -612,7 +617,7 @@ void buildValidCommandList(RobotState& state, vector<Command>& commandsFollowed,
             assert(amount < 100);
 
             commandsFollowed.push_back(Command{Command::Forward, amount});
-            const int increaseInStrLen = leadingCommaLen + 1 + (amount <= 9 ? 1 : 2);
+            const int increaseInStrLen = leadingCommaLen + (amount <= 9 ? 1 : 2);
             commandsFollowedStringLen += increaseInStrLen;
 
             buildValidCommandList(newState, commandsFollowed, commandsFollowedStringLen, destCommandList, worldMap);
