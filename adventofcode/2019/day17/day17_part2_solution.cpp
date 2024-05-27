@@ -1103,6 +1103,26 @@ int main()
         printWorldMap();
     }
 
+    std::cout << "winner.size(): " << winner.size() << std::endl;
+    std::cout << "Function calls: " << std::endl;
+    std::string functionCallString;
+    for (auto* function : winner)
+    {
+        const char name = functionName[function];
+        functionCallString += name;
+        functionCallString += ",";
+    }
+    assert(!functionCallString.empty());
+    functionCallString.pop_back();
+    std::cout << functionCallString << std::endl;
+    std::cout << "Functions: " << std::endl;
+    for (const auto& [function, name] : functionName)
+    {
+        std::cout << name << ":" << std::endl;
+        std::cout << toString(function->commandList()) << std::endl;
+    }
+    
+
 #if 0
     int largestNumThings = 0;
     for (int x = 0; x < width; x++)
