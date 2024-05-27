@@ -677,7 +677,11 @@ struct Outcome
 {
     set<Coord> cellsCovered;
     RobotState endingState;
-    auto operator<=>(const Outcome&) const = default;
+    //auto operator<=>(const Outcome&) const = default;
+    bool operator<(const Outcome& other) const
+    {
+        return cellsCovered < other.cellsCovered;
+    }
 };
 
 Outcome outcomeForCommands(const vector<Command>& commands)
@@ -834,12 +838,42 @@ int main()
                     return lhsCommandList.size() < rhsCommandList.size();
                 return lhsCommandList < rhsCommandList;
             });
+    std::cout << "allCommandLists.size(): " << allCommandLists.size() << std::endl;
+    int numShapes = 0;
     for (const auto& commandList : allCommandLists)
     {
         const auto outcome = outcomeForCommands(commandList);
         if (!smallestCommandListForOutcome.contains(outcome))
         {
             smallestCommandListForOutcome[outcome] = commandList;
+#if 0
+            const auto blah = cellsCovered(RobotState{{0,0}, RobotState::Direction::Up}, commandList);
+            int minX = std::numeric_limits<int>::max();
+            int maxX = std::numeric_limits<int>::min();
+            int minY = std::numeric_limits<int>::max();
+            int maxY = std::numeric_limits<int>::min();
+            for (const auto cell : blah)
+            {
+                minX = std::min(minX, cell.x);
+                maxX = std::max(maxX, cell.x);
+                minY = std::min(minY, cell.y);
+                maxY = std::max(maxY, cell.y);
+            }
+            const int width = maxX - minX + 1;
+            const int height = maxY - minY + 1;
+            //std::cout << "minX: " << minX << " maxX: " << maxX << " minY: " << minY << " maxY: " << maxY << std::endl;
+            vector<string> shape(height, string(width, ' '));
+            for (const auto cell : blah)
+            {
+                //std::cout << " cell.x: " << cell.x << " cell.y: " << cell.y << std::endl;
+                shape[cell.y - minY][cell.x - minX] = 'X';
+            }
+            shape[0 - minY][0 - minX] = 'O';
+            std::cout << "New shape # " << numShapes << std::endl;
+            for (const auto line : shape)
+                std::cout << line << std::endl;
+            numShapes++;
+#endif
         }
     }
     for (auto& [robotState, reducedCommandList] : stateToCommandListsMap)
@@ -858,14 +892,19 @@ int main()
     }
     std::cout << "Finished building functionsRunnableFromState" << std::endl;
     std::cout << "functionForCommandList.size(): " << functionForCommandList.size() << std::endl;
+    std::cout << "smallestCommandListForOutcome.size(): " << smallestCommandListForOutcome.size() << std::endl;
 
     for (auto& [robotState, runnableFunctions] : functionsRunnableFromState)
     {
+#if 0
         sort(runnableFunctions.begin(), runnableFunctions.end(), [](const auto* lhsFunction, const auto* rhsFunction)
                 {
                     return lhsFunction->score() > rhsFunction->score();
                 });
-        std::cout << "state: (" << robotState.coord.x << "," << robotState.coord.y << ") dir: " << robotState.direction << " best Function score: " << runnableFunctions.front()->score() << " - " << toString(runnableFunctions.front()->commandList()) << " " << runnableFunctions.front()->numStatesRunnableFrom() << "x" << runnableFunctions.front()->numCellsCovered() << std::endl;
+#endif
+        sort(runnableFunctions.begin(), runnableFunctions.end());
+        runnableFunctions.erase(std::unique(runnableFunctions.begin(), runnableFunctions.end()), runnableFunctions.end());
+        std::cout << "state: (" << robotState.coord.x << "," << robotState.coord.y << ") dir: " << robotState.direction << " best Function score: " << runnableFunctions.front()->score() << " - " << toString(runnableFunctions.front()->commandList()) << " " << runnableFunctions.front()->numStatesRunnableFrom() << "x" << runnableFunctions.front()->numCellsCovered() << " # functions:" << runnableFunctions.size() << std::endl;
     }
 
 #if 0
