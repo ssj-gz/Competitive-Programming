@@ -836,6 +836,7 @@ int main()
     map<vector<Command>, Function> functionForCommandList;
     map<Outcome, vector<Command>> smallestCommandListForOutcome;
     map<RobotState, vector<Function*>> functionsRunnableFromState;
+    map<RobotState, set<Function*>> isFunctionRunnableFromStateLookup;
     vector<vector<Command>> allCommandLists;
     std::cout << "Building functionsRunnableFromState" << std::endl;
     for (const auto& [robotState, commandListForState] : stateToCommandListsMap)
@@ -907,11 +908,11 @@ int main()
     for (auto& [robotState, runnableFunctions] : functionsRunnableFromState)
     {
         sort(runnableFunctions.begin(), runnableFunctions.end());
+        runnableFunctions.erase(std::unique(runnableFunctions.begin(), runnableFunctions.end()), runnableFunctions.end());
         sort(runnableFunctions.begin(), runnableFunctions.end(), [](const auto* lhsFunction, const auto* rhsFunction)
                 {
                     return lhsFunction->score() > rhsFunction->score();
                 });
-        runnableFunctions.erase(std::unique(runnableFunctions.begin(), runnableFunctions.end()), runnableFunctions.end());
         std::cout << "state: (" << robotState.coord.x << "," << robotState.coord.y << ") dir: " << robotState.direction << " best Function score: " << runnableFunctions.front()->score() << " - " << toString(runnableFunctions.front()->commandList()) << " " << runnableFunctions.front()->numStatesRunnableFrom() << "x" << runnableFunctions.front()->numCellsCovered() << " # functions:" << runnableFunctions.size() << std::endl;
     }
 
