@@ -777,12 +777,16 @@ class Function
         int m_numCellsCovered = 0;
 };
 
+vector<Function*> winner;
+
 void thing(const RobotState state, map<Coord, int>& numTimesVisitedCell, set<Function*>& functionsUsed, vector<Function*>& functionsCalled, const int numCellsRemaining, map<RobotState, set<Function*>>& isFunctionRunnableFromStateLookup,  map<RobotState, vector<Function*>>& orderedFunctionsRunnableFromState)
 {
+    if (!winner.empty())
+        return;
     if (numCellsRemaining == 0)
     {
         std::cout << "Hallelujah!" << std::endl;
-        std::exit(EXIT_SUCCESS);
+        winner = functionsCalled;
     }
     std::cout << "pos: " << state.coord.x << "," << state.coord.y << " # functionsUsed: " << functionsUsed.size() << " #functionsCalled: " << functionsCalled.size() << " numCellsRemaining: " << numCellsRemaining << std::endl;
     std::cout << "functions: " << std::endl;
@@ -1053,6 +1057,51 @@ int main()
     vector<Function*> functionsCalled;
     std::cout << "Running thing" << std::endl;
     thing(RobotState{robotCoord, RobotState::Direction::Up}, numTimesVisitedCell, functionsUsed, functionsCalled, numCells, isFunctionRunnableFromStateLookup,  functionsRunnableFromState);
+
+    if (winner.empty())
+    {
+        std::cout << "Failed!" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    auto printWorldMap = [&]()
+    {
+        std::cout << "Map: " << std::endl;
+        for (const auto& row : worldMap)
+        {
+        std::cout << row << std::endl;
+        }
+    };
+
+    printWorldMap();
+
+    char letter = 'A';
+    map<Function*, char> functionName;
+    for (auto* function : winner)
+    {
+        if (!functionName.contains(function))
+        {
+            functionName[function] = letter;
+            letter++;
+        }
+    }
+
+    RobotState state = { robotCoord, RobotState::Direction::Up };
+    for (auto* function : winner)
+    {
+        const char name = functionName[function];
+        const auto cellsCovered = ::cellsCovered(state, function->commandList());
+        for (const auto cell : cellsCovered)
+        {
+            worldMap[cell.y][cell.x] = name;
+        }
+        for (const auto command : function->commandList())
+        {
+            state.applyCommand(command);
+        }
+
+        printWorldMap();
+    }
 
 #if 0
     int largestNumThings = 0;
