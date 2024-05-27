@@ -5,6 +5,7 @@
 #include <map>
 #include <set>
 #include <algorithm>
+#include <regex>
 #include <limits>
 
 using namespace std;
@@ -16,9 +17,8 @@ struct Coord
     auto operator<=>(const Coord&) const = default;
 };
 
-vector<string> computeMapAndGetPrompt(const vector<int64_t>& program)
+vector<string> computeMapAndGetPrompt(IntCodeComputer& intCodeComputer)
 {
-    IntCodeComputer intCodeComputer(program);
     const auto status = intCodeComputer.run();
     assert(status == IntCodeComputer::WaitingForInput);
 
@@ -912,7 +912,8 @@ int main()
 
     assert(program[0] == 1);
     program[0] = 2;
-    const auto mapAndPrompt = computeMapAndGetPrompt(program);
+    IntCodeComputer intCodeComputer(program);
+    const auto mapAndPrompt = computeMapAndGetPrompt(intCodeComputer);
     assert(!mapAndPrompt.empty());
     vector<string> worldMap{mapAndPrompt.begin(), mapAndPrompt.begin() + mapAndPrompt.size() - 1};
     while(worldMap.back().empty())
@@ -946,8 +947,7 @@ int main()
     std::cout << "numCells: " << numCells << std::endl;
 
     const string mainPrompt = mapAndPrompt.back();
-    assert(mainPrompt == "Main:");
-    cout << "mainPrompt: " << mainPrompt << endl;
+
 
     auto stateToCommandListsMap = buildValidCommandListForAllStates(worldMap);
     map<vector<Command>, Function> functionForCommandList;
@@ -962,9 +962,9 @@ int main()
     }
     sort(allCommandLists.begin(), allCommandLists.end(), [](const auto& lhsCommandList, const auto& rhsCommandList) 
             {
-                if (lhsCommandList.size() != rhsCommandList.size())
-                    return lhsCommandList.size() < rhsCommandList.size();
-                return lhsCommandList < rhsCommandList;
+            if (lhsCommandList.size() != rhsCommandList.size())
+            return lhsCommandList.size() < rhsCommandList.size();
+            return lhsCommandList < rhsCommandList;
             });
     std::cout << "allCommandLists.size(): " << allCommandLists.size() << std::endl;
     int numShapes = 0;
@@ -1028,7 +1028,7 @@ int main()
         runnableFunctions.erase(std::unique(runnableFunctions.begin(), runnableFunctions.end()), runnableFunctions.end());
         sort(runnableFunctions.begin(), runnableFunctions.end(), [](const auto* lhsFunction, const auto* rhsFunction)
                 {
-                    return lhsFunction->score() > rhsFunction->score();
+                return lhsFunction->score() > rhsFunction->score();
                 });
         std::cout << "state: (" << robotState.coord.x << "," << robotState.coord.y << ") dir: " << robotState.direction << " best Function score: " << runnableFunctions.front()->score() << " - " << toString(runnableFunctions.front()->commandList()) << " " << runnableFunctions.front()->numStatesRunnableFrom() << "x" << runnableFunctions.front()->numCellsCovered() << " # functions:" << runnableFunctions.size() << std::endl;
         for (auto* function : runnableFunctions)
@@ -1069,7 +1069,7 @@ int main()
         std::cout << "Map: " << std::endl;
         for (const auto& row : worldMap)
         {
-        std::cout << row << std::endl;
+            std::cout << row << std::endl;
         }
     };
 
@@ -1121,7 +1121,87 @@ int main()
         std::cout << name << ":" << std::endl;
         std::cout << toString(function->commandList()) << std::endl;
     }
-    
+
+    //std::cout << "Waking IntCode" << std::endl;
+    //assert(program[0] == 1);
+    //program[0] = 2;
+
+    std::cout << "Output from IntCode:" << std::endl;
+    cout << "mainPrompt: " << mainPrompt << endl;
+    assert(mainPrompt == "Main:");
+
+    for (const auto letter : functionCallString)
+    {
+        intCodeComputer.addInput(letter);
+    }
+    intCodeComputer.addInput(10);
+
+
+    std::cout << "Provided function call list to IntCodeComputer."<< std::endl;
+    for (int i = 1; i <= 3; i++)
+    {
+        const auto status = intCodeComputer.run();
+        assert(status == IntCodeComputer::WaitingForInput);
+        const auto output = intCodeComputer.takeOutput();
+        std::string outputStr;
+        for (const auto ascii : output)
+        {
+            if (ascii != 10)
+                outputStr += static_cast<char>(ascii);
+        }
+        std::cout << "IntCode says: >>>" << outputStr << "<<<" << std::endl;
+        const std::regex functionNamePromptRegex("^Function (.):$");
+        std::smatch fnNamePromptMatch;
+        const bool matched = std::regex_match(outputStr, fnNamePromptMatch, functionNamePromptRegex );
+        assert(matched);
+        std::cout << "Asked for function: " << fnNamePromptMatch[1] << std::endl;
+        for (const auto& [function, name] : functionName)
+        {
+            if (name == fnNamePromptMatch[1])
+            {
+                std::cout << "Providing definition of fn " << name << " to IntCode" << std::endl;
+                for (const auto letter : toString(function->commandList()))
+                {
+                    intCodeComputer.addInput(letter);
+                }
+                intCodeComputer.addInput(10);
+            }
+        }
+    }
+    {
+        const auto status = intCodeComputer.run();
+        assert(status == IntCodeComputer::WaitingForInput);
+        const auto output = intCodeComputer.takeOutput();
+        std::string outputStr;
+        for (const auto ascii : output)
+        {
+            if (ascii != 10)
+                outputStr += static_cast<char>(ascii);
+        }
+        std::cout << "IntCode: >>>" << outputStr << "<<<" << std::endl;
+    }
+    {
+        std::cout << "Saying 'no' to Continuous Video Feed request" << std::endl;
+        // No video feed, thanks!
+        intCodeComputer.addInput('n');
+        intCodeComputer.addInput(10);
+        const auto status = intCodeComputer.run();
+        //assert(status == IntCodeComputer::WaitingForInput);
+        auto output = intCodeComputer.takeOutput();
+        const auto finalValue = output.back();
+        output.pop_back();
+        std::string outputStr;
+        for (const auto ascii : output)
+        {
+            if (ascii != 10)
+                outputStr += static_cast<char>(ascii);
+            else
+                outputStr += "\n";
+        }
+        std::cout << "IntCode: >>>" << outputStr << "<<<" << std::endl;
+        std::cout << "finalValue: " << finalValue << std::endl;
+    }
+
 
 #if 0
     int largestNumThings = 0;
