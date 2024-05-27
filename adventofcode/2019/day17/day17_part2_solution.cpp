@@ -672,6 +672,42 @@ map<RobotState, vector<vector<Command>>> buildValidCommandListForAllStates(const
                     vector<vector<Command>> destCommandList;
                     buildValidCommandList(startingState, commandsFollowed, commandsFollowedStringLen, destCommandList, worldMap);
                     std::cout << " destCommandList.size: " << destCommandList.size() << std::endl;
+
+                    struct Outcome
+                    {
+                        set<Coord> cellsCovered;
+                        RobotState endingState;
+                        auto operator<=>(const Outcome&) const = default;
+                    };
+                    set<Outcome> commandListOutcomes;
+                    sort(destCommandList.begin(), destCommandList.end(), [](const auto& lhsCommandList, const auto& rhsCommandList) {
+                                return lhsCommandList.size() < rhsCommandList.size();
+                            });
+                    vector<vector<Command>> reducedCommandList;
+                    for (const auto& commands : destCommandList)
+                    {
+                        RobotState state;
+                        state.coord = {x, y};
+                        state.direction = static_cast<RobotState::Direction>(direction);
+
+                        set<Coord> cellsCovered = {state.coord};
+                        for (const auto& command : commands)
+                        {
+                            state.applyCommand(command);
+                            cellsCovered.insert(state.coord);
+                        }
+                        Outcome outcome;
+                        outcome.cellsCovered = cellsCovered;
+                        outcome.endingState = state;
+
+                        if (!commandListOutcomes.contains(outcome)) {
+                            reducedCommandList.push_back(commands);
+                            commandListOutcomes.insert(outcome);
+                        }
+
+
+                    }
+                    std::cout << " reducedCommandList.size: " << reducedCommandList.size() << std::endl;
                 }
             }
         }
