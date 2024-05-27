@@ -9,12 +9,20 @@
 
 using namespace std;
 
-    struct Coord
-    {
-        int x = -1;
-        int y = -1;
-        auto operator<=>(const Coord&) const = default;
-    };
+struct Coord
+{
+    int x = -1;
+    int y = -1;
+    auto operator<=>(const Coord&) const = default;
+};
+
+struct RobotState
+{
+    Coord coord;
+    enum Direction { Up = 0, Right = 1, Down = 2, Left = 3 };
+    Direction direction;
+    auto operator<=>(const RobotState&) const = default;
+};
 
 vector<string> computeMapAndGetPrompt(const vector<int64_t>& program)
 {
@@ -49,6 +57,7 @@ struct Command
 {
     enum Cmd { Left, Right, Forward } cmd;
     int amount = 1;
+    auto operator<=>(const Command& other) const = default;
 };
 
 constexpr int maxFunctionCalls = 10;
@@ -498,6 +507,153 @@ void blah(int depth, const vector<string>& worldMap, map<Coord, int>& visitCount
     //assert(visitCount == dbgVisitCount);
 }
 
+string toString(const vector<Command>& commandList)
+{
+    if (commandList.empty())
+        return "";
+    string asStr;
+    for (const auto& command : commandList)
+    {
+        switch (command.cmd)
+        {
+            case Command::Left:
+                asStr += "L";
+                break;
+            case Command::Right:
+                asStr += "R";
+                break;
+            case Command::Forward:
+                asStr += "F";
+                break;
+        }
+        asStr += std::to_string(command.amount) + ",";
+    }
+    asStr.pop_back();
+    return asStr;
+}
+
+
+void buildValidCommandList(RobotState& state, vector<Command>& commandsFollowed, int& commandsFollowedStringLen, vector<vector<Command>>& destCommandList, const vector<string>& worldMap)
+{
+    //std::cout << "commandsFollowed: >" << toString(commandsFollowed) << "< size: " << toString(commandsFollowed).size() << " commandsFollowedStringLen: " << commandsFollowedStringLen << std::endl;
+    //assert(toString(commandsFollowed).size() == commandsFollowedStringLen);
+    if (commandsFollowedStringLen > 20)
+        return;
+    if (worldMap[state.coord.y][state.coord.x] != '#')
+        return;
+
+    if (!commandsFollowed.empty())
+    {
+        //std::cout << " adding command list: " << toString(commandsFollowed) << std::endl;
+        destCommandList.push_back(commandsFollowed);
+    }
+
+    const int leadingCommaLen = (commandsFollowed.empty() ? 0 : 1);
+
+    if (commandsFollowed.empty() || (commandsFollowed.back().cmd == Command::Forward))
+    {
+        for (int leftAmount = 1; leftAmount <= 2; leftAmount++)
+        {
+            RobotState newState = state;
+            newState.direction = static_cast<RobotState::Direction>((newState.direction + 4 - leftAmount) % 4);
+            commandsFollowed.push_back(Command{Command::Left, leftAmount});
+            const int increaseInStrLen = leadingCommaLen + 1 + 1;
+            commandsFollowedStringLen += increaseInStrLen;
+
+            buildValidCommandList(newState, commandsFollowed, commandsFollowedStringLen, destCommandList, worldMap);
+
+            commandsFollowedStringLen -= increaseInStrLen;
+            commandsFollowed.pop_back();
+        }
+        for (int rightAmount = 1; rightAmount <= 2; rightAmount++)
+        {
+            RobotState newState = state;
+            newState.direction = static_cast<RobotState::Direction>((newState.direction + rightAmount) % 4);
+            commandsFollowed.push_back(Command{Command::Right, rightAmount});
+            const int increaseInStrLen = leadingCommaLen + 1 + 1;
+            commandsFollowedStringLen += increaseInStrLen;
+
+            buildValidCommandList(newState, commandsFollowed, commandsFollowedStringLen, destCommandList, worldMap);
+
+            commandsFollowedStringLen -= increaseInStrLen;
+            commandsFollowed.pop_back();
+        }
+    }
+
+    if (commandsFollowed.empty() || (commandsFollowed.back().cmd != Command::Forward))
+    {
+        int amount = 1;
+        while (true)
+        {
+            RobotState newState = state;
+            switch (state.direction)
+            {
+                case RobotState::Direction::Up:
+                    newState.coord.y -= amount;
+                    break;
+                case RobotState::Direction::Down:
+                    newState.coord.y += amount;
+                    break;
+                case RobotState::Direction::Left:
+                    newState.coord.x -= amount;
+                    break;
+                case RobotState::Direction::Right:
+                    newState.coord.x += amount;
+                    break;
+            }
+
+            if (newState.coord.y < 0 || newState.coord.y >= worldMap.size())
+                break;
+            if (newState.coord.x < 0 || newState.coord.x >= worldMap.front().size())
+                break;
+            if (worldMap[newState.coord.y][newState.coord.x] != '#')
+                break;
+
+            assert(amount < 100);
+
+            commandsFollowed.push_back(Command{Command::Forward, amount});
+            const int increaseInStrLen = leadingCommaLen + 1 + (amount <= 9 ? 1 : 2);
+            commandsFollowedStringLen += increaseInStrLen;
+
+            buildValidCommandList(newState, commandsFollowed, commandsFollowedStringLen, destCommandList, worldMap);
+
+            commandsFollowedStringLen -= increaseInStrLen;
+            commandsFollowed.pop_back();
+
+            amount++;
+            
+        }
+    }
+}
+
+map<RobotState, vector<vector<Command>>> buildValidCommandListForAllStates(const vector<string>& worldMap)
+{
+    const int height = static_cast<int>(worldMap.size());
+    const int width = static_cast<int>(worldMap[0].size());
+    for (int x = 0; x < width; x++)
+    {
+        for (int y = 0; y < height; y++)
+        {
+            if (worldMap[y][x] == '#')
+            {
+                RobotState startingState;
+                startingState.coord = {x, y};
+                for (int direction = 0; direction < 4; direction++)
+                {
+                    std::cout << "Generating valid command lists for coord (" << x << "," << y << ") starting with direction: " << direction << std::endl;
+                    startingState.direction = static_cast<RobotState::Direction>(direction);
+                    vector<Command> commandsFollowed;
+                    int commandsFollowedStringLen = 0;
+                    vector<vector<Command>> destCommandList;
+                    buildValidCommandList(startingState, commandsFollowed, commandsFollowedStringLen, destCommandList, worldMap);
+                    std::cout << " destCommandList.size: " << destCommandList.size() << std::endl;
+                }
+            }
+        }
+    }
+    return map<RobotState, vector<vector<Command>>>();
+}
+
 int main()
 {
     vector<int64_t> program;
@@ -548,7 +704,9 @@ int main()
     assert(mainPrompt == "Main:");
     cout << "mainPrompt: " << mainPrompt << endl;
 
+    buildValidCommandListForAllStates(worldMap);
 
+#if 0
     int largestNumThings = 0;
     for (int x = 0; x < width; x++)
     {
@@ -571,6 +729,7 @@ int main()
         }
     }
     cout << "largestNumThings: " << largestNumThings << endl;
+#endif
 
 }
 
