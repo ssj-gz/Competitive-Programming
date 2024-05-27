@@ -739,6 +739,12 @@ class Function
               m_numCellsCovered{numCellsCovered}
         {
             assert(m_numCellsCovered > 0);
+            static int maxNumCellsCovered = 0;
+            if (numCellsCovered > maxNumCellsCovered)
+            {
+                maxNumCellsCovered = numCellsCovered;
+                std::cout << "New maxNumCellsCovered: " << maxNumCellsCovered << std::endl;
+            }
         }
         void incStatesRunnableFrom()
         {
@@ -817,6 +823,10 @@ int main()
     }
     assert(robotCoord.x != -1 && robotCoord.y != -1);
     std::cout << "Robot starts at " << robotCoord.x << "," << robotCoord.y << std::endl;
+    int numCells = 0;
+    for (const auto& row : worldMap)
+        numCells += std::count(row.begin(), row.end(), '#');
+    std::cout << "numCells: " << numCells << std::endl;
 
     const string mainPrompt = mapAndPrompt.back();
     assert(mainPrompt == "Main:");
