@@ -682,32 +682,5 @@ int main()
         std::cout << "IntCode: >>>" << outputStr << "<<<" << std::endl;
         std::cout << "finalValue: " << finalValue << std::endl;
     }
-
-
-#if 0
-    int largestNumThings = 0;
-    for (int x = 0; x < width; x++)
-    {
-        for (int y = 0; y < height; y++)
-        {
-            if (worldMap[y][x] == '#')
-            {
-                for (int direction = 0; direction < 4; direction++)
-                {
-                    map<Coord, int> visitCount;
-                    map<string, vector<Command>> movementFunctions;
-                    vector<Command> pendingMovementFunctionDef;
-                    vector<string> functionsExecuted;
-                    numThings = 0;
-                    blah(0, worldMap, visitCount, movementFunctions, pendingMovementFunctionDef, "A", functionsExecuted, {x, y}, direction);
-                    cout << "x: " << x << " y: " << y << " dir: " << direction << " numThings: " << numThings << endl;
-                    largestNumThings = max(largestNumThings, numThings);
-                }
-            }
-        }
-    }
-    cout << "largestNumThings: " << largestNumThings << endl;
-#endif
-
 }
 
