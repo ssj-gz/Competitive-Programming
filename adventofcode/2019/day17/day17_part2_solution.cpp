@@ -594,11 +594,13 @@ void buildValidCommandList(RobotState& state, vector<Command>& commandsFollowed,
         if (commandsFollowed.size() < 2 || (commandsFollowed.back().cmd != Command::Left || commandsFollowed[commandsFollowed.size() - 2].cmd != Command::Left))
         {
             // Left.
-            RobotState newState = state;
-            newState.direction = static_cast<RobotState::Direction>((newState.direction + 4 - 1) % 4);
+            RobotState newStateDbg = state;
+            newStateDbg.direction = static_cast<RobotState::Direction>((newStateDbg.direction + 4 - 1) % 4);
             commandsFollowed.push_back(Command{Command::Left, 1});
             const int increaseInStrLen = leadingCommaLen + 1;
             commandsFollowedStringLen += increaseInStrLen;
+            RobotState newState = RobotState(state).applyCommand(commandsFollowed.back());
+            assert(newState == newStateDbg);
 
             buildValidCommandList(newState, commandsFollowed, commandsFollowedStringLen, destCommandList, worldMap);
 
@@ -611,11 +613,13 @@ void buildValidCommandList(RobotState& state, vector<Command>& commandsFollowed,
     // Right.
     if (commandsFollowed.empty() || (commandsFollowed.back().cmd == Command::Forward))
     {
-        RobotState newState = state;
-        newState.direction = static_cast<RobotState::Direction>((newState.direction + 1) % 4);
+        RobotState newStateDbg = state;
+        newStateDbg.direction = static_cast<RobotState::Direction>((newStateDbg.direction + 1) % 4);
         commandsFollowed.push_back(Command{Command::Right, 1});
         const int increaseInStrLen = leadingCommaLen + 1;
         commandsFollowedStringLen += increaseInStrLen;
+        RobotState newState = RobotState(state).applyCommand(commandsFollowed.back());
+        assert(newState == newStateDbg);
 
         buildValidCommandList(newState, commandsFollowed, commandsFollowedStringLen, destCommandList, worldMap);
 
