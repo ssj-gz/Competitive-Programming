@@ -673,6 +673,28 @@ set<Coord> cellsCovered(const RobotState& startingState, const vector<Command>& 
     }
     return cellsCovered;
 }
+struct Outcome
+{
+    set<Coord> cellsCovered;
+    RobotState endingState;
+    auto operator<=>(const Outcome&) const = default;
+};
+
+Outcome outcomeForCommands(const vector<Command>& commands)
+{
+    RobotState state({0,0}, static_cast<RobotState::Direction>(0));
+
+    Outcome outcome;
+    outcome.cellsCovered = cellsCovered(state, commands);
+
+    outcome.endingState = state;
+    for (const auto& command : commands)
+    {
+        outcome.endingState.applyCommand(command);
+    }
+
+    return outcome;
+}
 
 map<RobotState, vector<vector<Command>>> buildValidCommandListForAllStates(const vector<string>& worldMap)
 {
@@ -697,57 +719,7 @@ map<RobotState, vector<vector<Command>>> buildValidCommandListForAllStates(const
                     buildValidCommandList(startingState, commandsFollowed, commandsFollowedStringLen, destCommandList, worldMap);
                     std::cout << " destCommandList.size: " << destCommandList.size() << std::endl;
 
-                    struct Outcome
-                    {
-                        set<Coord> cellsCovered;
-                        RobotState endingState;
-                        auto operator<=>(const Outcome&) const = default;
-                    };
-                    set<Outcome> commandListOutcomes;
-                    sort(destCommandList.begin(), destCommandList.end(), [](const auto& lhsCommandList, const auto& rhsCommandList) {
-                                return lhsCommandList.size() < rhsCommandList.size();
-                            });
-                    //destCommandList.clear();
-                    //destCommandList.push_back({Command{Command::Forward, 7}, Command{Command::Left}, Command{Command::Left}, Command{Command::Forward, 6}});
-                    //destCommandList.push_back({Command{Command::Forward, 7}, Command{Command::Left}, Command{Command::Left}, Command{Command::Forward, 4}, Command{Command::Left}, Command{Command::Left}, Command{Command::Forward, 1}, Command{Command::Left}, Command{Command::Left}, Command{Command::Forward, 3}});
-                    std::cout << "Computing reducedCommandList" << std::endl;
-                    vector<vector<Command>> reducedCommandList;
-                    for (const auto& commands : destCommandList)
-                    {
-                        const RobotState state{{x,y}, static_cast<RobotState::Direction>(direction)};
-
-                        Outcome outcome;
-                        outcome.cellsCovered = cellsCovered(state, commands);
-                        outcome.endingState = state;
-
-                        for (const auto& command : commands)
-                        {
-                            outcome.endingState.applyCommand(command);
-                        }
-
-
-                        //std::cout << "Commands: " << toString(commands) << std::endl;
-                        //std::cout << "endingState: " << outcome.endingState.coord.x << "," << outcome.endingState.coord.y << " dir:" << outcome.endingState.direction << std::endl;
-                        //std::cout << "cells: " << std::endl;
-                        //for (const auto cell : outcome.cellsCovered)
-                        //{
-                            //std::cout << " " << cell.x << "," << cell.y << std::endl;
-                        //}
-                        if (!commandListOutcomes.contains(outcome)) {
-                            //std::cout << " are new; adding" << std::endl;
-                            reducedCommandList.push_back(commands);
-                            commandListOutcomes.insert(outcome);
-                        }
-                        else
-                        {
-                            //std::cout << " are redundant; skipping" << std::endl;
-
-                        }
-
-
-                    }
-                    std::cout << " reducedCommandList.size: " << reducedCommandList.size() << std::endl;
-                    stateToCommandListsMap[startingState] = reducedCommandList;
+                    stateToCommandListsMap[startingState] = destCommandList;
                 }
             }
         }
@@ -846,14 +818,35 @@ int main()
     assert(mainPrompt == "Main:");
     cout << "mainPrompt: " << mainPrompt << endl;
 
-    const auto stateToCommandListsMap = buildValidCommandListForAllStates(worldMap);
+    auto stateToCommandListsMap = buildValidCommandListForAllStates(worldMap);
     map<vector<Command>, Function> functionForCommandList;
+    map<Outcome, vector<Command>> smallestCommandListForOutcome;
     map<RobotState, vector<Function*>> functionsRunnableFromState;
+    vector<vector<Command>> allCommandLists;
     std::cout << "Building functionsRunnableFromState" << std::endl;
-    for (const auto& [robotState, reducedCommandList] : stateToCommandListsMap)
+    for (const auto& [robotState, commandListForState] : stateToCommandListsMap)
     {
-        for (const auto& commands : reducedCommandList)
+        allCommandLists.insert(allCommandLists.end(), commandListForState.begin(), commandListForState.end());
+    }
+    sort(allCommandLists.begin(), allCommandLists.end(), [](const auto& lhsCommandList, const auto& rhsCommandList) 
+            {
+                if (lhsCommandList.size() != rhsCommandList.size())
+                    return lhsCommandList.size() < rhsCommandList.size();
+                return lhsCommandList < rhsCommandList;
+            });
+    for (const auto& commandList : allCommandLists)
+    {
+        const auto outcome = outcomeForCommands(commandList);
+        if (!smallestCommandListForOutcome.contains(outcome))
         {
+            smallestCommandListForOutcome[outcome] = commandList;
+        }
+    }
+    for (auto& [robotState, reducedCommandList] : stateToCommandListsMap)
+    {
+        for (auto& commands : reducedCommandList)
+        {
+            commands = smallestCommandListForOutcome[outcomeForCommands(commands)];
             if (!functionForCommandList.contains(commands))
             {
                 functionForCommandList[commands] = Function(commands, cellsCovered(robotState, commands).size());
