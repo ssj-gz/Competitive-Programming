@@ -754,7 +754,7 @@ class Function
         {
             assert(m_numStatesRunnableFrom != 0);
             assert(m_numCellsCovered != 0);
-            return m_numCellsCovered * std::min(maxFunctionCalls, m_numStatesRunnableFrom);
+            return m_numCellsCovered;// * std::min(maxFunctionCalls, m_numStatesRunnableFrom);
         }
         vector<Command> commandList() const
         {
@@ -779,6 +779,11 @@ class Function
 
 void thing(const RobotState state, map<Coord, int>& numTimesVisitedCell, set<Function*>& functionsUsed, vector<Function*>& functionsCalled, const int numCellsRemaining, map<RobotState, set<Function*>>& isFunctionRunnableFromStateLookup,  map<RobotState, vector<Function*>>& orderedFunctionsRunnableFromState)
 {
+    if (numCellsRemaining == 0)
+    {
+        std::cout << "Hallelujah!" << std::endl;
+        std::exit(EXIT_SUCCESS);
+    }
     std::cout << "pos: " << state.coord.x << "," << state.coord.y << " # functionsUsed: " << functionsUsed.size() << " #functionsCalled: " << functionsCalled.size() << " numCellsRemaining: " << numCellsRemaining << std::endl;
     std::cout << "functions: " << std::endl;
     for (auto* function : functionsUsed)
@@ -786,19 +791,14 @@ void thing(const RobotState state, map<Coord, int>& numTimesVisitedCell, set<Fun
         std::cout << " numCellsCovered: " << function->numCellsCovered() << " numStatesRunnableFrom: " << function->numStatesRunnableFrom() << std::endl;
     }
 
-    if (functionsCalled.size() >= 10)
-        return;
     static int minNumCellsRemaining = std::numeric_limits<int>::max();
     if (numCellsRemaining < minNumCellsRemaining)
     {
         minNumCellsRemaining = numCellsRemaining;
         std::cout << "New minNumCellsRemaining: " << minNumCellsRemaining << std::endl;
     }
-    if (numCellsRemaining == 0)
-    {
-        std::cout << "Hallelujah!" << std::endl;
+    if (functionsCalled.size() >= 10)
         return;
-    }
     // First, try and call a function again.
     if (!functionsUsed.empty())
     {
@@ -861,7 +861,24 @@ void thing(const RobotState state, map<Coord, int>& numTimesVisitedCell, set<Fun
             // Recurse.
             functionsCalled.push_back(function);
             functionsUsed.insert(function);
-            thing(newState, numTimesVisitedCell, functionsUsed, functionsCalled, newNumCellsRemaining, isFunctionRunnableFromStateLookup, orderedFunctionsRunnableFromState);
+            bool tryThese3 = true;
+#if 0
+            if (functionsUsed.size() == 3)
+            {
+                const int functionCallsRemaining = 10 - functionsCalled.size();
+                int maxNewCellsFromFunctionCalls = 0;
+                for (auto* function : functionsUsed)
+                    maxNewCellsFromFunctionCalls = max(maxNewCellsFromFunctionCalls, function->numCellsCovered() * min(functionCallsRemaining, function->numStatesRunnableFrom()));
+                std::cout << "3 functions! functionCallsRemaining: " << functionCallsRemaining << " maxNewCellsFromFunctionCalls: " << maxNewCellsFromFunctionCalls << " newNumCellsRemaining: " << newNumCellsRemaining << std::endl;
+                if (maxNewCellsFromFunctionCalls < newNumCellsRemaining) 
+                {
+                    std::cout << "No third function can help us from here; pruning" << std::endl;
+                    tryThese3 = false;
+                }
+            }
+#endif
+            if (tryThese3)
+                thing(newState, numTimesVisitedCell, functionsUsed, functionsCalled, newNumCellsRemaining, isFunctionRunnableFromStateLookup, orderedFunctionsRunnableFromState);
             functionsUsed.erase(function);
             functionsCalled.pop_back();;
             for (const auto& visitedCell : cellsCovered)
