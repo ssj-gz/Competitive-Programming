@@ -59,7 +59,6 @@ struct RobotState
     Direction direction = Up;
     RobotState& applyCommand(const Command& command)
     {
-        std::cout << "applyCommand - old state: (" << coord.x << "," << coord.y << ") dir: " << direction << " command: " << command.cmd << " amount: " << command.amount << std::endl;
         switch (command.cmd)
         {
             case Command::Forward:
@@ -93,7 +92,6 @@ struct RobotState
                 assert(false);
         }
 
-        std::cout << "applyCommand - new state: (" << coord.x << "," << coord.y << ") dir: " << direction << std::endl;
         return *this;
     }
     auto operator<=>(const RobotState&) const = default;
@@ -594,13 +592,10 @@ void buildValidCommandList(RobotState& state, vector<Command>& commandsFollowed,
         if (commandsFollowed.size() < 2 || (commandsFollowed.back().cmd != Command::Left || commandsFollowed[commandsFollowed.size() - 2].cmd != Command::Left))
         {
             // Left.
-            RobotState newStateDbg = state;
-            newStateDbg.direction = static_cast<RobotState::Direction>((newStateDbg.direction + 4 - 1) % 4);
             commandsFollowed.push_back(Command{Command::Left, 1});
             const int increaseInStrLen = leadingCommaLen + 1;
             commandsFollowedStringLen += increaseInStrLen;
             RobotState newState = RobotState(state).applyCommand(commandsFollowed.back());
-            assert(newState == newStateDbg);
 
             buildValidCommandList(newState, commandsFollowed, commandsFollowedStringLen, destCommandList, worldMap);
 
@@ -613,13 +608,10 @@ void buildValidCommandList(RobotState& state, vector<Command>& commandsFollowed,
     // Right.
     if (commandsFollowed.empty() || (commandsFollowed.back().cmd == Command::Forward))
     {
-        RobotState newStateDbg = state;
-        newStateDbg.direction = static_cast<RobotState::Direction>((newStateDbg.direction + 1) % 4);
         commandsFollowed.push_back(Command{Command::Right, 1});
         const int increaseInStrLen = leadingCommaLen + 1;
         commandsFollowedStringLen += increaseInStrLen;
         RobotState newState = RobotState(state).applyCommand(commandsFollowed.back());
-        assert(newState == newStateDbg);
 
         buildValidCommandList(newState, commandsFollowed, commandsFollowedStringLen, destCommandList, worldMap);
 
@@ -633,23 +625,10 @@ void buildValidCommandList(RobotState& state, vector<Command>& commandsFollowed,
         int amount = 1;
         while (true)
         {
-            RobotState newState = state;
-            switch (state.direction)
-            {
-                case RobotState::Direction::Up:
-                    newState.coord.y -= amount;
-                    break;
-                case RobotState::Direction::Down:
-                    newState.coord.y += amount;
-                    break;
-                case RobotState::Direction::Left:
-                    newState.coord.x -= amount;
-                    break;
-                case RobotState::Direction::Right:
-                    newState.coord.x += amount;
-                    break;
-            }
+            assert(amount < 100);
 
+            const Command forwardCommand{Command::Forward, amount};
+            RobotState newState = RobotState(state).applyCommand(forwardCommand);
             if (newState.coord.y < 0 || newState.coord.y >= worldMap.size())
                 break;
             if (newState.coord.x < 0 || newState.coord.x >= worldMap.front().size())
@@ -657,9 +636,7 @@ void buildValidCommandList(RobotState& state, vector<Command>& commandsFollowed,
             if (worldMap[newState.coord.y][newState.coord.x] != '#')
                 break;
 
-            assert(amount < 100);
-
-            commandsFollowed.push_back(Command{Command::Forward, amount});
+            commandsFollowed.push_back(forwardCommand);
             const int increaseInStrLen = leadingCommaLen + (amount <= 9 ? 1 : 2);
             commandsFollowedStringLen += increaseInStrLen;
 
