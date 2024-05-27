@@ -16,14 +16,6 @@ struct Coord
     auto operator<=>(const Coord&) const = default;
 };
 
-struct RobotState
-{
-    Coord coord;
-    enum Direction { Up = 0, Right = 1, Down = 2, Left = 3 };
-    Direction direction;
-    auto operator<=>(const RobotState&) const = default;
-};
-
 vector<string> computeMapAndGetPrompt(const vector<int64_t>& program)
 {
     IntCodeComputer intCodeComputer(program);
@@ -58,6 +50,53 @@ struct Command
     enum Cmd { Left, Right, Forward } cmd;
     int amount = 1;
     auto operator<=>(const Command& other) const = default;
+};
+
+struct RobotState
+{
+    Coord coord;
+    enum Direction { Up = 0, Right = 1, Down = 2, Left = 3 };
+    Direction direction = Up;
+    RobotState& applyCommand(const Command& command)
+    {
+        std::cout << "applyCommand - old state: (" << coord.x << "," << coord.y << ") dir: " << direction << " command: " << command.cmd << " amount: " << command.amount << std::endl;
+        switch (command.cmd)
+        {
+            case Command::Forward:
+                {
+                    switch (direction)
+                    {
+                        case RobotState::Direction::Up:
+                            coord.y -= command.amount;
+                            break;
+                        case RobotState::Direction::Down:
+                            coord.y += command.amount;
+                            break;
+                        case RobotState::Direction::Left:
+                            coord.x -= command.amount;
+                            break;
+                        case RobotState::Direction::Right:
+                            coord.x += command.amount;
+                            break;
+                        default:
+                            assert(false);
+                    }
+                }
+                break;
+            case Command::Left:
+                direction = static_cast<Direction>((static_cast<int>(direction) + 4 - 1) % 4);
+                break;
+            case Command::Right:
+                direction = static_cast<Direction>((static_cast<int>(direction) + 1) % 4);
+                break;
+            default:
+                assert(false);
+        }
+
+        std::cout << "applyCommand - new state: (" << coord.x << "," << coord.y << ") dir: " << direction << std::endl;
+        return *this;
+    }
+    auto operator<=>(const RobotState&) const = default;
 };
 
 constexpr int maxFunctionCalls = 10;
