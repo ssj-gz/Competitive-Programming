@@ -573,7 +573,7 @@ string toString(const vector<Command>& commandList)
 void buildValidCommandList(RobotState& state, vector<Command>& commandsFollowed, int& commandsFollowedStringLen, vector<vector<Command>>& destCommandList, const vector<string>& worldMap)
 {
     //std::cout << "commandsFollowed: >" << toString(commandsFollowed) << "< size: " << toString(commandsFollowed).size() << " commandsFollowedStringLen: " << commandsFollowedStringLen << std::endl;
-    assert(toString(commandsFollowed).size() == commandsFollowedStringLen);
+    //assert(toString(commandsFollowed).size() == commandsFollowedStringLen);
     if (commandsFollowedStringLen > 20)
         return;
     if (worldMap[state.coord.y][state.coord.x] != '#')
@@ -581,7 +581,7 @@ void buildValidCommandList(RobotState& state, vector<Command>& commandsFollowed,
 
     if (!commandsFollowed.empty())
     {
-        std::cout << " adding command list: " << toString(commandsFollowed) << std::endl;
+        //std::cout << " adding command list: " << toString(commandsFollowed) << std::endl;
         destCommandList.push_back(commandsFollowed);
     }
 
@@ -651,8 +651,21 @@ void buildValidCommandList(RobotState& state, vector<Command>& commandsFollowed,
     }
 }
 
+set<Coord> cellsCovered(const RobotState& startingState, const vector<Command>& commands)
+{
+    RobotState state = startingState;
+    set<Coord> cellsCovered = {state.coord};
+    for (const auto& command : commands)
+    {
+        state.applyCommand(command);
+        cellsCovered.insert(state.coord);
+    }
+    return cellsCovered;
+}
+
 map<RobotState, vector<vector<Command>>> buildValidCommandListForAllStates(const vector<string>& worldMap)
 {
+    map<RobotState, vector<vector<Command>>> stateToCommandListsMap;
     const int height = static_cast<int>(worldMap.size());
     const int width = static_cast<int>(worldMap[0].size());
     for (int x = 0; x < width; x++)
@@ -696,6 +709,7 @@ map<RobotState, vector<vector<Command>>> buildValidCommandListForAllStates(const
                             state.applyCommand(command);
                             cellsCovered.insert(state.coord);
                         }
+
                         Outcome outcome;
                         outcome.cellsCovered = cellsCovered;
                         outcome.endingState = state;
@@ -708,12 +722,39 @@ map<RobotState, vector<vector<Command>>> buildValidCommandListForAllStates(const
 
                     }
                     std::cout << " reducedCommandList.size: " << reducedCommandList.size() << std::endl;
+                    stateToCommandListsMap[startingState] = reducedCommandList;
                 }
             }
         }
     }
-    return map<RobotState, vector<vector<Command>>>();
+    return stateToCommandListsMap;
 }
+
+class Function
+{
+    public:
+        Function(const vector<Command>& commandList, int numCellsCovered)
+            : m_commandList{commandList},
+              m_numCellsCovered{numCellsCovered}
+        {
+            assert(m_numCellsCovered > 0);
+        }
+        void incStatesRunnableFrom()
+        {
+            m_numStatesRunnableFrom++;
+        }
+        int64_t score() const
+        {
+            assert(m_numStatesRunnableFrom != 0);
+            assert(m_numCellsCovered != 0);
+            return m_numCellsCovered * std::min(maxFunctionCalls, m_numStatesRunnableFrom);
+        }
+        Function() = default;
+    private:
+        vector<Command> m_commandList;
+        int m_numStatesRunnableFrom = 0;
+        int m_numCellsCovered = 0;
+};
 
 int main()
 {
@@ -765,7 +806,34 @@ int main()
     assert(mainPrompt == "Main:");
     cout << "mainPrompt: " << mainPrompt << endl;
 
-    buildValidCommandListForAllStates(worldMap);
+    const auto stateToCommandListsMap = buildValidCommandListForAllStates(worldMap);
+    map<vector<Command>, Function> functionForCommandList;
+    map<RobotState, vector<Function*>> functionsRunnableFromState;
+    std::cout << "Building functionsRunnableFromState" << std::endl;
+    for (const auto& [robotState, reducedCommandList] : stateToCommandListsMap)
+    {
+        for (const auto& commands : reducedCommandList)
+        {
+            if (!functionForCommandList.contains(commands))
+            {
+                functionForCommandList[commands] = Function(commands, cellsCovered(robotState, commands).size());
+            }
+            functionsRunnableFromState[robotState].push_back(&functionForCommandList[commands]);
+            functionForCommandList[commands].incStatesRunnableFrom();
+
+        }
+    }
+    std::cout << "Finished building functionsRunnableFromState" << std::endl;
+    std::cout << "functionForCommandList.size(): " << functionForCommandList.size() << std::endl;
+
+    for (auto& [robotState, runnableFunctions] : functionsRunnableFromState)
+    {
+        sort(runnableFunctions.begin(), runnableFunctions.end(), [](const auto* lhsFunction, const auto* rhsFunction)
+                {
+                    return lhsFunction->score() > rhsFunction->score();
+                });
+        std::cout << "state: (" << robotState.coord.x << "," << robotState.coord.y << ") dir: " << robotState.direction << " best Function score: " << runnableFunctions.front()->score() << std::endl;
+    }
 
 #if 0
     int largestNumThings = 0;
