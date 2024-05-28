@@ -17,10 +17,11 @@ struct Coord
 class KeySet
 {
     public:
-        void addKey(char keyChar)
+        KeySet& addKey(char keyChar)
         {
             assert(!hasKey(keyChar));
             m_keyBits |= keyBitForKey(keyChar);
+            return *this;
         };
         bool hasKey(char keyChar) const
         {
@@ -62,19 +63,17 @@ ostream& operator<<(ostream& os, const KeySet& keySet)
 
 struct NewKeyEvent
 {
-    KeySet previousKeySet;
-    char newKey = '\0';
-    int timeOfAcquisition = -1;
+    KeySet keySet;
     Coord placeOfAcquisition;
     auto operator<=>(const NewKeyEvent& other) const = default;
 };
 
-vector<NewKeyEvent> getNewKeyEvents(const KeySet& startingKeySet, const int startX, const int startY, const vector<string>& vaultMapOrig)
+vector<std::pair<int, NewKeyEvent>> getNewKeyEvents(const KeySet& startingKeySet, const int startX, const int startY, const vector<string>& vaultMapOrig)
 {
     auto vaultMap = vaultMapOrig;
     const int vaultHeight = vaultMap.size();
     const int vaultWidth = vaultMap.front().size();
-    vector<NewKeyEvent> newKeyEvents;
+    vector<std::pair<int, NewKeyEvent>> newKeyEvents;
     std::vector<Coord> toExplore = {{startX, startY}};
 
     int time = 1;
@@ -103,7 +102,8 @@ vector<NewKeyEvent> getNewKeyEvents(const KeySet& startingKeySet, const int star
                     if (!startingKeySet.hasKey(cellContents))
                     {
                         std::cout << "    Got new NewKeyEvent! - new key: " << cellContents << " @time: " << time << std::endl;
-                        newKeyEvents.push_back({startingKeySet, cellContents, time, neighbour});
+                        const KeySet newKeySet = KeySet(startingKeySet).addKey(cellContents);
+                        newKeyEvents.push_back({time, {newKeySet, neighbour}});
                     }
                     else
                     {
@@ -176,12 +176,10 @@ int main()
     std::cout << "allKeys: " << allKeys << std::endl;
 
     KeySet keySet;
-    const auto newKeyEvents = getNewKeyEvents(keySet, startCoord.x, startCoord.y, vaultMap);
     std::map<int, set<NewKeyEvent>> keyEventsForTime;
-    for (const auto newKeyEvent : newKeyEvents)
-    {
-        keyEventsForTime[newKeyEvent.timeOfAcquisition].insert(newKeyEvent);
-    }
+    keyEventsForTime[0] = { { keySet, startCoord } };
+    map<NewKeyEvent, int> earliestOccurenceOfKeyEvent;
+
     auto keyEventTimeIter = keyEventsForTime.begin();
     int quickestTime = -1;
     while (keyEventTimeIter != keyEventsForTime.end() && quickestTime == -1)
@@ -199,8 +197,7 @@ int main()
 #endif
         for (const auto keyEvent : keyEventsAtTime)
         {
-            KeySet keySet = keyEvent.previousKeySet;
-            keySet.addKey(keyEvent.newKey);
+            KeySet keySet = keyEvent.keySet;
             std::cout << "keySet: " << keySet << " currentTime: " << currentTime << " # events at time: " << keyEventsAtTime.size() << std::endl;
             if (keySet == allKeys)
             {
@@ -209,10 +206,23 @@ int main()
                 break;
             }
             const auto newKeyEvents = getNewKeyEvents(keySet, keyEvent.placeOfAcquisition.x, keyEvent.placeOfAcquisition.y, vaultMap);
-            for (const auto newKeyEvent : newKeyEvents)
+            for (const auto& [timeOfAcquisition, newKeyEvent] : newKeyEvents)
             {
-                assert(newKeyEvent.timeOfAcquisition != 0);
-                keyEventsForTime[newKeyEvent.timeOfAcquisition + currentTime].insert(newKeyEvent);
+                assert(timeOfAcquisition != 0);
+                bool add = true;
+                if (!earliestOccurenceOfKeyEvent.contains(newKeyEvent))
+                {
+                    earliestOccurenceOfKeyEvent[newKeyEvent] = currentTime + timeOfAcquisition;
+                }
+                else
+                {
+                    if (earliestOccurenceOfKeyEvent[newKeyEvent] > currentTime + timeOfAcquisition)
+                        earliestOccurenceOfKeyEvent[newKeyEvent] = currentTime + timeOfAcquisition;
+                    else
+                        add = false;
+                }
+                if (add)
+                    keyEventsForTime[timeOfAcquisition + currentTime].insert(newKeyEvent);
             }
         }
 
