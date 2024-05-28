@@ -164,18 +164,14 @@ int main()
     {
         Coord coord;
         int level = -1;
-        int mapId = 0;
-        bool justExitedWarp = false;
         auto operator<=>(const Pos& other) const = default;
     };
 
-    int mapId = 0;
     int time = 0;
     int bestTime = -1;
     bool foundExit = false;
-    vector<Pos> toExplore = { {startCoord, 0, mapId} };
-    map<int, set<Coord>> visitedPositionsForMapId = { {mapId, {startCoord}} };
-    map<int, int> parentMapId;
+    vector<Pos> toExplore = { {startCoord, 0} };
+    set<Pos> alreadyVisited = { {startCoord, 0} };
 
     while (!toExplore.empty() && !foundExit)
     {
@@ -206,7 +202,7 @@ int main()
                 //std::cout << " neighbourCoord: " << neighbourCoord << " cellContents: " << cellContents << std::endl;
                 if (cellContents != '.')
                     continue;
-                if (visitedPositionsForMapId[pos.mapId].contains(neighbourCoord))
+                if (alreadyVisited.contains({neighbourCoord, pos.level}))
                     continue;
                 if (pos.level != 0 && (pos.coord == startCoord || pos.coord == endCoord))
                     continue;
@@ -215,32 +211,25 @@ int main()
                     //neighbour = warps[neighbour];
 
                 //cellContents = 'X';
-                visitedPositionsForMapId[pos.mapId].insert(neighbourCoord);
-                nextToExplore.push_back({neighbourCoord, pos.level, pos.mapId});
+                alreadyVisited.insert({neighbourCoord, pos.level});
+                nextToExplore.push_back({neighbourCoord, pos.level});
 
             }
-            if (!pos.justExitedWarp && warps.contains(pos.coord))
+            if (warps.contains(pos.coord))
             {
                 //nextToExplore.push_back(warps[coord]);
                 const bool isOuterWarp = ((pos.coord.x == 0) || (pos.coord.x == width - 1) || (pos.coord.y == 0) || (pos.coord.y == height - 1) );
                 if (isOuterWarp) {
                     if (pos.level != 0) {
-                        const int mapIdOfParent = parentMapId[pos.mapId];
-                        if (!visitedPositionsForMapId[mapIdOfParent].contains(warps[pos.coord]))
-                        {
-                            std::cout << "Back up to " << mapIdOfParent << " due to entering warp: at pos: " << pos.coord << " level: " << pos.level << " exiting at: " << warps[pos.coord] << std::endl;
-                            nextToExplore.push_back({warps[pos.coord], pos.level - 1, mapIdOfParent});
-                            visitedPositionsForMapId.erase(pos.mapId);
-                        }
+                        //std::cout << "Back up to " << pos.level - 1 << " due to entering warp: at pos: " << pos.coord << " level: " << pos.level << " exiting at: " << warps[pos.coord] << std::endl;
+                        nextToExplore.push_back({warps[pos.coord], pos.level - 1});
                     }
                 }
                 else
                 {
-                    mapId++;
-                    std::cout << "New map: " << mapId << " due to entering warp: at pos: " << pos.coord << " level: " << pos.level << " mapId:" << pos.mapId << " exiting at: " << warps[pos.coord] << std::endl;
-                    parentMapId[mapId] = pos.mapId;
-                    visitedPositionsForMapId[pos.mapId].insert(pos.coord);
-                    nextToExplore.push_back({warps[pos.coord], pos.level + 1, mapId, true});
+                    //std::cout << "New map: " << mapId << " due to entering warp: at pos: " << pos.coord << " level: " << pos.level << " mapId:" << pos.mapId << " exiting at: " << warps[pos.coord] << std::endl;
+                    alreadyVisited.insert({pos.coord, pos.level});
+                    nextToExplore.push_back({warps[pos.coord], pos.level + 1});
                 }
 
             }
