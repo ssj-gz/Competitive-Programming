@@ -74,7 +74,9 @@ class IntCodeComputer
                         {
                             if (m_inputs.empty())
                             {
+#ifndef INTCODE_SILENT
                                 std::cout << " no input: exiting with WaitingForInput" << std::endl;
+#endif
                                 m_position--;
                                 return WaitingForInput;
                             }
@@ -135,7 +137,9 @@ class IntCodeComputer
                             break;
                         }
                     case 99:
+#ifndef INTCODE_SILENT
                         std::cout << "Terminate!" << std::endl;
+#endif
                         m_isTerminated = true;
                         return Terminated;
                     default:
