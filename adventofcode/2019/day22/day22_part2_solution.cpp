@@ -10,9 +10,7 @@
 using namespace std;
 
 const uint64_t numCards = 119'315'717'514'047ULL;
-//const uint64_t numCards = 32868853;
 const uint64_t numShuffles = 101'741'582'076'661ULL;
-//const uint64_t numShuffles = 10'123ULL;
 
 class ModNum
 {
@@ -181,31 +179,6 @@ Matrix2x2 quickMatrixExponentiation(Matrix2x2 base, int64_t exponent)
     return result;
 }
 
-
-int64_t quickPower(__uint128_t base, __uint128_t exponent, __uint128_t modulus)
-{
-    // Raise base to the exponent mod modulus using as few multiplications as 
-    // we can e.g. base ^ 8 ==  (((base^2)^2)^2).
-    __uint128_t result = 1;
-    __uint128_t power = 0;
-    while (exponent > 0)
-    {
-        if (exponent & 1)
-        {
-            __uint128_t subResult = base;
-            for (__uint128_t i = 0; i < power; i++)
-            {
-                subResult = (subResult * subResult) % modulus;
-            }
-            result = (result * subResult) % modulus;
-        }
-        exponent >>= 1;
-        power++;
-    }
-    return result;
-}
-
-
 int main()
 {
 
@@ -268,8 +241,7 @@ int main()
     ModNum desiredPos = initialDesiredPos;
     ModNum XYay;
     ModNum YYay;
-    //const int numShuffles = 256;
-    //for (int i = 0; i < numShuffles; i++)
+
     {
         ModNum X(1);
         ModNum Y(0);
@@ -303,79 +275,15 @@ int main()
         }
         XYay = X;
         YYay = Y;
-        ModNum pickle = 0;
-        pickle = X * initialDesiredPos + Y;
-        std::cout << "noodles: " << pickle << std::endl; 
-        //std::cout << "desiredPos after shuffle: # " << (i + 1) << " : " << desiredPos << std::endl;
-        std::cout << "desiredPos after shuffle: " << desiredPos << std::endl;
-        //assert(pickle == desiredPos);
-        std::cout << "X: " << X << std::endl;
-        std::cout << "Y: " << Y << std::endl;
-        //std::cout << "XVerify: " << XVerify << std::endl;
-        //std::cout << "YVerify: " << YVerify << std::endl;
-        //assert(XVerify.value() == X);
-        //assert(YVerify.value() == Y);
     }
-    std::cout << "desiredPos: " << desiredPos << std::endl;
-    //__uint128_t pickle = 0;
-    //pickle = (static_cast<__uint128_t>(X) * initialDesiredPos) % numCards;
-    //pickle = (pickle + Y) % numCards;
-    //std::cout << "haggis: " << static_cast<uint64_t>(pickle) << std::endl; 
-    std::cout << "XYay: " << XYay << " YYay: " << YYay << std::endl;
     ModNum X(XYay);
     ModNum Y(YYay);
-    //for (int i = 0; i < numShuffles - 1; i++)
-    {
-        ModNum Xnew = X * X;
-        ModNum Ynew = X * Y + Y;
-        X = Xnew;
-        Y = Ynew;
 
-        ModNum pickle = X * initialDesiredPos + Y;
-        //std::cout << "interim haggis # " << i << ": " << pickle << std::endl;  // Will be equal to desiredPos after the (2 ** i)th shuffle.
-    }
-    std::cout << "X: " << X << " Y: " << Y << std::endl;
-
-    //assert(XYay * initialDesiredPos + YYay == desiredPos);
-    const Matrix2x2 posSingleShuffleMatrix(XYay, YYay, 
-                                           0, 1);
-    //const int power = numShuffles;
-    //for (int i = 0; i < power; i++)
-    //{
-    //    posShuffleMatrix *= posSingleShuffleMatrix;
-    //}
     const Matrix2x2 initialPosMatrix(initialDesiredPos, 0, 
                                1, 0);
-    //posShuffleMatrix *= initialPosMatrix;
-    std::cout << endl;
+    const Matrix2x2 posSingleShuffleMatrix(XYay, YYay, 
+                                           0, 1);
     const Matrix2x2 posShuffleMatrix = quickMatrixExponentiation(posSingleShuffleMatrix, numShuffles);
     const Matrix2x2 finalResultMatrix = posShuffleMatrix * initialPosMatrix;
-    cout << "blah a11: " << posShuffleMatrix.a11() << std::endl;
-    cout << "blah a12: " << posShuffleMatrix.a12() << std::endl;
-    cout << "blah a21: " << posShuffleMatrix.a21() << std::endl;
-    cout << "blah a22: " << posShuffleMatrix.a22() << std::endl;
-    std::cout << endl;
-    //cout << "glap a11: " << gloob.a11() << std::endl;
-    //cout << "glap a12: " << gloob.a12() << std::endl;
-    //cout << "glap a21: " << gloob.a21() << std::endl;
-    //cout << "glap a22: " << gloob.a22() << std::endl;
-    //std::cout << endl;
-
-    //Matrix2x2 glarb(1, 0,
-    //                0 ,1);
-    //Matrix2x2 blobe(3, 4,
-    //                11 ,97);
-    //glarb*= blobe;
-
-    //cout << "blah a11: " << glarb.a11() << std::endl;
-    //cout << "blah a12: " << glarb.a12() << std::endl;
-    //cout << "blah a21: " << glarb.a21() << std::endl;
-    //cout << "blah a22: " << glarb.a22() << std::endl;
-    std::cout << endl;
-    ModNum pickle = 0;
-    pickle = (X * initialDesiredPos) + Y;
-    std::cout << "haggis: " << pickle << std::endl; 
     std::cout << "Final result: " << finalResultMatrix.a11() << std::endl;
-    std::cout << "desiredPos: " << desiredPos << std::endl;
-    //assert(finalResultMatrix.a11() == desiredPos);
 }
