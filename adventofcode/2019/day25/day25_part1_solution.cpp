@@ -17,6 +17,49 @@ struct RoomInfo
     vector<string> items;
 };
 
+void inputAsciiToIntCode(IntCodeComputer& intCodeComputer, const std::string& inputLine)
+{
+    std::cout << "Telling IntCode: >" << inputLine << "<" << std::endl;
+    vector<int64_t> input;
+    for (const char letter : inputLine)
+        input.push_back(static_cast<int64_t>(letter));
+    input.push_back(10);
+    intCodeComputer.addInputs(input);
+    const auto status = intCodeComputer.run();
+    assert(status != IntCodeComputer::Terminated);
+
+};
+
+vector<string> readAsciiOutput(IntCodeComputer& intCodeComputer)
+{
+    intCodeComputer.run();
+    const auto output = intCodeComputer.takeOutput();
+    //assert(!output.empty());
+    vector<string> lines;
+    string currentLine;
+    for (const auto letter : output)
+    {
+        if (letter == 10)
+        {
+            lines.push_back(currentLine);
+            currentLine.clear();
+        }
+        else
+        {
+            currentLine.push_back(static_cast<char>(letter));
+        }
+        //cout << static_cast<char>(letter);
+    }
+    lines.push_back(currentLine);
+
+    return lines;
+};
+
+void printLines(const vector<string>& lines)
+{
+    for (const auto& line : lines) cout << line << std::endl;
+}
+
 RoomInfo parseRoomInfo(const vector<string>& roomDescription)
 {
     string roomName;
@@ -95,43 +138,6 @@ string oppositeDirection(const std::string& direction)
 void explore(IntCodeComputer& intCodeComputer, set<string>& roomsSeen, const vector<string>& directionsFollowed, int depth, map<string, vector<string>>& directionsToRoom)
 {
     const std::string indent(depth, ' ');
-    auto inputAsciiToIntCode = [&intCodeComputer, indent](const std::string& inputLine)
-    {
-        std::cout << indent << "Telling IntCode: >" << inputLine << "<" << std::endl;
-        vector<int64_t> input;
-        for (const char letter : inputLine)
-            input.push_back(static_cast<int64_t>(letter));
-        input.push_back(10);
-        intCodeComputer.addInputs(input);
-        const auto status = intCodeComputer.run();
-        assert(status != IntCodeComputer::Terminated);
-
-    };
-
-    auto readAsciiOutput = [&intCodeComputer]()
-    {
-        intCodeComputer.run();
-        const auto output = intCodeComputer.takeOutput();
-        //assert(!output.empty());
-        vector<string> lines;
-        string currentLine;
-        for (const auto letter : output)
-        {
-            if (letter == 10)
-            {
-                lines.push_back(currentLine);
-                currentLine.clear();
-            }
-            else
-            {
-                currentLine.push_back(static_cast<char>(letter));
-            }
-            //cout << static_cast<char>(letter);
-        }
-        lines.push_back(currentLine);
-
-        return lines;
-    };
 
     auto printLines = [&indent](const vector<string>& lines)
     {
@@ -141,7 +147,7 @@ void explore(IntCodeComputer& intCodeComputer, set<string>& roomsSeen, const vec
 
     const std::string directionFollowed = (directionsFollowed.empty() ? "" : directionsFollowed.back());
     std::cout << indent << "Explore: depth " << depth << " directionFollowed:" << directionFollowed << std::endl;
-    const auto roomDescription = readAsciiOutput();
+    const auto roomDescription = readAsciiOutput(intCodeComputer);
     std::cout << indent << "roomDescription: " << std::endl;
     printLines(roomDescription);
     const RoomInfo roomInfo = parseRoomInfo(roomDescription);
@@ -151,8 +157,8 @@ void explore(IntCodeComputer& intCodeComputer, set<string>& roomsSeen, const vec
         std::cout << indent << "Already been to " << roomInfo.roomName << "; backtracking.  directionFollowed: " << directionFollowed << std::endl;
         const string oppositeDir = oppositeDirection(directionFollowed);
         assert(std::find(roomInfo.directions.begin(), roomInfo.directions.end(), oppositeDir) != roomInfo.directions.end());
-        inputAsciiToIntCode(oppositeDir);
-        readAsciiOutput(); // Swallow output.
+        inputAsciiToIntCode(intCodeComputer, oppositeDir);
+        readAsciiOutput(intCodeComputer); // Swallow output.
         return;
     }
 
@@ -163,10 +169,10 @@ void explore(IntCodeComputer& intCodeComputer, set<string>& roomsSeen, const vec
     {
         if (item == "infinite loop" || item == "molten lava" || item == "photons" || item == "giant electromagnet" || item == "escape pod")
             continue;
-        inputAsciiToIntCode("take " + item);
-        printLines(readAsciiOutput());
-        inputAsciiToIntCode("inv");
-        printLines(readAsciiOutput());
+        inputAsciiToIntCode(intCodeComputer, "take " + item);
+        printLines(readAsciiOutput(intCodeComputer));
+        inputAsciiToIntCode(intCodeComputer, "inv");
+        printLines(readAsciiOutput(intCodeComputer));
 
     }
 
@@ -175,7 +181,7 @@ void explore(IntCodeComputer& intCodeComputer, set<string>& roomsSeen, const vec
         if (!directionFollowed.empty() && direction == oppositeDirection(directionFollowed))
             continue;
         std::cout << indent << "Heading: >" << direction << "<" << std::endl;
-        inputAsciiToIntCode(direction);
+        inputAsciiToIntCode(intCodeComputer, direction);
         vector<string> newDirectionFollowed = directionsFollowed;
         newDirectionFollowed.push_back(direction);
         explore(intCodeComputer, roomsSeen, newDirectionFollowed, depth + 1, directionsToRoom);
@@ -184,12 +190,28 @@ void explore(IntCodeComputer& intCodeComputer, set<string>& roomsSeen, const vec
     std::cout << indent << "nothing more to do here; backtracking" << std::endl;
     if (depth != 0)
     {
-        inputAsciiToIntCode(oppositeDirection(directionFollowed));
-        readAsciiOutput(); // Swallow output.
+        inputAsciiToIntCode(intCodeComputer, oppositeDirection(directionFollowed));
+        readAsciiOutput(intCodeComputer); // Swallow output.
     }
 
 
 
+}
+
+void generateItemCombinations(const set<string>& allItems, set<string>::const_iterator itemsIter, set<string>& currentCombination, vector<set<string>>& itemsCombinations)
+{
+    if (itemsIter == allItems.end())
+    {
+        itemsCombinations.push_back(currentCombination);
+        return;
+    }
+
+    // Don't include this item.
+    generateItemCombinations(allItems, std::next(itemsIter), currentCombination, itemsCombinations);
+    // Do include this item.
+    currentCombination.insert(*itemsIter);
+    generateItemCombinations(allItems, std::next(itemsIter), currentCombination, itemsCombinations);
+    currentCombination.erase(*itemsIter);
 }
 
 int main()
@@ -258,4 +280,56 @@ int main()
     }
 
     std::cout << "Navigating back to Pressure Sensitive Floor" << std::endl;
+    const auto toPressureSensitiveFloor = directionsToRoom["Pressure-Sensitive Floor"];
+    vector<string> toCheckpoint(toPressureSensitiveFloor.begin(), std::prev(toPressureSensitiveFloor.end()));
+    for (const auto& direction : toCheckpoint)
+    {
+        inputAsciiToIntCode(intCodeComputer, direction);
+        printLines(readAsciiOutput(intCodeComputer));
+    }
+
+    set<string> allItems;
+    inputAsciiToIntCode(intCodeComputer, "inv");
+    const auto& inventoryLines = readAsciiOutput(intCodeComputer);
+    for (const auto& line : inventoryLines)
+    {
+        if (line.starts_with("- "))
+            allItems.insert(line.substr(2));
+    }
+    std::cout << "Items collected: " << std::endl;
+    for (const auto& item : allItems) std::cout << ">" << item << "<" << std::endl;
+    for (const auto& item : allItems) 
+    {
+        inputAsciiToIntCode(intCodeComputer, "drop " + item);
+        printLines(readAsciiOutput(intCodeComputer));
+    }
+
+    vector<set<string>> itemsCombinations;
+    set<string> currentCombination;
+    generateItemCombinations(allItems, allItems.cbegin(), currentCombination, itemsCombinations);
+    for (const auto& combination : itemsCombinations)
+    {
+        std::cout << "combination: " << std::endl;
+        for (const auto item : combination) std::cout << " " << item << std::endl;
+        std::cout << std::endl;
+
+        // Gather this combination.
+        for (const auto item : combination)
+        {
+            inputAsciiToIntCode(intCodeComputer, "take " + item);
+            printLines(readAsciiOutput(intCodeComputer));
+        }
+
+        inputAsciiToIntCode(intCodeComputer, toPressureSensitiveFloor.back());
+        printLines(readAsciiOutput(intCodeComputer));
+
+        // ... and drop it, ready for the next combination.
+        for (const auto item : combination)
+        {
+            inputAsciiToIntCode(intCodeComputer, "drop " + item);
+            printLines(readAsciiOutput(intCodeComputer));
+        }
+    }
+
+
 }
