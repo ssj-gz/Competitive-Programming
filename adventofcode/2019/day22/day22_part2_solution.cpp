@@ -16,7 +16,7 @@ class ModNum
 {
     public:
         ModNum(int64_t n = 0)
-            : m_n{n}
+            : m_n{(n + modulus) % modulus}
         {
         }
         ModNum& operator+=(const ModNum& other)
@@ -69,12 +69,23 @@ ModNum operator+(const ModNum& lhs, const ModNum& rhs)
     return result;
 }
 
+ModNum operator-(const ModNum& lhs, const ModNum& rhs)
+{
+    ModNum result(lhs);
+    result -= rhs;
+    return result;
+}
 
 ModNum operator*(const ModNum& lhs, const ModNum& rhs)
 {
     ModNum result(lhs);
     result *= rhs;
     return result;
+}
+
+bool operator==(const ModNum& lhs, const ModNum& rhs)
+{
+    return (lhs.value() == rhs.value());
 }
 
 ostream& operator<<(ostream& os, const ModNum& toPrint)
@@ -189,74 +200,61 @@ int main()
 
     std::reverse(instructions.begin(), instructions.end());
     const int64_t initialDesiredPos = 6577;
-    int64_t desiredPos = initialDesiredPos;
-    int64_t XYay = -1;
-    int64_t YYay = -1;
+    ModNum desiredPos = initialDesiredPos;
+    ModNum XYay;
+    ModNum YYay;
     const int numShuffles = 256;
     for (int i = 0; i < numShuffles; i++)
     {
-        int64_t X = 1;
-        int64_t Y = 0;
-        ModNum XVerify(1);
-        ModNum YVerify(0);
+        ModNum X(1);
+        ModNum Y(0);
         for (const auto instruction : instructions)
         {
             switch (instruction.type)
             {
                 case Instruction::DealWithIncrement:
                     {
-                        const __uint128_t inverseAmount = quickPower(instruction.amount, numCards - 2, numCards);
-                        const ModNum inverseAmountVerify = quickPower2(instruction.amount, numCards - 2);
+                        const ModNum inverseAmount = quickPower2(instruction.amount, numCards - 2);
                         //std::cout << "amount: " << instruction.amount << " inverseAmount: " << inverseAmount << " multiplied:" << (static_cast<__uint128_t>(inverseAmount) * static_cast<__uint128_t>(instruction.amount)) << " modulus: " << ((inverseAmount * instruction.amount) % numCards) << std::endl;
-                        assert(((static_cast<__uint128_t>(inverseAmount) * static_cast<__uint128_t>(instruction.amount)) % numCards) == 1);
-                        desiredPos = (static_cast<__uint128_t>(desiredPos) * static_cast<__uint128_t>(inverseAmount)) % numCards;
-                        X = (static_cast<__uint128_t>(X) * static_cast<__uint128_t>(inverseAmount)) % numCards;
-                        Y = (static_cast<__uint128_t>(Y) * static_cast<__uint128_t>(inverseAmount)) % numCards;
-                        XVerify = XVerify * inverseAmountVerify;
-                        YVerify = YVerify * inverseAmountVerify;
+                        assert(inverseAmount * instruction.amount == 1);
+                        desiredPos = desiredPos * inverseAmount;
+                        X = X * inverseAmount;
+                        Y = Y * inverseAmount;
                     }
                     break;
                 case Instruction::Cut:
-                    desiredPos = numCards + desiredPos + instruction.amount;
-                    assert(desiredPos >= 0);
-                    desiredPos = desiredPos % numCards;
-                    Y = (Y + numCards +  instruction.amount) % numCards;
-                    YVerify += instruction.amount;
+                    desiredPos += instruction.amount;
+                    Y += instruction.amount;
                     break;
                 case Instruction::DealIntoNewDeck:
                     desiredPos = numCards - 1 - desiredPos;
-                    X = (static_cast<__uint128_t>(X) * static_cast<__uint128_t>(numCards - 1)) % numCards;
-                    Y = (static_cast<__uint128_t>(Y) * static_cast<__uint128_t>(numCards - 1)) % numCards;
-                    Y = (Y + numCards + (numCards - 1)) % numCards;
-                    XVerify *= (numCards - 1);
-                    YVerify *= (numCards - 1);
-                    YVerify += numCards - 1;
+                    X = X * (numCards - 1);
+                    Y = Y * (numCards - 1) + (numCards - 1);
                     break;
                 default:
                     assert(false);
             }
-            assert(desiredPos >= 0 && desiredPos < numCards);
+            //assert(desiredPos >= 0 && desiredPos < numCards);
         }
         XYay = X;
         YYay = Y;
-        __uint128_t pickle = 0;
-        pickle = (static_cast<__uint128_t>(X) * initialDesiredPos) % numCards;
-        pickle = (pickle + Y) % numCards;
-        std::cout << "noodles: " << static_cast<uint64_t>(pickle) << std::endl; 
+        ModNum pickle = 0;
+        pickle = X * initialDesiredPos + Y;
+        std::cout << "noodles: " << pickle << std::endl; 
         std::cout << "desiredPos after shuffle: # " << (i + 1) << " : " << desiredPos << std::endl;
         std::cout << "X: " << X << std::endl;
         std::cout << "Y: " << Y << std::endl;
-        std::cout << "XVerify: " << XVerify << std::endl;
-        std::cout << "YVerify: " << YVerify << std::endl;
-        assert(XVerify.value() == X);
-        assert(YVerify.value() == Y);
+        //std::cout << "XVerify: " << XVerify << std::endl;
+        //std::cout << "YVerify: " << YVerify << std::endl;
+        //assert(XVerify.value() == X);
+        //assert(YVerify.value() == Y);
     }
     std::cout << "desiredPos: " << desiredPos << std::endl;
     //__uint128_t pickle = 0;
     //pickle = (static_cast<__uint128_t>(X) * initialDesiredPos) % numCards;
     //pickle = (pickle + Y) % numCards;
     //std::cout << "haggis: " << static_cast<uint64_t>(pickle) << std::endl; 
-    std::cout << "XYay: " << static_cast<int64_t>(XYay) << " YYay: " << static_cast<int64_t>(YYay) << std::endl;
+    std::cout << "XYay: " << XYay << " YYay: " << YYay << std::endl;
     ModNum X(XYay);
     ModNum Y(YYay);
     for (int i = 0; i < numShuffles - 1; i++)
