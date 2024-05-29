@@ -12,29 +12,6 @@ using namespace std;
 const uint64_t numCards = 119'315'717'514'047ULL;
 //const uint64_t numCards = 32868853;
 
-int64_t quickPower(__uint128_t base, __uint128_t exponent, __uint128_t modulus)
-{
-    // Raise base to the exponent mod modulus using as few multiplications as 
-    // we can e.g. base ^ 8 ==  (((base^2)^2)^2).
-    __uint128_t result = 1;
-    __uint128_t power = 0;
-    while (exponent > 0)
-    {
-        if (exponent & 1)
-        {
-            __uint128_t subResult = base;
-            for (__uint128_t i = 0; i < power; i++)
-            {
-                subResult = (subResult * subResult) % modulus;
-            }
-            result = (result * subResult) % modulus;
-        }
-        exponent >>= 1;
-        power++;
-    }
-    return result;
-}
-
 class ModNum
 {
     public:
@@ -106,6 +83,51 @@ ostream& operator<<(ostream& os, const ModNum& toPrint)
     return os;
 }
 
+ModNum quickPower2(ModNum base, int64_t exponent)
+{
+    // Raise base to the exponent mod modulus using as few multiplications as 
+    // we can e.g. base ^ 8 ==  (((base^2)^2)^2).
+    ModNum result = 1;
+    int64_t power = 0;
+    while (exponent > 0)
+    {
+        if (exponent & 1)
+        {
+            ModNum subResult = base;
+            for (int64_t i = 0; i < power; i++)
+            {
+                subResult = (subResult * subResult);
+            }
+            result = (result * subResult);
+        }
+        exponent >>= 1;
+        power++;
+    }
+    return result;
+}
+
+int64_t quickPower(__uint128_t base, __uint128_t exponent, __uint128_t modulus)
+{
+    // Raise base to the exponent mod modulus using as few multiplications as 
+    // we can e.g. base ^ 8 ==  (((base^2)^2)^2).
+    __uint128_t result = 1;
+    __uint128_t power = 0;
+    while (exponent > 0)
+    {
+        if (exponent & 1)
+        {
+            __uint128_t subResult = base;
+            for (__uint128_t i = 0; i < power; i++)
+            {
+                subResult = (subResult * subResult) % modulus;
+            }
+            result = (result * subResult) % modulus;
+        }
+        exponent >>= 1;
+        power++;
+    }
+    return result;
+}
 
 
 int main()
@@ -184,13 +206,14 @@ int main()
                 case Instruction::DealWithIncrement:
                     {
                         const __uint128_t inverseAmount = quickPower(instruction.amount, numCards - 2, numCards);
+                        const ModNum inverseAmountVerify = quickPower2(instruction.amount, numCards - 2);
                         //std::cout << "amount: " << instruction.amount << " inverseAmount: " << inverseAmount << " multiplied:" << (static_cast<__uint128_t>(inverseAmount) * static_cast<__uint128_t>(instruction.amount)) << " modulus: " << ((inverseAmount * instruction.amount) % numCards) << std::endl;
                         assert(((static_cast<__uint128_t>(inverseAmount) * static_cast<__uint128_t>(instruction.amount)) % numCards) == 1);
                         desiredPos = (static_cast<__uint128_t>(desiredPos) * static_cast<__uint128_t>(inverseAmount)) % numCards;
                         X = (static_cast<__uint128_t>(X) * static_cast<__uint128_t>(inverseAmount)) % numCards;
                         Y = (static_cast<__uint128_t>(Y) * static_cast<__uint128_t>(inverseAmount)) % numCards;
-                        XVerify = XVerify * static_cast<int64_t>(inverseAmount);
-                        YVerify = YVerify * static_cast<int64_t>(inverseAmount);
+                        XVerify = XVerify * inverseAmountVerify;
+                        YVerify = YVerify * inverseAmountVerify;
                     }
                     break;
                 case Instruction::Cut:
@@ -225,6 +248,8 @@ int main()
         std::cout << "Y: " << Y << std::endl;
         std::cout << "XVerify: " << XVerify << std::endl;
         std::cout << "YVerify: " << YVerify << std::endl;
+        assert(XVerify.value() == X);
+        assert(YVerify.value() == Y);
     }
     std::cout << "desiredPos: " << desiredPos << std::endl;
     //__uint128_t pickle = 0;
@@ -234,19 +259,31 @@ int main()
     std::cout << "XYay: " << static_cast<int64_t>(XYay) << " YYay: " << static_cast<int64_t>(YYay) << std::endl;
     __uint128_t X = XYay;
     __uint128_t Y = YYay;
+    ModNum XVerify(XYay);
+    ModNum YVerify(YYay);
     for (int i = 0; i < numShuffles - 1; i++)
     {
         __uint128_t Xnew = (X * X) % numCards;
         __uint128_t Ynew = (X * Y + Y) % numCards; // Squaring.
+        ModNum XnewVerify = XVerify * XVerify;
+        ModNum YnewVerify = XVerify * YVerify + YVerify;
+        assert(XnewVerify.value() == Xnew);
+        assert(YnewVerify.value() == Ynew);
         //__uint128_t Xnew = (X * XYay) % numCards;     // Multiplying by XYay YYay.
         //__uint128_t Ynew = (X * YYay + Y) % numCards;
         X = Xnew;
         Y = Ynew;
+        XVerify = XnewVerify;
+        YVerify = YnewVerify;
+        assert(XVerify.value() == X);
+        assert(YVerify.value() == Y);
 
         __uint128_t pickle = 0;
         pickle = (static_cast<__uint128_t>(X) * initialDesiredPos) % numCards;
         pickle = (pickle + Y) % numCards;
+        ModNum pickleVerify = XVerify * initialDesiredPos + YVerify;
         std::cout << "interim haggis # " << i << ": " << static_cast<uint64_t>(pickle) << std::endl;  // Will be equal to desiredPos after the (2 ** i)th shuffle.
+        assert(pickleVerify.value() == pickle);
     }
     std::cout << "X: " << static_cast<int64_t>(X) << " Y: " << static_cast<int64_t>(Y) << std::endl;
 
