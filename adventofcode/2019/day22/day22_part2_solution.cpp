@@ -196,7 +196,7 @@ int main()
     ModNum XYay;
     ModNum YYay;
     const int numShuffles = 256;
-    for (int i = 0; i < numShuffles; i++)
+    //for (int i = 0; i < numShuffles; i++)
     {
         ModNum X(1);
         ModNum Y(0);
@@ -226,14 +226,16 @@ int main()
                 default:
                     assert(false);
             }
-            //assert(desiredPos >= 0 && desiredPos < numCards);
+            assert((X * initialDesiredPos + Y) == desiredPos);
         }
         XYay = X;
         YYay = Y;
         ModNum pickle = 0;
         pickle = X * initialDesiredPos + Y;
         std::cout << "noodles: " << pickle << std::endl; 
-        std::cout << "desiredPos after shuffle: # " << (i + 1) << " : " << desiredPos << std::endl;
+        //std::cout << "desiredPos after shuffle: # " << (i + 1) << " : " << desiredPos << std::endl;
+        std::cout << "desiredPos after shuffle: " << desiredPos << std::endl;
+        assert(pickle == desiredPos);
         std::cout << "X: " << X << std::endl;
         std::cout << "Y: " << Y << std::endl;
         //std::cout << "XVerify: " << XVerify << std::endl;
@@ -249,7 +251,7 @@ int main()
     std::cout << "XYay: " << XYay << " YYay: " << YYay << std::endl;
     ModNum X(XYay);
     ModNum Y(YYay);
-    for (int i = 0; i < numShuffles - 1; i++)
+    //for (int i = 0; i < numShuffles - 1; i++)
     {
         ModNum Xnew = X * X;
         ModNum Ynew = X * Y + Y;
@@ -257,7 +259,7 @@ int main()
         Y = Ynew;
 
         ModNum pickle = X * initialDesiredPos + Y;
-        std::cout << "interim haggis # " << i << ": " << pickle << std::endl;  // Will be equal to desiredPos after the (2 ** i)th shuffle.
+        //std::cout << "interim haggis # " << i << ": " << pickle << std::endl;  // Will be equal to desiredPos after the (2 ** i)th shuffle.
     }
     std::cout << "X: " << X << " Y: " << Y << std::endl;
 
