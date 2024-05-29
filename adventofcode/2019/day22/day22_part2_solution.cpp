@@ -227,18 +227,18 @@ int main()
     // This is not all that helpful as the number of shuffles is huge.  However, we can also observe
     // that desiredPos after the (reversed) shuffle can be expressed as:
     //
-    //      desiredPos = X * 2020 + Y
+    //      desiredPos = X * 2020 + Y 
     //
-    // where X and Y can be updated in-tandem with desiredPos, again, it's hopefully clear from
-    // the code how to update X and Y for each instruction.
+    // (all modulo numCards, of course) where X and Y can be updated in-tandem with desiredPos; again, 
+    // it's hopefully clear from the code how to update X and Y for each instruction.
     //
     // How does this help? Well, let P = initialDesiredPos = 2020 and observe that:
     //
     //   ┌ X Y ┐┌ P 0 ┐ = ┌ X*P+Y 0 ┐
     //   └ 0 1 ┘└ 1 0 ┘   └ 1     0 ┘
     //
-    // The matrix on the left is called posSingleShuffleMatrix in the code, and the
-    // matrix it is multiplied by is called initialPosMatrix.
+    // (The matrix on the left is called posSingleShuffleMatrix in the code, and the
+    // matrix it is multiplied by is called initialPosMatrix.)
     // 
     // We see that the resulting matrix looks very similar to initialPosMatrix, except
     // that the entry that was P is now X*P+Y i.e. the entry that was initialDesiredPos
@@ -251,12 +251,13 @@ int main()
     // initialPosMatrix, the top-left entry in the result is the desiredPos after numShuffles
     // shuffles, which is what we want.
     //
-    // We can easily compute posSingleShuffleMatrix^numShuffles using quickMatrixExponentiation 
+    // We can easily compute posSingleShuffleMatrix^numShuffles using quickPower 
     // and so get the final result.
     const vector<Instruction> reversedInstructions(instructions.rbegin(), instructions.rend());
     const int64_t initialDesiredPos = 2020;
-    ModNum desiredPos = initialDesiredPos; // We don't really need this; it's mainly used to check
-                                           // that X & Y are correct.
+    ModNum desiredPos = initialDesiredPos; // We don't really need desiredPos; it's mainly used to check
+                                           // that X & Y are correct i.e. fulfil X * initialDesiredPos + Y
+                                           // == desiredPos.
     ModNum X(1);
     ModNum Y(0);
     {
