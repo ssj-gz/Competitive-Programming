@@ -257,38 +257,21 @@ int main()
     //pickle = (pickle + Y) % numCards;
     //std::cout << "haggis: " << static_cast<uint64_t>(pickle) << std::endl; 
     std::cout << "XYay: " << static_cast<int64_t>(XYay) << " YYay: " << static_cast<int64_t>(YYay) << std::endl;
-    __uint128_t X = XYay;
-    __uint128_t Y = YYay;
-    ModNum XVerify(XYay);
-    ModNum YVerify(YYay);
+    ModNum X(XYay);
+    ModNum Y(YYay);
     for (int i = 0; i < numShuffles - 1; i++)
     {
-        __uint128_t Xnew = (X * X) % numCards;
-        __uint128_t Ynew = (X * Y + Y) % numCards; // Squaring.
-        ModNum XnewVerify = XVerify * XVerify;
-        ModNum YnewVerify = XVerify * YVerify + YVerify;
-        assert(XnewVerify.value() == Xnew);
-        assert(YnewVerify.value() == Ynew);
-        //__uint128_t Xnew = (X * XYay) % numCards;     // Multiplying by XYay YYay.
-        //__uint128_t Ynew = (X * YYay + Y) % numCards;
+        ModNum Xnew = X * X;
+        ModNum Ynew = X * Y + Y;
         X = Xnew;
         Y = Ynew;
-        XVerify = XnewVerify;
-        YVerify = YnewVerify;
-        assert(XVerify.value() == X);
-        assert(YVerify.value() == Y);
 
-        __uint128_t pickle = 0;
-        pickle = (static_cast<__uint128_t>(X) * initialDesiredPos) % numCards;
-        pickle = (pickle + Y) % numCards;
-        ModNum pickleVerify = XVerify * initialDesiredPos + YVerify;
-        std::cout << "interim haggis # " << i << ": " << static_cast<uint64_t>(pickle) << std::endl;  // Will be equal to desiredPos after the (2 ** i)th shuffle.
-        assert(pickleVerify.value() == pickle);
+        ModNum pickle = X * initialDesiredPos + Y;
+        std::cout << "interim haggis # " << i << ": " << pickle << std::endl;  // Will be equal to desiredPos after the (2 ** i)th shuffle.
     }
-    std::cout << "X: " << static_cast<int64_t>(X) << " Y: " << static_cast<int64_t>(Y) << std::endl;
+    std::cout << "X: " << X << " Y: " << Y << std::endl;
 
-    __uint128_t pickle = 0;
-    pickle = (static_cast<__uint128_t>(X) * initialDesiredPos) % numCards;
-    pickle = (pickle + Y) % numCards;
-    std::cout << "haggis: " << static_cast<uint64_t>(pickle) << std::endl; 
+    ModNum pickle = 0;
+    pickle = (X * initialDesiredPos) + Y;
+    std::cout << "haggis: " << pickle << std::endl; 
 }
