@@ -26,7 +26,7 @@ void inputAsciiToIntCode(IntCodeComputer& intCodeComputer, const std::string& in
     input.push_back(10);
     intCodeComputer.addInputs(input);
     const auto status = intCodeComputer.run();
-    assert(status != IntCodeComputer::Terminated);
+    //assert(status != IntCodeComputer::Terminated);
 
 };
 
@@ -322,6 +322,11 @@ int main()
 
         inputAsciiToIntCode(intCodeComputer, toPressureSensitiveFloor.back());
         printLines(readAsciiOutput(intCodeComputer));
+        if (intCodeComputer.isTerminated())
+        {
+            std::cout << "Terminated!" << std::endl;
+            break;
+        }
 
         // ... and drop it, ready for the next combination.
         for (const auto item : combination)
