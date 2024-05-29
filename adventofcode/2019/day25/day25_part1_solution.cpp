@@ -223,22 +223,13 @@ int main()
     vector<string> directionsFollowed;
     explore(intCodeComputer, roomsSeen, directionsFollowed, 0, directionsToRoom);
 
-    std::cout << "Explored " << roomsSeen.size() << " rooms: " << std::endl;
-    for (const auto& roomName : roomsSeen)
-    {
-        std::cout << " >" << roomName << "<, reached as follows:" << std::endl;
-        for (const auto& direction : directionsToRoom[roomName])
-            std::cout << " " << direction << std::endl; 
-
-    }
-
-    std::cout << "Navigating back to Pressure Sensitive Floor" << std::endl;
+    // Navigate back to just outside the Pressure-Sensitive Floor room. 
     const auto toPressureSensitiveFloor = directionsToRoom["Pressure-Sensitive Floor"];
     vector<string> toCheckpoint(toPressureSensitiveFloor.begin(), std::prev(toPressureSensitiveFloor.end()));
     for (const auto& direction : toCheckpoint)
     {
         inputAsciiToIntCode(intCodeComputer, direction);
-        printLines(readAsciiOutput(intCodeComputer));
+        readAsciiOutput(intCodeComputer); // Swallow output.
     }
 
     set<string> allItems;
@@ -249,12 +240,11 @@ int main()
         if (line.starts_with("- "))
             allItems.insert(line.substr(2));
     }
-    std::cout << "Items collected: " << std::endl;
-    for (const auto& item : allItems) std::cout << ">" << item << "<" << std::endl;
+    // Drop everything, ready for the "trial and error" portion.
     for (const auto& item : allItems) 
     {
         inputAsciiToIntCode(intCodeComputer, "drop " + item);
-        printLines(readAsciiOutput(intCodeComputer));
+        readAsciiOutput(intCodeComputer); // Swallow output.
     }
 
     vector<set<string>> itemsCombinations;
@@ -262,32 +252,29 @@ int main()
     generateItemCombinations(allItems, allItems.cbegin(), currentCombination, itemsCombinations);
     for (const auto& combination : itemsCombinations)
     {
-        std::cout << "combination: " << std::endl;
-        for (const auto item : combination) std::cout << " " << item << std::endl;
-        std::cout << std::endl;
-
-        // Gather this combination.
+        // Gather up this combination of items ...
         for (const auto item : combination)
         {
             inputAsciiToIntCode(intCodeComputer, "take " + item);
-            printLines(readAsciiOutput(intCodeComputer));
+            readAsciiOutput(intCodeComputer); // Swallow output.
         }
 
+        // ... enter the Pressure-Sensitive Floor room with this combination of
+        // Items ...
         inputAsciiToIntCode(intCodeComputer, toPressureSensitiveFloor.back());
-        printLines(readAsciiOutput(intCodeComputer));
+        printLines(readAsciiOutput(intCodeComputer)); // The solution will be in the final text printed
+                                                      // prior to termination.
         if (intCodeComputer.isTerminated())
         {
-            std::cout << "Terminated!" << std::endl;
+            std::cout << "IntCodeComputer Terminated; we're done :)" << std::endl;
             break;
         }
 
-        // ... and drop it, ready for the next combination.
+        // ... and drop everything, ready for the next combination.
         for (const auto item : combination)
         {
             inputAsciiToIntCode(intCodeComputer, "drop " + item);
-            printLines(readAsciiOutput(intCodeComputer));
+            readAsciiOutput(intCodeComputer); // Swallow output.
         }
     }
-
-
 }
