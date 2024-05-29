@@ -90,18 +90,18 @@ ostream& operator<<(ostream& os, const ModNum& toPrint)
     return os;
 }
 
-ModNum quickPower2(ModNum base, int64_t exponent)
+template <typename Type>
+Type quickPower(Type initialValue, Type base, int64_t exponent)
 {
     // Raise base to the exponent mod modulus using as few multiplications as 
     // we can e.g. base ^ 8 ==  (((base^2)^2)^2).
-    ModNum result = 1;
-    ModNum baseToPower = base; // As we iterate, goes through base, base^2, (base^2)^2, etc.
-    int64_t power = 0;
+    Type result = initialValue;
+    Type baseToPower = base; // As we iterate, goes through base, base^2, (base^2)^2, etc.
     while (exponent > 0)
     {
         if (exponent & 1)
         {
-            result = (result * baseToPower);
+            result *= baseToPower;
         }
         exponent >>= 1;
         baseToPower *= baseToPower;
@@ -156,26 +156,6 @@ Matrix2x2 operator*(const Matrix2x2& lhs, const Matrix2x2& rhs)
 {
     Matrix2x2 result(lhs);
     result *= rhs;
-    return result;
-}
-
-Matrix2x2 quickMatrixExponentiation(Matrix2x2 base, int64_t exponent)
-{
-    // Raise base to the exponent using as few multiplications as 
-    // we can e.g. base ^ 8 ==  (((base^2)^2)^2).
-    Matrix2x2 result(1, 0,
-                     0, 1);
-             
-    Matrix2x2 baseToPower = base; // As we iterate, goes through base, base^2, (base^2)^2, etc.
-    while (exponent > 0)
-    {
-        if (exponent & 1)
-        {
-            result *= baseToPower;
-        }
-        exponent >>= 1;
-        baseToPower *= baseToPower;
-    }
     return result;
 }
 
@@ -286,7 +266,7 @@ int main()
             {
                 case Instruction::DealWithIncrement:
                     {
-                        const ModNum inverseAmount = quickPower2(instruction.amount, numCards - 2);
+                        const ModNum inverseAmount = quickPower<ModNum>(1, instruction.amount, numCards - 2);
                         assert(inverseAmount * instruction.amount == 1);
                         desiredPos = desiredPos * inverseAmount;
                         X = X * inverseAmount;
@@ -313,7 +293,9 @@ int main()
                                      1,                 0);
     const Matrix2x2 posSingleShuffleMatrix(X, Y, 
                                            0, 1);
-    const Matrix2x2 posShuffleMatrix = quickMatrixExponentiation(posSingleShuffleMatrix, numShuffles);
+    const Matrix2x2 identityMatrix(1, 0,
+                                   0, 1);
+    const Matrix2x2 posShuffleMatrix = quickPower(identityMatrix, posSingleShuffleMatrix, numShuffles);
     const Matrix2x2 finalResultMatrix = posShuffleMatrix * initialPosMatrix;
     std::cout << "Final result: " << finalResultMatrix.a11() << std::endl;
 }
