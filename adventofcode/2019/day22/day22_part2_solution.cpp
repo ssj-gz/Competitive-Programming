@@ -11,6 +11,8 @@ using namespace std;
 
 const uint64_t numCards = 119'315'717'514'047ULL;
 //const uint64_t numCards = 32868853;
+const uint64_t numShuffles = 101'741'582'076'661ULL;
+//const uint64_t numShuffles = 10'123ULL;
 
 class ModNum
 {
@@ -262,12 +264,12 @@ int main()
     }
 
     std::reverse(instructions.begin(), instructions.end());
-    const int64_t initialDesiredPos = 6577;
+    const int64_t initialDesiredPos = 2020;
     ModNum desiredPos = initialDesiredPos;
     ModNum XYay;
     ModNum YYay;
-    const int numShuffles = 256;
-    for (int i = 0; i < numShuffles; i++)
+    //const int numShuffles = 256;
+    //for (int i = 0; i < numShuffles; i++)
     {
         ModNum X(1);
         ModNum Y(0);
@@ -297,7 +299,7 @@ int main()
                 default:
                     assert(false);
             }
-            //assert((X * initialDesiredPos + Y) == desiredPos);
+            assert((X * initialDesiredPos + Y) == desiredPos);
         }
         XYay = X;
         YYay = Y;
@@ -335,43 +337,45 @@ int main()
     std::cout << "X: " << X << " Y: " << Y << std::endl;
 
     //assert(XYay * initialDesiredPos + YYay == desiredPos);
-    Matrix2x2 posShuffleMatrix(1, 0, 
-                               0, 1);
     const Matrix2x2 posSingleShuffleMatrix(XYay, YYay, 
                                            0, 1);
-    const int power = numShuffles;
-    for (int i = 0; i < power; i++)
-    {
-        posShuffleMatrix *= posSingleShuffleMatrix;
-    }
-    Matrix2x2 initialPosMatrix(initialDesiredPos, 0, 
+    //const int power = numShuffles;
+    //for (int i = 0; i < power; i++)
+    //{
+    //    posShuffleMatrix *= posSingleShuffleMatrix;
+    //}
+    const Matrix2x2 initialPosMatrix(initialDesiredPos, 0, 
                                1, 0);
     //posShuffleMatrix *= initialPosMatrix;
     std::cout << endl;
+    const Matrix2x2 posShuffleMatrix = quickMatrixExponentiation(posSingleShuffleMatrix, numShuffles);
+    const Matrix2x2 finalResultMatrix = posShuffleMatrix * initialPosMatrix;
     cout << "blah a11: " << posShuffleMatrix.a11() << std::endl;
     cout << "blah a12: " << posShuffleMatrix.a12() << std::endl;
     cout << "blah a21: " << posShuffleMatrix.a21() << std::endl;
     cout << "blah a22: " << posShuffleMatrix.a22() << std::endl;
     std::cout << endl;
-    const Matrix2x2 gloob = quickMatrixExponentiation(posSingleShuffleMatrix, power);
-    cout << "glap a11: " << gloob.a11() << std::endl;
-    cout << "glap a12: " << gloob.a12() << std::endl;
-    cout << "glap a21: " << gloob.a21() << std::endl;
-    cout << "glap a22: " << gloob.a22() << std::endl;
-    std::cout << endl;
+    //cout << "glap a11: " << gloob.a11() << std::endl;
+    //cout << "glap a12: " << gloob.a12() << std::endl;
+    //cout << "glap a21: " << gloob.a21() << std::endl;
+    //cout << "glap a22: " << gloob.a22() << std::endl;
+    //std::cout << endl;
 
-    Matrix2x2 glarb(1, 0,
-                    0 ,1);
-    Matrix2x2 blobe(3, 4,
-                    11 ,97);
-    glarb*= blobe;
+    //Matrix2x2 glarb(1, 0,
+    //                0 ,1);
+    //Matrix2x2 blobe(3, 4,
+    //                11 ,97);
+    //glarb*= blobe;
 
-    cout << "blah a11: " << glarb.a11() << std::endl;
-    cout << "blah a12: " << glarb.a12() << std::endl;
-    cout << "blah a21: " << glarb.a21() << std::endl;
-    cout << "blah a22: " << glarb.a22() << std::endl;
+    //cout << "blah a11: " << glarb.a11() << std::endl;
+    //cout << "blah a12: " << glarb.a12() << std::endl;
+    //cout << "blah a21: " << glarb.a21() << std::endl;
+    //cout << "blah a22: " << glarb.a22() << std::endl;
     std::cout << endl;
     ModNum pickle = 0;
     pickle = (X * initialDesiredPos) + Y;
     std::cout << "haggis: " << pickle << std::endl; 
+    std::cout << "Final result: " << finalResultMatrix.a11() << std::endl;
+    std::cout << "desiredPos: " << desiredPos << std::endl;
+    //assert(finalResultMatrix.a11() == desiredPos);
 }
