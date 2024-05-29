@@ -201,15 +201,14 @@ int main()
 {
     vector<int64_t> program;
     int64_t programInput;
-    ifstream programIn("day25_input.txt", std::ios::in);
     while (true)
     {
-        programIn >> programInput;
+        cin >> programInput;
         program.push_back(programInput);
-        assert(programIn);
+        assert(cin);
         char comma;
-        programIn >> comma;
-        if (!programIn)
+        cin >> comma;
+        if (!cin)
             break;
         assert(comma == ',');
     }
