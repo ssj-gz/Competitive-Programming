@@ -172,6 +172,10 @@ class IntCodeComputer
         {
             m_output.clear();
         }
+        bool isTerminated() const
+        {
+            return m_isTerminated;
+        }
     private:
         bool m_isTerminated = false;
         std::map<int64_t, int64_t> m_program;
