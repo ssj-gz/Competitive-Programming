@@ -209,6 +209,7 @@ int main()
         int amount = -1;
     };
 
+    // Read and store the instructions.
     string instructionLine;
     vector<Instruction> instructions;
     while (std::getline(cin, instructionLine))
@@ -236,23 +237,56 @@ int main()
         }
     }
 
-    std::reverse(instructions.begin(), instructions.end());
+    // Basic algorithm: run the instructions *in reverse*, and for each instruction,
+    // see how the desiredPos (initially 2020) changes (hopefully clear from the code
+    // how it changes at each instruction).
+    //
+    // This will allow us to easily compute the card that would eventually be at position 2020
+    // *after a single shuffle*.
+    //
+    // This is not all that helpful as the number of shuffles is huge.  However, we can also observe
+    // that desiredPos after the (reversed) shuffle can be expressed as:
+    //
+    //      desiredPos = X * 2020 + Y
+    //
+    // where X and Y can be updated in-tandem with desiredPos, again, it's hopefully clear from
+    // the code how to update X and Y for each instruction.
+    //
+    // How does this help? Well, let P = initialDesiredPos = 2020 and observe that:
+    //
+    //   ┌ X Y ┐┌ P 0 ┐ = ┌ X*P+Y 0 ┐
+    //   └ 0 1 ┘└ 1 0 ┘   └ 1     0 ┘
+    //
+    // The matrix on the left is called posSingleShuffleMatrix in the code, and the
+    // matrix it is multiplied by is called initialPosMatrix.
+    // 
+    // We see that the resulting matrix looks very similar to initialPosMatrix, except
+    // that the entry that was P is now X*P+Y i.e. the entry that was initialDesiredPos
+    // is now desiredPos i.e. the result of the single shuffle.
+    //
+    // If we multiplied posSingleShuffleMatrix by this new matrix, the top-left entry
+    // of the result would be desiredPos after *two* shuffles, etc.
+    //
+    // In general, if we compute posSingleShuffleMatrix^numShuffles and multiply it by
+    // initialPosMatrix, the top-left entry in the result is the desiredPos after numShuffles
+    // shuffles, which is what we want.
+    //
+    // We can easily compute posSingleShuffleMatrix^numShuffles using quickMatrixExponentiation 
+    // and so get the final result.
+    const vector<Instruction> reversedInstructions(instructions.rbegin(), instructions.rend());
     const int64_t initialDesiredPos = 2020;
-    ModNum desiredPos = initialDesiredPos;
-    ModNum XYay;
-    ModNum YYay;
-
+    ModNum desiredPos = initialDesiredPos; // We don't really need this; it's mainly used to check
+                                           // that X & Y are correct.
+    ModNum X(1);
+    ModNum Y(0);
     {
-        ModNum X(1);
-        ModNum Y(0);
-        for (const auto instruction : instructions)
+        for (const auto instruction : reversedInstructions)
         {
             switch (instruction.type)
             {
                 case Instruction::DealWithIncrement:
                     {
                         const ModNum inverseAmount = quickPower2(instruction.amount, numCards - 2);
-                        //std::cout << "amount: " << instruction.amount << " inverseAmount: " << inverseAmount << " multiplied:" << (static_cast<__uint128_t>(inverseAmount) * static_cast<__uint128_t>(instruction.amount)) << " modulus: " << ((inverseAmount * instruction.amount) % numCards) << std::endl;
                         assert(inverseAmount * instruction.amount == 1);
                         desiredPos = desiredPos * inverseAmount;
                         X = X * inverseAmount;
@@ -264,24 +298,20 @@ int main()
                     Y += instruction.amount;
                     break;
                 case Instruction::DealIntoNewDeck:
-                    desiredPos = numCards - 1 - desiredPos;
+                    desiredPos = numCards - 1 - desiredPos; // Equivalent to multiplying by "-1" (i.e. numCards - 1), then adding (numCards - 1).
                     X = X * (numCards - 1);
                     Y = Y * (numCards - 1) + (numCards - 1);
                     break;
                 default:
                     assert(false);
             }
-            assert((X * initialDesiredPos + Y) == desiredPos);
+            assert((X * initialDesiredPos + Y) == desiredPos); // Use desiredPos to check that the values of X & Y fulfil the required invariant.
         }
-        XYay = X;
-        YYay = Y;
     }
-    ModNum X(XYay);
-    ModNum Y(YYay);
 
     const Matrix2x2 initialPosMatrix(initialDesiredPos, 0, 
-                               1, 0);
-    const Matrix2x2 posSingleShuffleMatrix(XYay, YYay, 
+                                     1,                 0);
+    const Matrix2x2 posSingleShuffleMatrix(X, Y, 
                                            0, 1);
     const Matrix2x2 posShuffleMatrix = quickMatrixExponentiation(posSingleShuffleMatrix, numShuffles);
     const Matrix2x2 finalResultMatrix = posShuffleMatrix * initialPosMatrix;
