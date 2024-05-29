@@ -99,20 +99,16 @@ ModNum quickPower2(ModNum base, int64_t exponent)
     // Raise base to the exponent mod modulus using as few multiplications as 
     // we can e.g. base ^ 8 ==  (((base^2)^2)^2).
     ModNum result = 1;
+    ModNum baseToPower = base; // As we iterate, goes through base, base^2, (base^2)^2, etc.
     int64_t power = 0;
     while (exponent > 0)
     {
         if (exponent & 1)
         {
-            ModNum subResult = base;
-            for (int64_t i = 0; i < power; i++)
-            {
-                subResult = (subResult * subResult);
-            }
-            result = (result * subResult);
+            result = (result * baseToPower);
         }
         exponent >>= 1;
-        power++;
+        baseToPower *= baseToPower;
     }
     return result;
 }
