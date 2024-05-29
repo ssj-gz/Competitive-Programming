@@ -18,6 +18,7 @@ class ModNum
         ModNum(int64_t n = 0)
             : m_n{(n + modulus) % modulus}
         {
+            assert(m_n >= 0);
         }
         ModNum& operator+=(const ModNum& other)
         {
@@ -48,11 +49,6 @@ class ModNum
             }
             m_n = result;
 
-            return *this;
-        }
-        ModNum operator++(int)
-        {
-            m_n += 1;
             return *this;
         }
         int64_t value() const { return m_n; };
