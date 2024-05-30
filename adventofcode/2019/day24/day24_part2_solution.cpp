@@ -31,17 +31,8 @@ int main()
     }
     area[2][2] = '?';
 
-    auto printArea = [](const auto& area)
-    {
-        for (const auto& row : area)
-        {
-            std::cout << row << std::endl;
-        }
-    };
-
     const int areaWidth = area.front().size();
     const int areaHeight = area.size();
-    printArea(area);
 
     struct Cell
     {
@@ -120,20 +111,6 @@ int main()
         }
     }
 
-    for (int x = 0; x < areaWidth; x++)
-    {
-        for (int y = 0; y < areaHeight; y++)
-        {
-            std::cout << "adjacencies for x: " << x << " y: " << y << " level: 0 :" << std::endl;
-            for (const auto& cell : adjacentCellsForCell[x][y])
-            {
-                std::cout << " level: " << cell.levelOffset << " (" << cell.coord.x << "," << cell.coord.y << ")" << std::endl;
-                assert(!(cell.coord.x == 2 && cell.coord.y == 2));
-            }
-        }
-    }
-    assert(adjacentCellsForCell[2][2].empty());
-
     vector<string> emptyArea(areaHeight, string(areaWidth, '.'));
     emptyArea[2][2] = '?';
     int maxLevelToCheck = 1;
@@ -142,11 +119,6 @@ int main()
     int time = 0;
     while (true)
     {
-        std::cout << "Begin iteration for time : " << (time + 1) << std::endl;
-        //std::cout << "areaForLevel[minLevelToCheck]: " << std::endl;
-        //printArea(areaForLevel[minLevelToCheck]);
-        //std::cout << "areaForLevel[maxLevelToCheck]: " << std::endl;
-        //printArea(areaForLevel[maxLevelToCheck]);
         assert(areaForLevel[minLevelToCheck] == emptyArea);
         assert(areaForLevel[maxLevelToCheck] == emptyArea);
 
@@ -154,8 +126,6 @@ int main()
         for (int level = minLevelToCheck; level <= maxLevelToCheck; level++)
         {
             const auto& area = areaForLevel[level];
-            std::cout << "level: " << level << " area: " << std::endl;
-            printArea(area);
             if (!areaForLevel.contains(level - 1))
                 areaForLevel[level - 1] = emptyArea;
             if (!areaForLevel.contains(level + 1))
@@ -174,12 +144,10 @@ int main()
                             numAdjacentBugs++;
                         }
                     }
-                    std::cout << "level: " << level << " x: " << x << " y: " << y << " numAdjacentBugs: " << numAdjacentBugs << std::endl;
                     if (area[y][x] == '#')
                     {
                         if (numAdjacentBugs != 1)
                         {
-                            std::cout << "setting level: " << level << " x: " << x << " y: " << y << " to '.'" << std::endl;
                             newAreaForLevel[level][y][x] = '.';
                         } 
                     }
@@ -187,7 +155,6 @@ int main()
                     {
                         if ((numAdjacentBugs == 1) || (numAdjacentBugs == 2))
                         {
-                            std::cout << "setting level: " << level << " x: " << x << " y: " << y << " to '#' as numAdjacentBugs is: " << numAdjacentBugs << std::endl;
                             newAreaForLevel[level][y][x] = '#';
                         }
                     }
@@ -211,12 +178,6 @@ int main()
         }
 
         time++;
-        std::cout << "After time: " << time << std::endl;
-        for (int level = minLevelToCheck; level <= maxLevelToCheck; level++)
-        {
-            cout << "Depth " << level << ":" << std::endl;
-            printArea(areaForLevel[level]);
-        }
         if (time == 200)
         {
             int64_t numBugs = 0;
@@ -227,7 +188,7 @@ int main()
                     numBugs += std::count(row.begin(), row.end(), '#');
                 }
             }
-            std::cout << "numBugs: " << numBugs << std::endl;
+            std::cout << "numBugs: " << numBugs << std::endl; 
             break;
         }
     }
