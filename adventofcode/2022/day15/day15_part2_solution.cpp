@@ -74,11 +74,11 @@ int64_t numCoveredByRangesBruteForce(const vector<Range>& rangesOrig)
 #endif
 
 
-int64_t numCoveredByRanges(const vector<Range>& rangesOrig)
+int64_t findSoleXNotCoveredByRanges(const vector<Range>& rangesOrig)
 {
     std::cout << "Beginning numCoveredByRanges" << std::endl;
     deque<Range> ranges(rangesOrig.begin(), rangesOrig.end());
-    int64_t numCoveredByRanges = 1;
+    int64_t uncoveredX = -1;
     sort(ranges.begin(), ranges.end(), [](const auto& lhs, const auto& rhs)
             {
                 return lhs.startX < rhs.startX;
@@ -127,23 +127,19 @@ int64_t numCoveredByRanges(const vector<Range>& rangesOrig)
         if (currentX != std::numeric_limits<int64_t>::min())
         {
             assert(newCurrentX >= currentX);
-            const int64_t amountToAdd = wasStillWithinRange ? (newCurrentX - currentX) + 1 /* Add the range from newCurrentX -> currentX, inclusive. */ 
-                          : 1 /* Only add the single cell at newCurrentX. */;
-            assert(amountToAdd >= 0);
-            //std::cout << " amountToAdd: " << amountToAdd << " currentX: " << currentX << " newCurrentX: " << newCurrentX << " wasStillWithinRange? " << wasStillWithinRange << std::endl;
-            numCoveredByRanges += amountToAdd;
-        }
-        else
-        {
-            const int64_t amountToAdd = 1;
-            //std::cout << " amountToAdd (first): " << amountToAdd << " currentX: " << currentX << " newCurrentX: " << newCurrentX << " wasStillWithinRange? " << wasStillWithinRange << std::endl;
+            if (!wasStillWithinRange)
+            {
+                assert(newCurrentX == currentX + 1);
+                assert(uncoveredX == -1);
+                uncoveredX = newCurrentX - 1;
+            }
         }
 
         currentX = newCurrentX + 1; // We've processed this currentX, and have added it to numCoveredByRanges.
     }
-    std::cout << "numCoveredByRanges: " << numCoveredByRanges << std::endl;
+    std::cout << "uncoveredX: " << uncoveredX << std::endl;
 
-    return numCoveredByRanges;
+    return uncoveredX;
 }
 
 Coord hiddenBeaconPosition(const std::vector<SensorInfo>& sensorInfos)
@@ -239,14 +235,15 @@ Coord hiddenBeaconPosition(const std::vector<SensorInfo>& sensorInfos)
 #ifdef BRUTE_FORCE
         assert(numCoveredByRanges(allRanges) == numCoveredByRangesBruteForce(allRanges));
 #endif
-        const int64_t numPlacesCannotBe = numCoveredByRanges(allRanges);
-        const int64_t numPlacesCouldBe = beaconMaxX + 1 - numPlacesCannotBe;
+        //const int64_t numPlacesCannotBe = numCoveredByRanges(allRanges);
+        //const int64_t numPlacesCouldBe = beaconMaxX + 1 - numPlacesCannotBe;
         //assert(numPlacesCouldBe == 0 || numPlacesCouldBe == 1);
-        if (numPlacesCouldBe == 1)
+        const int notCoveredX = findSoleXNotCoveredByRanges(allRanges);
+        if (notCoveredX != -1)
         {
-            std::cout << "woohoo: yCoord: " << yCoord << std::endl;
+            std::cout << "woohoo: xCoord: " << notCoveredX << " yCoord: " << yCoord << std::endl;
             assert((answer == Coord{-1, -1}));
-            answer = {-1, /*TODO*/ yCoord};
+            answer = {notCoveredX, /*TODO*/ yCoord};
         }
 
         for (const auto& leftExpandingRangeOrig : expandingRanges)
@@ -432,8 +429,9 @@ int main()
     const auto bruteForce = hiddenBeaconPositionBruteForce(sensorInfos);
     std::cout << "hiddenBeaconPositionBruteForce: " << bruteForce.x << ", " << bruteForce.y << std::endl;
 #endif
-    const auto optimised = hiddenBeaconPosition(sensorInfos);
-    std::cout << "hiddenBeaconPosition: " << optimised.x << ", " << optimised.y << std::endl;
+    const auto answer = hiddenBeaconPosition(sensorInfos);
+    std::cout << "hiddenBeaconPosition: " << answer.x << ", " << answer.y << std::endl;
+    std::cout << answer.x * beaconMaxX  + answer.y << std::endl;
 
 }
 
