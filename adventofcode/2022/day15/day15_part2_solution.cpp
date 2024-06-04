@@ -98,6 +98,62 @@ int64_t numCoveredByRanges(const deque<Range>& rangesOrig)
     return numCoveredByRanges;
 }
 
+Coord hiddenBeaconPosition(const std::vector<SensorInfo>& sensorInfos)
+{
+    struct ProjectedRange
+    {
+        enum GrowthDirection { Expanding, Contracting } ;
+        GrowthDirection growthDirection;
+        Range range;
+    };
+    set<int64_t> eventsYCoords;
+    for (const auto& sensorInfo : sensorInfos)
+    {
+        const int64_t distToNearestBeacon = abs(sensorInfo.posX - sensorInfo.nearestBeaconX) + abs(sensorInfo.posY - sensorInfo.nearestBeaconY);
+        eventsYCoords.insert(sensorInfo.posY - distToNearestBeacon); // Topmost y-coord of this block of '#'s.
+        eventsYCoords.insert(sensorInfo.posY + 1); // One-past-middle i.e. where this block of '#'s starts to narrow as y increases, instead of expanding.
+        eventsYCoords.insert(sensorInfo.posY + distToNearestBeacon); // First y where this block of '#'s has disappeared.
+    }
+    for (const auto yCoord : eventsYCoords)
+    {
+        if (yCoord < 0 || yCoord > beaconMaxY)
+            continue;
+
+        // Find the ranges projected onto this yCoord.
+        vector<ProjectedRange> projectedRanges;
+        for (const auto& sensorInfo : sensorInfos)
+        {
+            const int64_t distToNearestBeacon = abs(sensorInfo.posX - sensorInfo.nearestBeaconX) + abs(sensorInfo.posY - sensorInfo.nearestBeaconY);
+            if (sensorInfo.posY + distToNearestBeacon < yCoord || sensorInfo.posY - distToNearestBeacon > yCoord)
+                continue;
+            const auto growthDirection = (sensorInfo.posY > yCoord ? ProjectedRange::GrowthDirection::Contracting : ProjectedRange::GrowthDirection::Expanding);
+
+            assert(abs(yCoord - sensorInfo.posY) <= distToNearestBeacon);
+            const int64_t projectedRangeWidthAtY = (2 * distToNearestBeacon + 1) - 2 * abs(yCoord - sensorInfo.posY);
+            assert(projectedRangeWidthAtY >= 1);
+            assert(projectedRangeWidthAtY % 2 == 1);
+            Range projectedRange(sensorInfo.posX - (projectedRangeWidthAtY - 1) / 2, sensorInfo.posX + (projectedRangeWidthAtY - 1) / 2);
+            projectedRange.startX = max<int64_t>(projectedRange.startX, 0);
+            projectedRange.endX = min(projectedRange.endX, beaconMaxX);
+            if (projectedRange.startX <= projectedRange.endX)
+                projectedRanges.push_back({growthDirection, projectedRange});
+
+        }
+
+        set<Coord> beaconsOnRow;
+        for (const auto& sensorInfo : sensorInfos)
+        {
+            if (sensorInfo.nearestBeaconY == yCoord)
+                beaconsOnRow.insert({sensorInfo.nearestBeaconX, sensorInfo.nearestBeaconY});
+        }
+
+
+
+    }
+
+    return {-1, -1};
+
+}
 Coord hiddenBeaconPositionBruteForce(const std::vector<SensorInfo>& sensorInfos)
 {
     static std::map<Coord, char> cellContents;
