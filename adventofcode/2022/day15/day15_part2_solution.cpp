@@ -21,6 +21,7 @@ struct Range
 {
     int64_t startX = -1;
     int64_t endX = -1;
+    auto operator<=>(const Range& other) const = default;
 };
 
 struct Coord
@@ -78,11 +79,18 @@ int64_t numCoveredByRanges(const vector<Range>& rangesOrig)
     std::cout << "Beginning numCoveredByRanges" << std::endl;
     deque<Range> ranges(rangesOrig.begin(), rangesOrig.end());
     int64_t numCoveredByRanges = 1;
-
     sort(ranges.begin(), ranges.end(), [](const auto& lhs, const auto& rhs)
             {
                 return lhs.startX < rhs.startX;
             });
+    for (auto& range : ranges)
+    {
+        range.startX = max<int64_t>(0, range.startX);
+        range.endX = min(beaconMaxX, range.endX);
+    }
+    ranges.erase(std::remove_if(ranges.begin(), ranges.end(), [](const auto& range) {
+                return range.startX > beaconMaxX || range.endX < 0 || range.startX > range.endX;
+            }), ranges.end());
     deque<int64_t> yCoordsOfCurrentRangesEnds;
     int64_t currentX = std::numeric_limits<int64_t>::min();
     //auto rangeIter = ranges.cbegin();
@@ -140,15 +148,26 @@ int64_t numCoveredByRanges(const vector<Range>& rangesOrig)
 
 Coord hiddenBeaconPosition(const std::vector<SensorInfo>& sensorInfos)
 {
+    std::cout << "Beginning hiddenBeaconPosition" << std::endl;
+    //std::vector<SensorInfo> sensorInfos = { sensorInfosOrig.front() };
     Coord answer = {-1, -1};
     set<int64_t> eventsYCoords;
     for (const auto& sensorInfo : sensorInfos)
     {
+        std::cout << "sensorInfo: " << sensorInfo.posX << ", " << sensorInfo.posY << " nb: " << sensorInfo.nearestBeaconX << ", " << sensorInfo.nearestBeaconY << std::endl;
         const int64_t distToNearestBeacon = abs(sensorInfo.posX - sensorInfo.nearestBeaconX) + abs(sensorInfo.posY - sensorInfo.nearestBeaconY);
+        std::cout << "distToNearestBeacon: " << distToNearestBeacon << std::endl;
         eventsYCoords.insert(sensorInfo.posY - distToNearestBeacon); // Topmost y-coord of this block of '#'s.
         eventsYCoords.insert(sensorInfo.posY + 1); // One-past-middle i.e. where this block of '#'s starts to narrow as y increases, instead of expanding.
-        eventsYCoords.insert(sensorInfo.posY + distToNearestBeacon); // First y where this block of '#'s has disappeared.
+        eventsYCoords.insert(sensorInfo.posY + distToNearestBeacon + 1); // First y where this block of '#'s has disappeared.
     }
+
+    {
+        // TODO - remove this!
+        //eventsYCoords.insert(2658763);
+        //eventsYCoords.insert(2658764);
+    }
+
     for (const auto yCoord : eventsYCoords)
     {
         if (yCoord < 0 || yCoord > beaconMaxY)
@@ -193,12 +212,23 @@ Coord hiddenBeaconPosition(const std::vector<SensorInfo>& sensorInfos)
                 allRanges.push_back({sensorInfo.nearestBeaconX, sensorInfo.nearestBeaconX});
         }
 
+        sort(allRanges.begin(), allRanges.end(), [](const auto& lhs, const auto& rhs)
+                {
+                return lhs.startX < rhs.startX;
+                });
+        std::cout << "Ranges: " << std::endl;
+        for (const auto range : allRanges)
+        {
+            std::cout << " (" << range.startX << ", " << range.endX << ")" << std::endl;
+        }
+
+
 #ifdef BRUTE_FORCE
         assert(numCoveredByRanges(allRanges) == numCoveredByRangesBruteForce(allRanges));
 #endif
         const int64_t numPlacesCannotBe = numCoveredByRanges(allRanges);
         const int64_t numPlacesCouldBe = beaconMaxX + 1 - numPlacesCannotBe;
-        assert(numPlacesCouldBe == 0 || numPlacesCouldBe == 1);
+        //assert(numPlacesCouldBe == 0 || numPlacesCouldBe == 1);
         if (numPlacesCouldBe == 1)
         {
             std::cout << "woohoo: yCoord: " << yCoord << std::endl;
@@ -214,19 +244,47 @@ Coord hiddenBeaconPosition(const std::vector<SensorInfo>& sensorInfos)
                     swap(leftExpandingRange, rightExpandingRange);
                 if ((abs(rightExpandingRange.startX - leftExpandingRange.endX) % 2) == 1)
                     continue;
-                const int64_t yIncreaseUntil1Gap = (rightExpandingRange.startX - leftExpandingRange.endX) / 2;
+                int64_t yIncreaseUntil1Gap = (rightExpandingRange.startX - leftExpandingRange.endX) / 2;
+                if (yIncreaseUntil1Gap < 0)
+                    continue;
+                yIncreaseUntil1Gap--;
+                auto leftCopy = leftExpandingRange;
+                auto rightCopy = rightExpandingRange;
+                leftCopy.startX -= yIncreaseUntil1Gap;
+                leftCopy.endX += yIncreaseUntil1Gap;
+                rightCopy.startX -= yIncreaseUntil1Gap;
+                rightCopy.endX += yIncreaseUntil1Gap;
+                assert(rightCopy.startX == leftCopy.endX + 2);
                 eventsYCoords.insert(yCoord + yIncreaseUntil1Gap);
             }
         }
-        for (auto leftContractingRange : expandingRanges)
+        for (auto leftContractingRange : contractingRanges)
         {
-            for (auto rightContractingRange : expandingRanges)
+            for (auto rightContractingRange : contractingRanges)
             {
+                if (leftContractingRange == rightContractingRange)
+                    continue;
                 if (leftContractingRange.startX > rightContractingRange.startX)
                     swap(leftContractingRange, rightContractingRange);
                 if ((abs(rightContractingRange.startX - leftContractingRange.endX) % 2) == 1)
                     continue;
-                const int64_t yIncreaseUntil1Gap = -(rightContractingRange.startX - leftContractingRange.endX) / 2;
+                int64_t yIncreaseUntil1Gap = -(rightContractingRange.startX - leftContractingRange.endX) / 2;
+                if (yIncreaseUntil1Gap < 0)
+                    continue;
+                yIncreaseUntil1Gap++;
+                auto leftCopy = leftContractingRange;
+                auto rightCopy = rightContractingRange;
+                leftCopy.startX += yIncreaseUntil1Gap;
+                leftCopy.endX -= yIncreaseUntil1Gap;
+                rightCopy.startX += yIncreaseUntil1Gap;
+                rightCopy.endX -= yIncreaseUntil1Gap;
+                //std::cout << "yIncreaseUntil1Gap: " << yIncreaseUntil1Gap << std::endl;
+                //std::cout << "leftContractingRange: " << leftContractingRange.startX << ", " << leftContractingRange.endX << std::endl;
+                //std::cout << "rightContractingRange: " << rightContractingRange.startX << ", " << rightContractingRange.endX << std::endl;
+                //std::cout << "rightCopy.startX: " << rightCopy.startX << " leftCopy.endX: " << leftCopy.endX << std::endl;
+                assert(rightCopy.startX == leftCopy.endX + 2);
+
+
                 eventsYCoords.insert(yCoord + yIncreaseUntil1Gap);
             }
         }
