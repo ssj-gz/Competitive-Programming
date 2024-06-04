@@ -30,13 +30,53 @@ struct Coord
     auto operator<=>(const Coord& other) const = default;
 };
 
+#define BRUTE_FORCE
+
+#if 0
 const int64_t beaconMaxX = 20; // TODO - replace both of these with 4'000'000
 const int64_t beaconMaxY = 20;
+#else
+const int64_t beaconMaxX = 4'000'000;
+const int64_t beaconMaxY = 4'000'000;
+#undef BRUTE_FORCE
+#endif
 
-int64_t numCoveredByRanges(const deque<Range>& rangesOrig)
+#ifdef BRUTE_FORCE
+int64_t numCoveredByRangesBruteForce(const vector<Range>& rangesOrig)
+{
+    int64_t minX = std::numeric_limits<int64_t>::max();
+    int64_t maxX = std::numeric_limits<int64_t>::min();
+    for (const auto& range : rangesOrig)
+    {
+        minX = min(minX, range.startX);
+        maxX = max(maxX, range.endX);
+        assert(range.startX <= range.endX);
+    }
+    assert(maxX >= minX);
+    std::cout << "minX: " << minX << " maxX: " << maxX << std::endl;
+    string cellContents(maxX - minX + 1, '.');
+    assert(!cellContents.empty());
+    for (const auto& range : rangesOrig)
+    {
+        for (int x = range.startX; x <= range.endX; x++)
+        {
+
+            assert(x - minX >= 0); 
+            assert(x - minX < cellContents.size());
+            cellContents[x - minX] = '#';
+        }
+    }
+
+    std::cout << "numCoveredByRangesBruteForce cellContents: " << cellContents << " # ranges: " << rangesOrig.size() << " minX: " << minX << " maxX: " << maxX << " size: " << cellContents.size() << std::endl;
+    return std::count(cellContents.begin(), cellContents.end(), '#');
+}
+#endif
+
+
+int64_t numCoveredByRanges(const vector<Range>& rangesOrig)
 {
     std::cout << "Beginning numCoveredByRanges" << std::endl;
-    deque<Range> ranges = rangesOrig;
+    deque<Range> ranges(rangesOrig.begin(), rangesOrig.end());
     int64_t numCoveredByRanges = 1;
 
     sort(ranges.begin(), ranges.end(), [](const auto& lhs, const auto& rhs)
@@ -100,12 +140,7 @@ int64_t numCoveredByRanges(const deque<Range>& rangesOrig)
 
 Coord hiddenBeaconPosition(const std::vector<SensorInfo>& sensorInfos)
 {
-    struct ProjectedRange
-    {
-        enum GrowthDirection { Expanding, Contracting } ;
-        GrowthDirection growthDirection;
-        Range range;
-    };
+    Coord answer = {-1, -1};
     set<int64_t> eventsYCoords;
     for (const auto& sensorInfo : sensorInfos)
     {
@@ -118,15 +153,16 @@ Coord hiddenBeaconPosition(const std::vector<SensorInfo>& sensorInfos)
     {
         if (yCoord < 0 || yCoord > beaconMaxY)
             continue;
+        std::cout << "yCoord: " << yCoord << std::endl;
 
         // Find the ranges projected onto this yCoord.
-        vector<ProjectedRange> projectedRanges;
+        vector<Range> expandingRanges;
+        vector<Range> contractingRanges;
         for (const auto& sensorInfo : sensorInfos)
         {
             const int64_t distToNearestBeacon = abs(sensorInfo.posX - sensorInfo.nearestBeaconX) + abs(sensorInfo.posY - sensorInfo.nearestBeaconY);
             if (sensorInfo.posY + distToNearestBeacon < yCoord || sensorInfo.posY - distToNearestBeacon > yCoord)
                 continue;
-            const auto growthDirection = (sensorInfo.posY > yCoord ? ProjectedRange::GrowthDirection::Contracting : ProjectedRange::GrowthDirection::Expanding);
 
             assert(abs(yCoord - sensorInfo.posY) <= distToNearestBeacon);
             const int64_t projectedRangeWidthAtY = (2 * distToNearestBeacon + 1) - 2 * abs(yCoord - sensorInfo.posY);
@@ -136,24 +172,71 @@ Coord hiddenBeaconPosition(const std::vector<SensorInfo>& sensorInfos)
             projectedRange.startX = max<int64_t>(projectedRange.startX, 0);
             projectedRange.endX = min(projectedRange.endX, beaconMaxX);
             if (projectedRange.startX <= projectedRange.endX)
-                projectedRanges.push_back({growthDirection, projectedRange});
+            {
+                if (sensorInfo.posY > yCoord)
+                {
+                    expandingRanges.push_back(projectedRange);
+                }
+                else
+                {
+                    contractingRanges.push_back(projectedRange);
+                }
+            }
 
         }
 
-        set<Coord> beaconsOnRow;
+        vector<Range> allRanges = expandingRanges;
+        allRanges.insert(allRanges.end(), contractingRanges.begin(), contractingRanges.end());
         for (const auto& sensorInfo : sensorInfos)
         {
-            if (sensorInfo.nearestBeaconY == yCoord)
-                beaconsOnRow.insert({sensorInfo.nearestBeaconX, sensorInfo.nearestBeaconY});
+            if (sensorInfo.nearestBeaconY == yCoord && (sensorInfo.nearestBeaconX >= 0 && sensorInfo.nearestBeaconX <= beaconMaxX) )
+                allRanges.push_back({sensorInfo.nearestBeaconX, sensorInfo.nearestBeaconX});
         }
 
+#ifdef BRUTE_FORCE
+        assert(numCoveredByRanges(allRanges) == numCoveredByRangesBruteForce(allRanges));
+#endif
+        const int64_t numPlacesCannotBe = numCoveredByRanges(allRanges);
+        const int64_t numPlacesCouldBe = beaconMaxX + 1 - numPlacesCannotBe;
+        assert(numPlacesCouldBe == 0 || numPlacesCouldBe == 1);
+        if (numPlacesCouldBe == 1)
+        {
+            std::cout << "woohoo: yCoord: " << yCoord << std::endl;
+            assert((answer == Coord{-1, -1}));
+            answer = {-1, /*TODO*/ yCoord};
+        }
 
-
+        for (auto leftExpandingRange : expandingRanges)
+        {
+            for (auto rightExpandingRange : expandingRanges)
+            {
+                if (leftExpandingRange.startX > rightExpandingRange.startX)
+                    swap(leftExpandingRange, rightExpandingRange);
+                if ((abs(rightExpandingRange.startX - leftExpandingRange.endX) % 2) == 1)
+                    continue;
+                const int64_t yIncreaseUntil1Gap = (rightExpandingRange.startX - leftExpandingRange.endX) / 2;
+                eventsYCoords.insert(yCoord + yIncreaseUntil1Gap);
+            }
+        }
+        for (auto leftContractingRange : expandingRanges)
+        {
+            for (auto rightContractingRange : expandingRanges)
+            {
+                if (leftContractingRange.startX > rightContractingRange.startX)
+                    swap(leftContractingRange, rightContractingRange);
+                if ((abs(rightContractingRange.startX - leftContractingRange.endX) % 2) == 1)
+                    continue;
+                const int64_t yIncreaseUntil1Gap = -(rightContractingRange.startX - leftContractingRange.endX) / 2;
+                eventsYCoords.insert(yCoord + yIncreaseUntil1Gap);
+            }
+        }
     }
 
-    return {-1, -1};
+    return answer;
 
 }
+
+#ifdef BRUTE_FORCE
 Coord hiddenBeaconPositionBruteForce(const std::vector<SensorInfo>& sensorInfos)
 {
     static std::map<Coord, char> cellContents;
@@ -244,6 +327,7 @@ Coord hiddenBeaconPositionBruteForce(const std::vector<SensorInfo>& sensorInfos)
     }
     return hiddenBeaconPosition;
 }
+#endif
 
 int main()
 {
@@ -266,87 +350,12 @@ int main()
         sensorInfos.push_back(sensorInfo);
     }
 
+#ifdef BRUTE_FORCE
     const auto bruteForce = hiddenBeaconPositionBruteForce(sensorInfos);
     std::cout << "hiddenBeaconPositionBruteForce: " << bruteForce.x << ", " << bruteForce.y << std::endl;
-
-#if 0
-    //const int64_t requiredRowNumber = 2000000;
-    const int maxX = 20; // TODO - replace both of these with 4'000'000
-    const int maxY = 20;
-
-    set<Coord> beaconsOnRow;
-    for (const auto& sensorInfo : sensorInfos)
-    {
-        if (sensorInfo.nearestBeaconY == requiredRowNumber)
-            beaconsOnRow.insert({sensorInfo.nearestBeaconX, sensorInfo.nearestBeaconY});
-    }
-    std::cout << "# beaconsOnRow: " << beaconsOnRow.size() << std::endl;
-
-    std::deque<Range> rangesOnDesiredRow;
-    for (const auto& sensorInfo : sensorInfos)
-    {
-        const int64_t distToNearestBeacon = abs(sensorInfo.posX - sensorInfo.nearestBeaconX) + abs(sensorInfo.posY - sensorInfo.nearestBeaconY);
-        if (sensorInfo.posY + distToNearestBeacon < requiredRowNumber || sensorInfo.posY - distToNearestBeacon > requiredRowNumber)
-            continue;
-        assert(abs(requiredRowNumber - sensorInfo.posY) <= distToNearestBeacon);
-        const int64_t projectedRangeWidthAtY = (2 * distToNearestBeacon + 1) - 2 * abs(requiredRowNumber - sensorInfo.posY);
-        assert(projectedRangeWidthAtY >= 1);
-        assert(projectedRangeWidthAtY % 2 == 1);
-        rangesOnDesiredRow.push_back({sensorInfo.posX - (projectedRangeWidthAtY - 1) / 2, sensorInfo.posX + (projectedRangeWidthAtY - 1) / 2});
-    }
-
-    const auto optimised = numCoveredByRanges(rangesOnDesiredRow);
-    const auto bruteForce = numCoveredByRangesBruteForce(rangesOnDesiredRow);
-    std::cout << "optimised: " << optimised << " bruteForce: " << bruteForce << std::endl;
-    std::cout << "Answer: " << (optimised - beaconsOnRow.size()) << std::endl;;
 #endif
+    const auto optimised = hiddenBeaconPosition(sensorInfos);
+    std::cout << "hiddenBeaconPosition: " << optimised.x << ", " << optimised.y << std::endl;
 
-#if 0
-
-    numNotPresentInRowBruteForce(sensorInfos, requiredRowNumber);
-
-    std::cout << "Woo" << std::endl;
-    assert(numCoveredByRanges({{1, 10}, {15, 20}}) == 10 + 6);
-    assert(numCoveredByRanges({{1, 10}, {11, 20}}) == 20);
-    assert(numCoveredByRanges({{1, 10}, {10, 20}}) == 20);
-    assert(numCoveredByRanges({{1, 10}, {2, 20}}) == 20);
-    assert(numCoveredByRanges({{1, 10}, {12, 20}}) == 19);
-    assert(numCoveredByRanges({{1, 10}, {1, 20}}) == 20);
-
-    while (true)
-    {
-        int minX = rand() % 100 - 50;
-        int maxX = rand() % 100 - 50;
-        if (minX > maxX)
-            swap(minX, maxX);
-        if (minX == maxX)
-            continue;
-        const int num = rand() % 100 + 1;
-        deque<Range> ranges;
-        for (int i = 0; i < num; i++)
-        {
-            int startX = (rand() % (maxX - minX)) + minX;
-            int endX = (rand() % (maxX - minX)) + minX;
-            assert(startX >= minX && startX <= maxX);
-            assert(endX >= minX && endX <= maxX);
-            if (startX > endX)
-                swap(startX, endX);
-            ranges.push_back({startX, endX});
-        }
-
-        const auto optimised = numCoveredByRanges(ranges);
-        const auto bruteForce = numCoveredByRangesBruteForce(ranges);
-        std::cout << "optimised: " << optimised << " bruteForce: " << bruteForce << std::endl;
-        if(optimised != bruteForce)
-        {
-            std::cout << "Failure: " << std::endl;
-            for (const auto range : ranges)
-            {
-                std::cout << " " << range.startX << ", " << range.endX << std::endl;
-            }
-            break;
-        }
-    }
-#endif
 }
 
