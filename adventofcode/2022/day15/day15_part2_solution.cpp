@@ -179,6 +179,7 @@ Coord hiddenBeaconPosition(const std::vector<SensorInfo>& sensorInfos)
         vector<Range> contractingRanges;
         for (const auto& sensorInfo : sensorInfos)
         {
+            std::cout << "sensorInfo: " << sensorInfo.posX << ", " << sensorInfo.posY << " nb: " << sensorInfo.nearestBeaconX << ", " << sensorInfo.nearestBeaconY << std::endl;
             const int64_t distToNearestBeacon = abs(sensorInfo.posX - sensorInfo.nearestBeaconX) + abs(sensorInfo.posY - sensorInfo.nearestBeaconY);
             if (sensorInfo.posY + distToNearestBeacon < yCoord || sensorInfo.posY - distToNearestBeacon > yCoord)
                 continue;
@@ -188,8 +189,9 @@ Coord hiddenBeaconPosition(const std::vector<SensorInfo>& sensorInfos)
             assert(projectedRangeWidthAtY >= 1);
             assert(projectedRangeWidthAtY % 2 == 1);
             Range projectedRange(sensorInfo.posX - (projectedRangeWidthAtY - 1) / 2, sensorInfo.posX + (projectedRangeWidthAtY - 1) / 2);
-            projectedRange.startX = max<int64_t>(projectedRange.startX, 0);
-            projectedRange.endX = min(projectedRange.endX, beaconMaxX);
+            //projectedRange.startX = max<int64_t>(projectedRange.startX, 0);
+            //projectedRange.endX = min(projectedRange.endX, beaconMaxX);
+            std::cout << " blah: " << projectedRange.startX << ", " << projectedRange.endX << ")" << std::endl;
             if (projectedRange.startX <= projectedRange.endX)
             {
                 if (sensorInfo.posY > yCoord)
@@ -202,6 +204,17 @@ Coord hiddenBeaconPosition(const std::vector<SensorInfo>& sensorInfos)
                 }
             }
 
+        }
+
+        std::cout << "Expanding ranges: " << std::endl;
+        for (const auto range : expandingRanges)
+        {
+            std::cout << " (" << range.startX << ", " << range.endX << ")" << std::endl;
+        }
+        std::cout << "Contracting ranges: " << std::endl;
+        for (const auto range : contractingRanges)
+        {
+            std::cout << " (" << range.startX << ", " << range.endX << ")" << std::endl;
         }
 
         vector<Range> allRanges = expandingRanges;
@@ -236,10 +249,15 @@ Coord hiddenBeaconPosition(const std::vector<SensorInfo>& sensorInfos)
             answer = {-1, /*TODO*/ yCoord};
         }
 
-        for (auto leftExpandingRange : expandingRanges)
+        for (const auto& leftExpandingRangeOrig : expandingRanges)
         {
-            for (auto rightExpandingRange : expandingRanges)
+            for (const auto& rightExpandingRangeOrig : expandingRanges)
             {
+                Range leftExpandingRange = leftExpandingRangeOrig;
+                Range rightExpandingRange = rightExpandingRangeOrig;
+
+                std::cout << "leftExpandingRange: " << leftExpandingRange.startX << ", " << leftExpandingRange.endX << std::endl;
+                std::cout << "rightExpandingRange: " << rightExpandingRange.startX << ", " << rightExpandingRange.endX << std::endl;
                 if (leftExpandingRange.startX > rightExpandingRange.startX)
                     swap(leftExpandingRange, rightExpandingRange);
                 if ((abs(rightExpandingRange.startX - leftExpandingRange.endX) % 2) == 1)
@@ -389,6 +407,8 @@ Coord hiddenBeaconPositionBruteForce(const std::vector<SensorInfo>& sensorInfos)
 
 int main()
 {
+    std::cout << "glomph: " << (3226902 - (2391592 - 2276711)) << std::endl;
+    std::cout << "glamph: " << (3226902 + (2391592 - 2276711)) << std::endl;
     vector<SensorInfo> sensorInfos;
 
     string sensorInfoLine;
