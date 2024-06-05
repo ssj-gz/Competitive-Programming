@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <deque>
+#include <queue>
 #include <map>
 #include <set>
 #include <regex>
@@ -39,7 +40,7 @@ int64_t numCoveredByRanges(const deque<Range>& rangesOrig)
             {
                 return lhs.startX < rhs.startX;
             });
-    deque<int64_t> yCoordsOfCurrentRangesEnds;
+    priority_queue<int64_t, std::vector<int64_t>, std::greater<>> yCoordsOfCurrentRangesEnds;
     int64_t currentX = std::numeric_limits<int64_t>::min();
     while (true)
     {
@@ -48,9 +49,9 @@ int64_t numCoveredByRanges(const deque<Range>& rangesOrig)
         {
             ranges.pop_front();
         }
-        while (!yCoordsOfCurrentRangesEnds.empty() && yCoordsOfCurrentRangesEnds.front() < currentX)
+        while (!yCoordsOfCurrentRangesEnds.empty() && yCoordsOfCurrentRangesEnds.top() < currentX)
         {
-            yCoordsOfCurrentRangesEnds.pop_front();
+            yCoordsOfCurrentRangesEnds.pop();
         }
 
         if (ranges.empty() && yCoordsOfCurrentRangesEnds.empty())
@@ -58,17 +59,16 @@ int64_t numCoveredByRanges(const deque<Range>& rangesOrig)
         const bool wasStillWithinRange = !yCoordsOfCurrentRangesEnds.empty();
 
         const int64_t bestRangeStartX = (!ranges.empty() ? ranges.front().startX : std::numeric_limits<int64_t>::max());
-        const int64_t bestEndOfCurrentRangeX = (!yCoordsOfCurrentRangesEnds.empty() ? yCoordsOfCurrentRangesEnds.front() : std::numeric_limits<int64_t>::max());
+        const int64_t bestEndOfCurrentRangeX = (!yCoordsOfCurrentRangesEnds.empty() ? yCoordsOfCurrentRangesEnds.top() : std::numeric_limits<int64_t>::max());
         const int64_t newCurrentX = min(bestRangeStartX, bestEndOfCurrentRangeX);
         assert(newCurrentX != std::numeric_limits<int64_t>::max());
 
         // We might have started processing a range; update yCoordsOfCurrentRangesEnds, regardless.
         while (!ranges.empty() && ranges.front().startX == newCurrentX)
         {
-            yCoordsOfCurrentRangesEnds.push_back(ranges.front().endX);
+            yCoordsOfCurrentRangesEnds.push(ranges.front().endX);
             ranges.pop_front();
         }
-        sort(yCoordsOfCurrentRangesEnds.begin(), yCoordsOfCurrentRangesEnds.end());
 
         if (currentX != std::numeric_limits<int64_t>::min())
         {
