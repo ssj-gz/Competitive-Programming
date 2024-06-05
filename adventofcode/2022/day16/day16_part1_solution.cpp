@@ -82,7 +82,7 @@ int main()
         for (const auto& neighbourLabel : neighbourLabelsRange)
         {
             string neighbourLabelTrimmed(neighbourLabel.begin(), neighbourLabel.end());
-            neighbourLabelTrimmed.erase(std::remove(neighbourLabelTrimmed.begin(), neighbourLabelTrimmed.end(), ' '), neighbourLabelTrimmed.end());
+            std::erase(neighbourLabelTrimmed, ' ');
             valveInfo.neighbourLabels.push_back(neighbourLabelTrimmed);
         }
         std::cout << "label: " << valveInfo.label  << " flowRate: " << valveInfo.flowRate << " neighbourLabels: " << std::endl;
