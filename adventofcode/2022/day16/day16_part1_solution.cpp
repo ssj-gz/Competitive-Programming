@@ -139,10 +139,6 @@ int main()
             {
                 // Assumes newState.pressureReleased has not yet been updated.
                 newState.pressureReleased += parentState.openValves.totalFlowRate();
-                if (newState.pressureReleased > highestPressureReleased)
-                {
-                    highestPressureReleased = newState.pressureReleased;
-                }
                 if (!seenStates.contains(newState))
                 {
                     nextToExplore.push_back(newState);
@@ -166,8 +162,14 @@ int main()
             }
         }
 
-        toExplore = nextToExplore;
-        time++;
+        // End of this minute.
+        for (const auto& state : toExplore)
+        {
+            const int64_t pressureReleasedAtEndOfMinute = state.pressureReleased + state.openValves.totalFlowRate();
+            highestPressureReleased = max(pressureReleasedAtEndOfMinute, highestPressureReleased);
+        }
         std::cout << "highestPressureReleased after time " << time << " : " << highestPressureReleased << std::endl;
+        time++;
+        toExplore = nextToExplore;
     }
 }
