@@ -127,30 +127,26 @@ int main()
 
     vector<State> toExplore = { initialState };
     std::set<State> seenStates = { initialState };
-    std::map<State, State> parentOfState;
     int time = 1;
     int64_t highestPressureReleased = 0;
-    State highestPressureReleasedState;
     while (time <= 30)
     {
         vector<State> nextToExplore;
         std::cout << "time: " << time << " # toExplore: " << toExplore.size() << std::endl;
         for (const auto& state : toExplore)
         {
-            auto handleNewState = [&seenStates, &nextToExplore, &highestPressureReleased, &highestPressureReleasedState, &parentOfState](State& newState, const State& parentState)
+            auto handleNewState = [&seenStates, &nextToExplore, &highestPressureReleased](State& newState, const State& parentState)
             {
                 // Assumes newState.pressureReleased has not yet been updated.
                 newState.pressureReleased += parentState.openValves.totalFlowRate();
                 if (newState.pressureReleased > highestPressureReleased)
                 {
                     highestPressureReleased = newState.pressureReleased;
-                    highestPressureReleasedState = newState;
                 }
                 if (!seenStates.contains(newState))
                 {
                     nextToExplore.push_back(newState);
                     seenStates.insert(newState);
-                    parentOfState[newState] = parentState;
                 }
             };
             if ((state.currentPos->flowRate != 0) && (!state.openValves.hasValve(state.currentPos)))
@@ -173,35 +169,5 @@ int main()
         toExplore = nextToExplore;
         time++;
         std::cout << "highestPressureReleased after time " << time << " : " << highestPressureReleased << std::endl;
-    }
-
-    {
-        vector<State> backtrack;
-        State current = highestPressureReleasedState;
-        while (true)
-        {
-            backtrack.push_back(current);
-            if (!parentOfState.contains(current))
-                break;
-            current = parentOfState[current];
-        }
-        std::reverse(backtrack.begin(), backtrack.end());
-
-        int time = 1;
-        for (const auto& state : backtrack)
-        {
-            std::cout << "== time: " << time << " == " <<std::endl;
-            std::cout << "At valve: " << state.currentPos->label << std::endl;
-            std::cout << "Open valves: " << std::endl;
-            for (const auto& valve : valves)
-            {
-                if (state.openValves.hasValve(&valve))
-                    std::cout << valve.label << " ";
-            }
-            std::cout  << std::endl<< "totalFlowRate: " << state.openValves.totalFlowRate() << std::endl;
-            std::cout << "Pressure released: " << state.pressureReleased << std::endl;
-
-            time++;
-        }
     }
 }
