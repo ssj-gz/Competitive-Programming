@@ -20,13 +20,11 @@ struct Valve
 
 void updateMinDistances(const Valve* startValve, map<const Valve*, map<const Valve*, int>>& minDistanceBetweenValves)
 {
-    std::cout << "updateMinDistances starting with: " << startValve->label << std::endl;
     vector<const Valve*> toExplore = { startValve };
     set<const Valve*> seen = { startValve };
     int distance = 1;
     while (!toExplore.empty())
     {
-        std::cout << "toExplore: " << toExplore.size() << std::endl;
         vector<const Valve*> nextToExplore;
 
         for (const auto* valve : toExplore)
@@ -45,7 +43,6 @@ void updateMinDistances(const Valve* startValve, map<const Valve*, map<const Val
                 }
             }
         }
-
 
         distance++;
         toExplore = nextToExplore;
@@ -71,18 +68,6 @@ class ValveSet
             return m_totalFlowRate;
         }
         auto operator<=>(const ValveSet& other) const = default;
-#if 0
-        string toString() const
-        {
-            string asStr;
-            for (int valveIndex = 0; valveIndex < 63; valveIndex++)
-            {
-                if (hasValve())
-                    asStr += key;
-            }
-            return asStr;
-        }
-#endif
     private:
         uint64_t m_valveBits = 0;
         int64_t m_totalFlowRate = 0;
@@ -104,7 +89,6 @@ int main()
     while (std::getline(cin, valveInfoLine))
     {
         std::smatch valveInfoMatch;
-        std::cout << "line: " << valveInfoLine << std::endl;
         const bool matchSuccessful = std::regex_match(valveInfoLine, valveInfoMatch, valveInfoRegex);
         assert(matchSuccessful);
         Valve valveInfo;
@@ -118,11 +102,6 @@ int main()
             string neighbourLabelTrimmed(neighbourLabel.begin(), neighbourLabel.end());
             std::erase(neighbourLabelTrimmed, ' ');
             valveInfo.neighbourLabels.push_back(neighbourLabelTrimmed);
-        }
-        std::cout << "label: " << valveInfo.label  << " flowRate: " << valveInfo.flowRate << " neighbourLabels: " << std::endl;
-        for (const auto& label : valveInfo.neighbourLabels)
-        {
-            std::cout << " " << label << std::endl;
         }
         valves.push_back(valveInfo);
 
@@ -141,15 +120,9 @@ int main()
             assert(neighbourIter != valves.end());
             valve.neighbours.push_back(&(*neighbourIter));
         }
-        std::cout << "valve with label: " << valve.label << " has neighbours: " << std::endl;
-        for (const auto* neighbour : valve.neighbours)
-        {
-            std::cout << " " << neighbour->label << std::endl;
-        }
     }
     assert(startingValve != nullptr);
     // Build minDistanceBetweenValves map.
-    std::cout << "Building minDistanceBetweenValves" << std::endl;
     map<const Valve*, map<const Valve*, int>> minDistanceBetweenValves;
     for (const auto& valve : valves)
     {
@@ -157,20 +130,13 @@ int main()
             updateMinDistances(&valve, minDistanceBetweenValves);
     }
     updateMinDistances(startingValve, minDistanceBetweenValves);
-    std::cout << "Finished Building minDistanceBetweenValves" << std::endl;
-    for (const auto [valve, minDistanceFromValve] : minDistanceBetweenValves)
-    {
-        for (const auto [otherValve, distance] : minDistanceFromValve)
-        {
-            std::cout << "Min distance between " << valve->label << " and " << otherValve->label << " is: " << distance << std::endl;
-        }
-    }
     
     struct State
     {
         const Valve* currentPos = nullptr;
         ValveSet openValves;
-        // Pressure released is deliberately omitted.
+        // Pressure released is deliberately omitted; instead, it's 
+        // stored externally, in highestPressureForStateAtMinute.
         auto operator<=>(const State& other) const = default;
     };
 
@@ -178,23 +144,23 @@ int main()
 
     constexpr int timeLimit = 30;
     vector<map<State, int>> highestPressureForStateAtMinute(timeLimit + 1);
-    int time = 1;
     highestPressureForStateAtMinute[1] = { { initialState, 0} };
+    int time = 1;
     int64_t highestPressureReleased = 0;
     while (time <= timeLimit)
     {
         const auto& toExplore = highestPressureForStateAtMinute[time];
-        std::cout << "time: " << time << " # toExplore: " << toExplore.size() << std::endl;
         for (const auto& [state, pressureReleased] : toExplore)
         {
-            auto handleNewState = [&highestPressureForStateAtMinute, pressureReleased](State& newState, const int newStateTime, const State& parentState, const int parentStateTime)
+            auto handleNewState = [&highestPressureForStateAtMinute, &parentState = state, pressureReleased, parentStateTime = time](State& newState, const int newStateTime)
             {
                 // Assumes newState.pressureReleased has not yet been updated.
                 assert(parentStateTime < newStateTime);
                 const int64_t pressureReleasedAtNewState = pressureReleased + (newStateTime - parentStateTime) * parentState.openValves.totalFlowRate();
-                if (!highestPressureForStateAtMinute[newStateTime].contains(newState) || highestPressureForStateAtMinute[newStateTime][newState] < pressureReleasedAtNewState)
+                auto& currentHighestPressureForNewState = highestPressureForStateAtMinute[newStateTime][newState];
+                if (currentHighestPressureForNewState < pressureReleasedAtNewState)
                 {
-                    highestPressureForStateAtMinute[newStateTime][newState] = pressureReleasedAtNewState;
+                    currentHighestPressureForNewState = pressureReleasedAtNewState;
                 }
             };
             if (time != timeLimit)
@@ -204,7 +170,7 @@ int main()
                     // Spend this turn opening the valve.
                     State newState = state;
                     newState.openValves.addValve(state.currentPos);
-                    handleNewState(newState, time + 1, state, time);
+                    handleNewState(newState, time + 1);
                 }
 
                 // Move.
@@ -214,14 +180,14 @@ int main()
                     if (time + distance <= timeLimit)
                     {
                         newState.currentPos = otherValve;
-                        handleNewState(newState, time + distance, state, time);
+                        handleNewState(newState, time + distance);
                     }
                     else
                     {
                         // Can't reach this other valve in time; just stand here until the clock
                         // runs out.
                         if (time != timeLimit)
-                            handleNewState(newState, timeLimit, state, time);
+                            handleNewState(newState, timeLimit);
                     }
                 }
             }
@@ -233,7 +199,7 @@ int main()
             const int64_t pressureReleasedAtEndOfMinute = pressureReleased + state.openValves.totalFlowRate();
             highestPressureReleased = max(pressureReleasedAtEndOfMinute, highestPressureReleased);
         }
-        std::cout << "highestPressureReleased after time " << time << " : " << highestPressureReleased << std::endl;
         time++;
     }
+    std::cout << "answer: " << highestPressureReleased << std::endl;
 }
