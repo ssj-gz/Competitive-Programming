@@ -170,35 +170,31 @@ int main()
     {
         const Valve* currentPos = nullptr;
         ValveSet openValves;
-        int64_t pressureReleased = 0;
+        // Pressure released is deliberately omitted.
         auto operator<=>(const State& other) const = default;
     };
 
     State initialState = { startingValve };
 
     constexpr int timeLimit = 30;
-    vector<set<State>> statesToExploreAtMinute(timeLimit + 1);
+    vector<map<State, int>> highestPressureForStateAtMinute(timeLimit + 1);
     int time = 1;
-    statesToExploreAtMinute[time] = { initialState };
-    std::set<State> seenStates = { initialState };
+    highestPressureForStateAtMinute[1] = { { initialState, 0} };
     int64_t highestPressureReleased = 0;
     while (time <= timeLimit)
     {
-        const auto& toExplore = statesToExploreAtMinute[time];
-        vector<State> nextToExplore;
+        const auto& toExplore = highestPressureForStateAtMinute[time];
         std::cout << "time: " << time << " # toExplore: " << toExplore.size() << std::endl;
-        for (const auto& state : toExplore)
+        for (const auto& [state, pressureReleased] : toExplore)
         {
-            seenStates.insert(state);
-            auto handleNewState = [&seenStates, &nextToExplore, &statesToExploreAtMinute](State& newState, const int newStateTime, const State& parentState, const int parentStateTime)
+            auto handleNewState = [&highestPressureForStateAtMinute, pressureReleased](State& newState, const int newStateTime, const State& parentState, const int parentStateTime)
             {
                 // Assumes newState.pressureReleased has not yet been updated.
                 assert(parentStateTime < newStateTime);
-                //assert(newStateTime <= timeLimit);
-                newState.pressureReleased += (newStateTime - parentStateTime) * parentState.openValves.totalFlowRate();
-                if (!seenStates.contains(newState))
+                const int64_t pressureReleasedAtNewState = pressureReleased + (newStateTime - parentStateTime) * parentState.openValves.totalFlowRate();
+                if (!highestPressureForStateAtMinute[newStateTime].contains(newState) || highestPressureForStateAtMinute[newStateTime][newState] < pressureReleasedAtNewState)
                 {
-                    statesToExploreAtMinute[newStateTime].insert(newState);
+                    highestPressureForStateAtMinute[newStateTime][newState] = pressureReleasedAtNewState;
                 }
             };
             if (time != timeLimit)
@@ -232,13 +228,12 @@ int main()
         }
 
         // End of this minute.
-        for (const auto& state : toExplore)
+        for (const auto& [state, pressureReleased] : toExplore)
         {
-            const int64_t pressureReleasedAtEndOfMinute = state.pressureReleased + state.openValves.totalFlowRate();
+            const int64_t pressureReleasedAtEndOfMinute = pressureReleased + state.openValves.totalFlowRate();
             highestPressureReleased = max(pressureReleasedAtEndOfMinute, highestPressureReleased);
         }
         std::cout << "highestPressureReleased after time " << time << " : " << highestPressureReleased << std::endl;
         time++;
-        //toExplore = nextToExplore;
     }
 }
