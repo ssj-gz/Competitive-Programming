@@ -18,6 +18,46 @@ struct Valve
     vector<string> neighbourLabels;
 };
 
+ostream& operator<<(ostream& os, const Valve* valve)
+{
+    if (!valve)
+        os << "NONE";
+    else
+        os << valve->label;
+    return os;
+}
+
+void updateMinDistances(const Valve* startValve, map<const Valve*, map<const Valve*, int>>& minDistanceBetweenValves)
+{
+    vector<const Valve*> toExplore = { startValve };
+    set<const Valve*> seen = { startValve };
+    int distance = 1;
+    while (!toExplore.empty())
+    {
+        vector<const Valve*> nextToExplore;
+
+        for (const auto* valve : toExplore)
+        {
+            for (const auto* neigbourValve : valve->neighbours)
+            {
+                if (!seen.contains(neigbourValve))
+                {
+                    if (neigbourValve->flowRate > 0)
+                    {
+                        minDistanceBetweenValves[startValve][neigbourValve] = distance;
+                        minDistanceBetweenValves[neigbourValve][startValve] = distance;
+                    }
+                    seen.insert(neigbourValve);
+                    nextToExplore.push_back(neigbourValve);
+                }
+            }
+        }
+
+        distance++;
+        toExplore = nextToExplore;
+    }
+}
+
 class ValveSet
 {
     public:
@@ -43,6 +83,7 @@ class ValveSet
 
         uint64_t bitForValve(const Valve* valve) const
         {
+            assert(valve != nullptr);
             uint64_t keyBit = static_cast<uint64_t>(1) << static_cast<uint64_t>(valve->valveIndex);
             return keyBit;
         }
@@ -91,31 +132,72 @@ int main()
         }
     }
     assert(startingValve != nullptr);
+
+    // Build minDistanceBetweenValves map.
+    map<const Valve*, map<const Valve*, int>> minDistanceBetweenValves;
+    for (const auto& valve : valves)
+    {
+        if (valve.flowRate != 0)
+            updateMinDistances(&valve, minDistanceBetweenValves);
+    }
+    updateMinDistances(startingValve, minDistanceBetweenValves);
+    for (const auto [valve, minDistanceFromValve] : minDistanceBetweenValves)
+    {
+        for (const auto [otherValve, distance] : minDistanceFromValve)
+        {
+            std::cout << "Min distance between " << valve->label << " and " << otherValve->label << " is: " << distance << std::endl;
+        }
+    }
+    vector<const Valve*> valvesWithNonZeroRate;
+    for (const auto& valve : valves)
+    {
+        if (valve.flowRate > 0)
+            valvesWithNonZeroRate.push_back(&valve);
+    }
+    std::cout << "#valvesWithNonZeroRate: " << valvesWithNonZeroRate.size() << std::endl;
     
     constexpr int numActors = 2; // Man and elephant.
     struct State
     {
-        const Valve* actorPositions[numActors] = { nullptr, nullptr };
+        const Valve* actorTargetValves[numActors] = { nullptr, nullptr };
+        int actorDistsToTargetValves[numActors] = { -1, -1 };
         ValveSet openValves;
         // Pressure released is deliberately omitted; instead, it's 
         // stored externally, in highestPressureForStateAtMinute.
         auto operator<=>(const State& other) const = default;
     };
+    //const Valve* actorTargetValves[numActors] = { nullptr, nullptr };
+    //actorTargetValves[0] = nullptr;
 
-    State initialState = { {startingValve, startingValve} };
+    State initialState = { {startingValve, startingValve}, {0, 0} };
+    initialState.openValves.addValve(startingValve); // A bit of a hack - just want to prevent attempting to open the startingValve.
 
+    set<ValveSet> valveSets;
     constexpr int timeLimit = 26;
     vector<map<State, int>> highestPressureForStateAtMinute(timeLimit + 1);
+    map<State, int> highestPressureForState;
     highestPressureForStateAtMinute[1] = { { initialState, 0} };
     int time = 1;
     int64_t highestPressureReleased = 0;
+    int numSkipped = 0;
     while (time <= timeLimit)
     {
-        const auto& toExplore = highestPressureForStateAtMinute[time];
-        std::cout << "time: " << time << " #toExplore: " << toExplore.size() << std::endl;
-        for (const auto& [state, pressureReleased] : toExplore)
+        auto& toExplore = highestPressureForStateAtMinute[time];
+        std::cout << "time: " << time << " #toExplore: " << toExplore.size() << " #valveSets: "<< valveSets.size() << " numSkipped: " << numSkipped << " highestPressureReleased: " << highestPressureReleased << std::endl;
+        for (auto& [origState, pressureReleased] : toExplore)
         {
-            auto handleNewState = [&highestPressureForStateAtMinute, &parentState = state, pressureReleased, parentStateTime = time](State& newState, const int newStateTime)
+            //std::cout << "Exploring a state: targetValve[0]: " << origState.actorTargetValves[0] << " targetValve[1]: " << origState.actorTargetValves[1] << " actorDistsToTargetValves[0]: " << origState.actorDistsToTargetValves[0] << " actorDistsToTargetValves[1]: " << origState.actorDistsToTargetValves[1] << std::endl; 
+            if (highestPressureForState.contains(origState) && highestPressureForState[origState] >= pressureReleased)
+            {
+                //std::cout << "Skipping" << std::endl;
+                numSkipped++;
+                //continue;
+            }
+            else
+            {
+                highestPressureForState[origState] = pressureReleased;
+            }
+            auto handleNewState = [&highestPressureForStateAtMinute, &parentState = origState, pressureReleased, parentStateTime = time, &valveSets](State& newState, const int newStateTime)
             {
                 // Assumes newState.pressureReleased has not yet been updated.
                 assert(parentStateTime < newStateTime);
@@ -124,76 +206,131 @@ int main()
                 if (currentHighestPressureForNewState < pressureReleasedAtNewState)
                 {
                     currentHighestPressureForNewState = pressureReleasedAtNewState;
+                    valveSets.insert(newState.openValves);
                 }
             };
             if (time != timeLimit)
             {
                 // Yuck.
+                State state = origState;
+                const Valve* actorPositions[] = { nullptr, nullptr };
+                for (int actorIndex = 0; actorIndex < numActors; actorIndex++)
+                {
+                    if (state.actorDistsToTargetValves[actorIndex] == 0)
+                    {
+                        actorPositions[actorIndex] = state.actorTargetValves[actorIndex];
+                        state.actorTargetValves[actorIndex] = nullptr;
+                    }
+                }
                 for (bool actor1OpensValve : { true, false })
                 {
                     for (bool actor2OpensValve : { true, false })
                     {
-                        if (actor1OpensValve && actor2OpensValve)
+                        //std::cout << "actor1OpensValve: " << actor1OpensValve << " actor2OpensValve: " << actor2OpensValve << std::endl;
+                        bool actorOpensValve[] = { actor1OpensValve, actor2OpensValve };
+                        bool invalidCombination = false;
+                        for (int actorIndex = 0; actorIndex < numActors; actorIndex++)
                         {
-                            State newState = state;
-                            if ((state.actorPositions[0]->flowRate != 0) && (!newState.openValves.hasValve(state.actorPositions[0])))
+                            if (actorOpensValve[actorIndex])
                             {
-                                // Actor 1 spends this turn opening the valve.
-                                newState.openValves.addValve(state.actorPositions[0]);
-                            }
-                            if ((state.actorPositions[1]->flowRate != 0) && (!newState.openValves.hasValve(state.actorPositions[1])))
-                            {
-                                // Actor 2 spends this turn opening the valve.
-                                newState.openValves.addValve(state.actorPositions[1]);
-                            }
-                            handleNewState(newState, time + 1);
-                        }
-                        else if (actor1OpensValve && !actor2OpensValve)
-                        {
-                            State newState = state;
-                            if ((state.actorPositions[0]->flowRate != 0) && (!newState.openValves.hasValve(state.actorPositions[0])))
-                            {
-                                // Actor 1 spends this turn opening the valve.
-                                newState.openValves.addValve(state.actorPositions[0]);
-                            }
-                            // Move Actor 2.
-                            for (const auto* neigbourValve : state.actorPositions[1]->neighbours)
-                            {
-                                newState.actorPositions[1] = neigbourValve;
-                                handleNewState(newState, time + 1);
-
-                            }
-                        }
-                        if (!actor1OpensValve && actor2OpensValve)
-                        {
-                            State newState = state;
-                            if ((state.actorPositions[1]->flowRate != 0) && (!newState.openValves.hasValve(state.actorPositions[1])))
-                            {
-                                // Actor 2 spends this turn opening the valve.
-                                newState.openValves.addValve(state.actorPositions[1]);
-                            }
-                            // Move Actor 1.
-                            for (const auto* neigbourValve : state.actorPositions[0]->neighbours)
-                            {
-                                newState.actorPositions[0] = neigbourValve;
-                                handleNewState(newState, time + 1);
-
-                            }
-                        }
-                        else
-                        {
-                            for (const auto* neigbour1Valve : state.actorPositions[0]->neighbours)
-                            {
-                                State newState = state;
-                                newState.actorPositions[0] = neigbour1Valve;
-                                for (const auto* neigbour2Valve : state.actorPositions[1]->neighbours)
+                                if ((actorPositions[actorIndex] == nullptr) || state.openValves.hasValve(actorPositions[actorIndex]))
                                 {
-                                    newState.actorPositions[1] = neigbour2Valve;
-                                    handleNewState(newState, time + 1);
+                                    // Can't open this valve, so this combination is invalid.
+                                    invalidCombination = true;
                                 }
                             }
                         }
+                        if (actor1OpensValve && actor2OpensValve && (actorPositions[0] == actorPositions[1]))
+                        {
+                            // Can't both open the same valve, so this combination is invalid.
+                            invalidCombination = true;
+                        }
+                        if (invalidCombination)
+                        {
+                            //std::cout << "invalid combination of valve openings" << std::endl;
+                            continue; // Move on to the next combination.
+                        }
+                        else
+                        {
+                            //std::cout << "Valid combination of valve openings :)" << std::endl;
+                        }
+                        State nextState = state;
+                        if (actor1OpensValve)
+                        {
+                            nextState.openValves.addValve(actorPositions[0]);
+                        }
+                        if (actor2OpensValve)
+                        {
+                            nextState.openValves.addValve(actorPositions[1]);
+                        }
+                        if (!actor1OpensValve && !actor2OpensValve)
+                        {
+                            //std::cout << "Neither opens valve, so both must move" << std::endl;
+                        }
+                        vector<State> actorNextStates[numActors];
+                        for (int actorIndex = 0; actorIndex < numActors; actorIndex++)
+                        {
+                            if (actorOpensValve[actorIndex])
+                            {
+                                for (const auto* targetValve : valvesWithNonZeroRate)
+                                {
+                                    if ((targetValve == actorPositions[actorIndex]) || nextState.openValves.hasValve(targetValve))
+                                        continue;
 
+                                    nextState.actorDistsToTargetValves[actorIndex] = minDistanceBetweenValves[actorPositions[actorIndex]][targetValve];
+                                    nextState.actorTargetValves[actorIndex] = targetValve;
+                                    actorNextStates[actorIndex].push_back(nextState);
+                                }
+                            }
+                            else if (nextState.actorTargetValves[actorIndex] == nullptr)
+                            {
+                                for (const auto* targetValve : valvesWithNonZeroRate)
+                                {
+                                    if ((targetValve == actorPositions[actorIndex]) || nextState.openValves.hasValve(targetValve))
+                                        continue;
+                                    nextState.actorDistsToTargetValves[actorIndex] = minDistanceBetweenValves[actorPositions[actorIndex]][targetValve] - 1;
+                                    nextState.actorTargetValves[actorIndex] = targetValve;
+                                    actorNextStates[actorIndex].push_back(nextState);
+                                }
+                            }
+                            else if (nextState.actorTargetValves[actorIndex] != nullptr && nextState.actorDistsToTargetValves[actorIndex] >= 1)
+                            {
+                                nextState.actorDistsToTargetValves[actorIndex]--;
+                                actorNextStates[actorIndex].push_back(nextState);
+                            }
+#if 0
+                            else if (nextState.actorTargetValves[actorIndex] != nullptr && nextState.actorDistsToTargetValves[actorIndex] == 1)
+                            {
+                                for (const auto* targetValve : valvesWithNonZeroRate)
+                                {
+                                    if ((targetValve == actorPositions[actorIndex]) || nextState.openValves.hasValve(targetValve))
+                                        continue;
+
+                                    nextState.actorDistsToTargetValves[actorIndex] = minDistanceBetweenValves[actorPositions[actorIndex]][targetValve];
+                                    nextState.actorTargetValves[actorIndex] = targetValve;
+                                    actorNextStates[actorIndex].push_back(nextState);
+                                }
+                            }
+#endif
+                            else
+                            {
+                                std::cout << "Uh-oh! actorIndex: " << actorIndex << " actorOpensValve: " << actorOpensValve[actorIndex] << " nextState.actorTargetValves[actorIndex]: " << nextState.actorTargetValves[actorIndex] << " nextState.actorDistsToTargetValves[actorIndex]: " << nextState.actorDistsToTargetValves[actorIndex] << std::endl;
+                                assert(false);
+                            }
+                            //assert(!actorNextStates[actorIndex].empty());
+                        }
+                        //std::cout << "# next states for actor 1: " << actorNextStates[0].size() << std::endl;
+                        //std::cout << "# next states for actor 2: " << actorNextStates[1].size() << std::endl;
+                        for (const auto& actor1NextState : actorNextStates[0])
+                        {
+                            for (const auto& actor2NextState : actorNextStates[1])
+                            {
+                                State stateToAdd = actor1NextState;
+                                stateToAdd.actorTargetValves[1] = actor2NextState.actorTargetValves[1];
+                                stateToAdd.actorDistsToTargetValves[1] = actor2NextState.actorDistsToTargetValves[1];
+                                handleNewState(stateToAdd, time + 1);
+                            }
+                        }
                     }
                 }
             }
@@ -206,6 +343,7 @@ int main()
             highestPressureReleased = max(pressureReleasedAtEndOfMinute, highestPressureReleased);
         }
         time++;
+        toExplore.clear();
     }
     std::cout << "answer: " << highestPressureReleased << std::endl;
 }
