@@ -18,37 +18,6 @@ struct Valve
     vector<string> neighbourLabels;
 };
 
-void updateMinDistances(const Valve* startValve, map<const Valve*, map<const Valve*, int>>& minDistanceBetweenValves)
-{
-    vector<const Valve*> toExplore = { startValve };
-    set<const Valve*> seen = { startValve };
-    int distance = 1;
-    while (!toExplore.empty())
-    {
-        vector<const Valve*> nextToExplore;
-
-        for (const auto* valve : toExplore)
-        {
-            for (const auto* neigbourValve : valve->neighbours)
-            {
-                if (!seen.contains(neigbourValve))
-                {
-                    if (neigbourValve->flowRate > 0)
-                    {
-                        minDistanceBetweenValves[startValve][neigbourValve] = distance;
-                        minDistanceBetweenValves[neigbourValve][startValve] = distance;
-                    }
-                    seen.insert(neigbourValve);
-                    nextToExplore.push_back(neigbourValve);
-                }
-            }
-        }
-
-        distance++;
-        toExplore = nextToExplore;
-    }
-}
-
 class ValveSet
 {
     public:
@@ -122,14 +91,6 @@ int main()
         }
     }
     assert(startingValve != nullptr);
-    // Build minDistanceBetweenValves map.
-    map<const Valve*, map<const Valve*, int>> minDistanceBetweenValves;
-    for (const auto& valve : valves)
-    {
-        if (valve.flowRate != 0)
-            updateMinDistances(&valve, minDistanceBetweenValves);
-    }
-    updateMinDistances(startingValve, minDistanceBetweenValves);
     
     struct State
     {
@@ -174,21 +135,11 @@ int main()
                 }
 
                 // Move.
-                for (const auto [otherValve, distance] : minDistanceBetweenValves[state.currentPos])
+                for (const auto* neigbourValve : state.currentPos->neighbours)
                 {
                     State newState = state;
-                    if (time + distance <= timeLimit)
-                    {
-                        newState.currentPos = otherValve;
-                        handleNewState(newState, time + distance);
-                    }
-                    else
-                    {
-                        // Can't reach this other valve in time; just stand here until the clock
-                        // runs out.
-                        if (time != timeLimit)
-                            handleNewState(newState, timeLimit);
-                    }
+                    newState.currentPos = neigbourValve;
+                    handleNewState(newState, time + 1);
                 }
             }
         }
