@@ -34,7 +34,6 @@ int main()
         cubeInfo.x = std::stoll(cubeInfoMatch[1]);
         cubeInfo.y = std::stoll(cubeInfoMatch[2]);
         cubeInfo.z = std::stoll(cubeInfoMatch[3]);
-        std::cout << "Cube: " << cubeInfo.x << "," << cubeInfo.y << "," << cubeInfo.z << std::endl;
         assert(!cubes.contains(cubeInfo));
         cubes.insert(cubeInfo);
 
@@ -91,19 +90,14 @@ int main()
         {0, 0, -1},
         {0, 0, +1}
     };
-    std::cout << "minX: " << minX << " maxX: " << maxX << std::endl;
-    std::cout << "minY: " << minY << " maxY: " << maxY << std::endl;
-    std::cout << "minZ: " << minZ << " maxZ: " << maxZ << std::endl;
 
     // Grow the steam cubes.
     while (true)
     {
         bool addedSteamCube = false;
 
-        std::cout << "# steam cubes: " << steamCubes.size() << std::endl;
         for (const auto& steamCube : steamCubes)
         {
-            std::cout << "steam cube at: " << steamCube.x << "," << steamCube.y << "," << steamCube.z << std::endl;
             for (const auto [dx, dy, dz] : neighbourCubeOffsets)
             {
                 const Cube neighbourCube = { steamCube.x + dx, steamCube.y + dy, steamCube.z + dz };
@@ -116,7 +110,6 @@ int main()
                 if (!cubes.contains(neighbourCube) && !steamCubes.contains(neighbourCube))
                 {
                     steamCubes.insert(neighbourCube);
-                    std::cout << " Added one: " << neighbourCube.x << "," << neighbourCube.y << "," << neighbourCube.z << std::endl;
                     addedSteamCube = true;
                 }
             }
@@ -125,7 +118,6 @@ int main()
         if (!addedSteamCube)
             break;
     }
-
 
     int numExposedFaces = 0;
     for (const auto& cube : cubes)
