@@ -85,8 +85,8 @@ int main()
 
                     if (shape[y][x] == '#')
                         playAreaView[yInPlayAreaView][xInPlayAreaView] = '@';
-                    else
-                        playAreaView[yInPlayAreaView][xInPlayAreaView] = '.';
+                    //else
+                        //playAreaView[yInPlayAreaView][xInPlayAreaView] = '.';
 
                 }
             }
@@ -167,7 +167,9 @@ int main()
                         const int yInPlayArea = shapeTopY - y;
                         while (yInPlayArea >= playArea.size())
                             playArea.push_back(string(playAreaWidth, '.'));
-                        playArea[yInPlayArea][xInPlayArea] = shape[y][x];
+                        if (shape[y][x] != '.')
+                            playArea[yInPlayArea][xInPlayArea] = '#';
+
                     }
                 }
                 std::cout << "Inscribed shape" << std::endl;
