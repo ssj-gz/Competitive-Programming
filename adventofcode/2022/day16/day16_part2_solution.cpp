@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <set>
-#include <map>
+#include <unordered_map>
 #include <regex>
 #include <ranges>
 #include <cassert>
@@ -37,6 +37,10 @@ class ValveSet
             return m_totalFlowRate;
         }
         auto operator<=>(const ValveSet& other) const = default;
+        uint64_t hash() const
+        {
+            return m_valveBits;
+        }
     private:
         uint64_t m_valveBits = 0;
         int64_t m_totalFlowRate = 0;
@@ -48,6 +52,40 @@ class ValveSet
         }
 };
 
+constexpr int numActors = 2; // Man and elephant.
+
+struct State
+{
+    const Valve* actorPositions[numActors] = { nullptr, nullptr };
+    ValveSet openValves;
+    // Pressure released is deliberately omitted; instead, it's 
+    // stored externally, in highestPressureForStateAtMinute.
+    auto operator<=>(const State& other) const = default;
+};
+
+namespace std
+{
+    template<>
+    class hash<State>
+    {
+        public:
+            size_t operator()(const State& state) const
+            {
+                size_t result = 0;
+                assert(state.actorPositions[0]);
+                assert(state.actorPositions[1]);
+                result += state.actorPositions[0]->valveIndex;
+                result *= 100;
+                result += state.actorPositions[1]->valveIndex;
+                result *= 100;
+                result << 32;
+                result += state.openValves.hash();
+
+                return result;
+
+            }
+    };
+}
 
 int main()
 {
@@ -92,20 +130,10 @@ int main()
     }
     assert(startingValve != nullptr);
     
-    constexpr int numActors = 2; // Man and elephant.
-    struct State
-    {
-        const Valve* actorPositions[numActors] = { nullptr, nullptr };
-        ValveSet openValves;
-        // Pressure released is deliberately omitted; instead, it's 
-        // stored externally, in highestPressureForStateAtMinute.
-        auto operator<=>(const State& other) const = default;
-    };
-
     State initialState = { {startingValve, startingValve} };
 
     constexpr int timeLimit = 26;
-    vector<map<State, int>> highestPressureForStateAtMinute(timeLimit + 1);
+    vector<unordered_map<State, int>> highestPressureForStateAtMinute(timeLimit + 1);
     highestPressureForStateAtMinute[1] = { { initialState, 0} };
     int time = 1;
     int64_t highestPressureReleased = 0;
@@ -115,9 +143,15 @@ int main()
         std::cout << "time: " << time << " #toExplore: " << toExplore.size() << std::endl;
         for (const auto& [state, pressureReleased] : toExplore)
         {
-            auto handleNewState = [&highestPressureForStateAtMinute, &parentState = state, pressureReleased, parentStateTime = time](State& newState, const int newStateTime)
+            auto handleNewState = [&highestPressureForStateAtMinute, &parentState = state, pressureReleased, parentStateTime = time](const State& newStateOrig, const int newStateTime)
             {
-                // Assumes newState.pressureReleased has not yet been updated.
+                State newState = newStateOrig;
+                // Normalise: by symmetry, we can insist that the Man's current position's valveIndex is less than
+                // that of the Elephant's.
+                if (newState.actorPositions[0]->valveIndex > newState.actorPositions[1]->valveIndex)
+                {
+                    std::swap(newState.actorPositions[0], newState.actorPositions[1]);
+                }
                 assert(parentStateTime < newStateTime);
                 const int64_t pressureReleasedAtNewState = pressureReleased + (newStateTime - parentStateTime) * parentState.openValves.totalFlowRate();
                 auto& currentHighestPressureForNewState = highestPressureForStateAtMinute[newStateTime][newState];
