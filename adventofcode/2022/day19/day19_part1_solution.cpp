@@ -69,6 +69,7 @@ int main()
 
     int64_t qualitySum = 0;
     int blueprintNumber = 1;
+    constexpr int timeLimit = 24;
     for (const auto& bluePrint : blueprints)
     {
         std::cout << "Here" << std::endl;
@@ -114,6 +115,13 @@ int main()
                 {
                     nextState.amountOfResource[resourceType] += nextState.amountOfRobot[resourceType];
                 }
+                // Cap - we don't need more of a given resource R than the cost to buy the most expensive
+                // resource (in terms of R) every single minute until the end.
+                for (int resourceType = 0; resourceType < numResourceTypes; resourceType++)
+                {
+                    nextState.amountOfResource[resourceType] = std::min(nextState.amountOfResource[resourceType], (timeLimit - time + 1) * maxAmountOfResourceToBuyRobot[resourceType]);
+                }
+
 #if 0
                 // Finish building.
                 for (int resourceType = 0; resourceType < numResourceTypes; resourceType++)
@@ -161,7 +169,7 @@ int main()
 
             toExplore = nextToExplore;
             time++;
-            if (time == 24)
+            if (time == timeLimit)
             {
                 std::cout << "mostGeodes: " << mostGeodes << std::endl;
                 qualitySum += mostGeodes * blueprintNumber;
