@@ -19,29 +19,18 @@ int main()
         numbers.push_back({number, static_cast<int>(numbers.size()) });
     }
 
-    for (int origIndexToMove = 0; origIndexToMove < numbers.size(); origIndexToMove++)
+    for (int origIndexToMove = 0; origIndexToMove < static_cast<int>(numbers.size()); origIndexToMove++)
     {
-#if 0
-        std::cout << "current: " << std::endl;
-        for (const auto& number : numbers)
-        {
-            std::cout << number.number << " ";
-        }
-#endif
-        std::cout << std::endl;
         const auto numberToMoveIter = std::find_if(numbers.begin(), numbers.end(), [origIndexToMove](const auto& number) { return (number.originalIndex == origIndexToMove); });
         assert(numberToMoveIter != numbers.end()); 
 
         const auto numberToMoveCopy = *numberToMoveIter;
 
-        int stepsToMove = abs(numberToMoveIter->number);
-        std::cout << "Moving " << numberToMoveIter->number << " by " << numberToMoveIter->number << std::endl;
+        const int stepsToMove = abs(numberToMoveIter->number);
         if (stepsToMove == 0)
             continue;
         enum Direction { Left, Right } directionToMove = (numberToMoveIter->number < 0 ? Left : Right);
 
-        //numberToMoveIter = numbers.erase(numberToMoveIter);
-        bool erased = false;
         if (directionToMove == Right)
         {
             auto desiredIterToRight = std::next(numberToMoveIter);
@@ -87,48 +76,10 @@ int main()
             }
 
         }
-
-#if 0
-        for (int i = 0; i < stepsToMove; i++)
-        {
-            if (directionToMove == Left)
-            {
-                if (numberToMoveIter == numbers.begin() || std::prev(numberToMoveIter) == numbers.begin())
-                    numberToMoveIter = std::prev(numbers.end());
-                else
-                {
-                    numberToMoveIter--;
-                }
-            }
-            else if (directionToMove == Right)
-            {
-                if (numberToMoveIter == numbers.end() || std::next(numberToMoveIter) == numbers.end())
-                    numberToMoveIter = std::next(numbers.begin());
-                else
-                    numberToMoveIter++;
-            }
-            else
-            {
-                assert(false);
-            }
-        }
-#endif
-#if 0
-        if (numberToMoveIter == numbers.end() || std::next(numberToMoveIter) == numbers.end())
-            numberToMoveIter = numbers.begin();
-        else
-            numberToMoveIter++;
-#endif
-
-        //numbers.insert(numberToMoveIter, numberToMoveCopy);
     }
-    std::cout << "Final: " << std::endl;
-    for (const auto& number : numbers)
-    {
-        std::cout << number.number << " ";
-    }
-    std::cout << std::endl;
 
+    // Mix complete - find the final answer (counting the 1000th, 2000th and 3000th elements after
+    // the 0, with wraparound).
     auto iterToCount = std::find_if(numbers.begin(), numbers.end(), [](const auto& number) { return (number.number == 0); });
     assert(iterToCount != numbers.end());
     int64_t total = 0;
