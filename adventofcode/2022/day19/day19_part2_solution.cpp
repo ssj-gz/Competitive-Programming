@@ -10,7 +10,6 @@ using namespace std;
 
 enum Resource { Ore = 0, Clay = 1, Obsidian = 2, Geode = 3 };
 constexpr int numResourceTypes = 4;
-std::string_view resourceTypeNames[] = { "Ore", "Clay", "Obsidian", "Geode" };
 
 struct Blueprint
 {
@@ -22,34 +21,14 @@ struct State
 {
     int64_t amountOfResource[numResourceTypes] = {};
     int64_t amountOfRobot[numResourceTypes] = {};
-    //bool isRobotBeingBuilt[numResourceTypes]= {};
     auto operator<=>(const State& other) const = default;
-};
-
-ostream& operator<<(ostream& os, const State& state)
-{
-    os << "State: amount of: ";
-    for (int resourceType = 0; resourceType < numResourceTypes; resourceType++)
-    {
-        os << " " << resourceTypeNames[resourceType] << " = " << state.amountOfResource[resourceType];
-    }
-    os << " amount of robot: ";
-    for (int resourceType = 0; resourceType < numResourceTypes; resourceType++)
-    {
-        os << " " << resourceTypeNames[resourceType] << " = " << state.amountOfRobot[resourceType];
-    }
-#if 0
-    os << " building robot? ";
-    for (int resourceType = 0; resourceType < numResourceTypes; resourceType++)
-    {
-        os << " " << resourceTypeNames[resourceType] << " = " << state.isRobotBeingBuilt[resourceType];
-    }
-#endif
-    return os;
 };
 
 int64_t estimateMaxPossibleExtraGeodes(int initialNumObsidianRobots, int initialObsidian, int initialNumGeodeRobots, int timeRemaining, const Blueprint& bluePrint)
 {
+    // A greatly simplified solution that hopefully provides a tight-ish upper-bound on the number of
+    // Geodes this configuration can produce.
+    // Recommended to be used only when timeRemaining <= 10 or so.
     if (timeRemaining == -1)
         return 0;
     static std::map<std::tuple<int, int, int, int, int>, int> lookup;
@@ -63,13 +42,9 @@ int64_t estimateMaxPossibleExtraGeodes(int initialNumObsidianRobots, int initial
     int64_t extraFromBuyingGeode = 0;
     if (initialObsidian >= bluePrint.costOfRobot[Geode][Obsidian])
     {
-        //std::cout << "timeRemaining: " << timeRemaining << " can buy extra geode robot!" << std::endl;
+        // ... but only allow Geode robots when we have enough Obsidian (but ignore
+        // the cost of other resources).
         extraFromBuyingGeode = estimateMaxPossibleExtraGeodes(initialNumObsidianRobots, initialObsidian - bluePrint.costOfRobot[Geode][Obsidian] + initialNumObsidianRobots, initialNumGeodeRobots + 1, timeRemaining - 1, bluePrint);
-        //std::cout << " extraFromBuyingGeode: " <<  extraFromBuyingGeode  << std::endl;
-    }
-    else
-    {
-        //std::cout << "timeRemaining: " << timeRemaining << " CAN'T buy extra geode robot - costs " << bluePrint.costOfRobot[Geode][Obsidian] << " but only have: " << initialObsidian << std::endl;
     }
 
     int64_t result = numNewGeodes + std::max(extraFromBuyingGeode, extraFromBuyingObsidiean);
@@ -79,14 +54,11 @@ int64_t estimateMaxPossibleExtraGeodes(int initialNumObsidianRobots, int initial
 
 int main()
 {
-
-
     vector<Blueprint> blueprints;
     string blueprintInfoLine;
     std::regex blueprintInfoRegex("^Blueprint\\s*(\\d+):\\sEach ore robot costs (\\d+) ore.\\s*Each clay robot costs (\\d+) ore.\\s*Each obsidian robot costs (\\d+) ore and (\\d+) clay.\\s*Each geode robot costs (\\d+) ore and (\\d+) obsidian\\.?\\s*$");
     while (std::getline(cin, blueprintInfoLine))
     {
-        std::cout << "blueprintInfoLine: " << blueprintInfoLine << std::endl;
         std::smatch blueprintInfoMatch;
         const bool matchSuccessful = std::regex_match(blueprintInfoLine, blueprintInfoMatch, blueprintInfoRegex);
         assert(matchSuccessful);
@@ -99,25 +71,19 @@ int main()
 
         blueprints.push_back(blueprintInfo);
     }
-    // blueprint: 1time: 22 mostGeodes: 5 maxPossibleGeodes: 0 minCompetitorGeodes: 16 pruning state: State: amount of:  Ore = 4 Clay = 19 Obsidian = 11 Geode = 0 amount of robot:  Ore = 2 Clay = 5 Obsidian = 3 Geode = 0
-    std::cout << "blah: " << estimateMaxPossibleExtraGeodes(3, 11, 0, 2, blueprints[0]) << std::endl;
-    //return 0;
 
     int64_t product = 1;
     constexpr int timeLimit = 32;
     for (const auto& bluePrint : blueprints)
     {
+        // Calculate maxAmountOfResourceToBuyRobot for this Blueprint.
         int64_t maxAmountOfResourceToBuyRobot[numResourceTypes] = {};
-            for (int resourceType = 0; resourceType < numResourceTypes; resourceType++)
+        for (int resourceType = 0; resourceType < numResourceTypes; resourceType++)
         {
             for (int robotType = 0; robotType < numResourceTypes; robotType++)
             {
                 maxAmountOfResourceToBuyRobot[resourceType] = std::max<int64_t>(maxAmountOfResourceToBuyRobot[resourceType], bluePrint.costOfRobot[robotType][resourceType]);
             }
-        }
-        for (int resourceType = 0; resourceType < numResourceTypes; resourceType++)
-        {
-            std::cout << "Max of " << resourceTypeNames[resourceType] << " to buy a robot: " << maxAmountOfResourceToBuyRobot[resourceType] << std::endl;
         }
         // We never spend Geodes, so don't want to cap the amount of Geode-producing robots.
         maxAmountOfResourceToBuyRobot[Geode] = std::numeric_limits<int64_t>::max();
@@ -132,7 +98,6 @@ int main()
         int64_t earliestTimeOfMostGeodes = -1;
         while (!toExplore.empty())
         {
-            std::cout << "time: " << time << " #toExplore: " << toExplore.size() << std::endl;
             vector<State> nextToExplore;
             for (const auto& state : toExplore)
             {
@@ -147,17 +112,11 @@ int main()
                     const int64_t minCompetitorGeodes = mostGeodes + (timeLimit - earliestTimeOfMostGeodes);
                     if (maxPossibleGeodes <= minCompetitorGeodes)
                     {
-                        //std::cout << " blueprint: " << blueprintNumber << " time: " << time << " most (competitor) Geodes: " << mostGeodes << " earliestTimeOfMostGeodes: " << earliestTimeOfMostGeodes << " maxPossibleGeodes: " << maxPossibleGeodes << " minCompetitorGeodes: " << minCompetitorGeodes << " pruning state: " << state << std::endl;
                         continue;
                     }
                 }
                 seenStates.insert(state);
                 State nextState = state;
-                if (rand() % 100'000 == 0)
-                {
-                    cout << "time: " << time << " blueprint: " << bluePrint.blueprintNumber << " " << state << std::endl;
-                }
-                //cout << state << endl;
                 // Collect.
                 for (int resourceType = 0; resourceType < numResourceTypes; resourceType++)
                 {
@@ -170,17 +129,11 @@ int main()
                     nextState.amountOfResource[resourceType] = std::min(nextState.amountOfResource[resourceType], (timeLimit - time + 1) * maxAmountOfResourceToBuyRobot[resourceType]);
                 }
 
-#if 0
-                // Finish building.
-                for (int resourceType = 0; resourceType < numResourceTypes; resourceType++)
+                if (mostGeodes < nextState.amountOfResource[Geode])
                 {
-                    if (state.isRobotBeingBuilt[resourceType])
-                    {
-                        nextState.amountOfRobot[resourceType]++;
-                        nextState.isRobotBeingBuilt[resourceType] = false;
-                    }
+                    mostGeodes = nextState.amountOfResource[Geode];
+                    earliestTimeOfMostGeodes = time;
                 }
-#endif
                 // Build?
                 for (int robotType = 0; robotType < numResourceTypes; robotType++)
                 {
@@ -208,23 +161,15 @@ int main()
                 // Don't build.
                 nextToExplore.push_back(nextState);
 
-                if (mostGeodes < nextState.amountOfResource[Geode])
-                {
-                    mostGeodes = nextState.amountOfResource[Geode];
-                    earliestTimeOfMostGeodes = time;
-                    std::cout << "New mostGeodes: " << mostGeodes << std::endl;
-                }
             }
 
             toExplore = nextToExplore;
             time++;
             if (time == timeLimit)
             {
-                std::cout << "mostGeodes: " << mostGeodes << " for bluePrint: " << bluePrint.blueprintNumber << std::endl;
                 break;
             }
         }
-
         if (bluePrint.blueprintNumber == 4)
         {
             break;
@@ -236,5 +181,7 @@ int main()
 
     }
     std::cout << "product: " << product << std::endl;
+
+
 
 }
