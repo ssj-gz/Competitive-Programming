@@ -3,6 +3,7 @@
 #include <set>
 #include <array>
 #include <regex>
+#include <limits>
 #include <cassert>
 
 using namespace std;
@@ -70,6 +71,22 @@ int main()
     int blueprintNumber = 1;
     for (const auto& bluePrint : blueprints)
     {
+        std::cout << "Here" << std::endl;
+        int64_t maxAmountOfResourceToBuyRobot[numResourceTypes] = {};
+            for (int resourceType = 0; resourceType < numResourceTypes; resourceType++)
+        {
+            for (int robotType = 0; robotType < numResourceTypes; robotType++)
+            {
+                maxAmountOfResourceToBuyRobot[resourceType] = std::max<int64_t>(maxAmountOfResourceToBuyRobot[resourceType], bluePrint.costOfRobot[robotType][resourceType]);
+            }
+        }
+        for (int resourceType = 0; resourceType < numResourceTypes; resourceType++)
+        {
+            std::cout << "Max of " << resourceTypeNames[resourceType] << " to buy a robot: " << maxAmountOfResourceToBuyRobot[resourceType] << std::endl;
+        }
+        // We never spend Geodes, so don't want to cap the amount of Geode-producing robots.
+        maxAmountOfResourceToBuyRobot[Geode] = std::numeric_limits<int64_t>::max();
+
         State initialState;
         initialState.amountOfRobot[Ore] = 1;
 
@@ -87,6 +104,10 @@ int main()
                     continue;
                 seenStates.insert(state);
                 State nextState = state;
+                if (rand() % 100'000 == 0)
+                {
+                    cout << "time: " << time << " " << state << std::endl;
+                }
                 //cout << state << endl;
                 // Collect.
                 for (int resourceType = 0; resourceType < numResourceTypes; resourceType++)
@@ -123,6 +144,8 @@ int main()
                             buildingRobotState.amountOfResource[resourceType] -= bluePrint.costOfRobot[robotType][resourceType];
                             assert(buildingRobotState.amountOfResource[resourceType] >= 0);
                         }
+                        // Cap - we don't need more robots than are necessary to build a robot each minute.
+                        buildingRobotState.amountOfRobot[robotType] = std::min(buildingRobotState.amountOfRobot[robotType], maxAmountOfResourceToBuyRobot[robotType]);
                         nextToExplore.push_back(buildingRobotState);
                     }
                 }
