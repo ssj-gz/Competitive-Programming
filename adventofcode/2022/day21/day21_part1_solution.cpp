@@ -36,8 +36,6 @@ int64_t findYellForMonkey(const std::string& monkeyName, std::map<string, Monkey
         assert(yellForMonkey.yellType == MonkeyYell::Type::Operation);
         const int64_t yellForOp1Monkey = findYellForMonkey(yellForMonkey.monkeyOp1Name, yellInfoForMonkey);
         const int64_t yellForOp2Monkey = findYellForMonkey(yellForMonkey.monkeyOp2Name, yellInfoForMonkey);
-        std::cout << "yellForOp1Monkey: " << yellForMonkey.monkeyOp1Name << " = " << yellForOp1Monkey << std::endl;
-        std::cout << "yellForOp2Monkey: " << yellForMonkey.monkeyOp2Name << " = " << yellForOp2Monkey << std::endl;
         switch (yellForMonkey.operation)
         {
             case '+':
@@ -77,7 +75,6 @@ int main()
             monkeyYellInfo.monkeyOp1Name = monkeyYellOpMatch[2];
             monkeyYellInfo.monkeyOp2Name = monkeyYellOpMatch[4];
             monkeyYellInfo.operation = std::string(monkeyYellOpMatch[3])[0];
-            std::cout << "Op: name: " << monkeyYellInfo.monkeyName << " opname1: " << monkeyYellInfo.monkeyOp1Name << " - opname2: " << monkeyYellInfo.monkeyOp2Name << " - op: " << monkeyYellInfo.operation << std::endl;
         }
         else
         {
@@ -88,7 +85,6 @@ int main()
             monkeyYellInfo.yellType = MonkeyYell::Type::Number;
             monkeyYellInfo.monkeyName = monkeyYellNumberMatch[1];
             monkeyYellInfo.numberToYell = std::stoll(monkeyYellNumberMatch[2]);
-            std::cout << "Number: name: " << monkeyYellInfo.monkeyName << " - numberToYell: " << monkeyYellInfo.numberToYell << std::endl;
         }
         yellInfoForMonkey[monkeyYellInfo.monkeyName] = monkeyYellInfo;
     }
