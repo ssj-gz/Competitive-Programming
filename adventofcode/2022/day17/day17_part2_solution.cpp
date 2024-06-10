@@ -16,9 +16,6 @@ int main()
     string jetBlastPatterns;
     cin >> jetBlastPatterns;
 
-    std::cout << "jetBlastPatterns: " << jetBlastPatterns << std::endl;
-    std::cout << "jetBlastPatterns.size(): " << jetBlastPatterns.size() << std::endl;
-
     const vector<vector<string>> shapes = {
         { "####" },
 
@@ -40,8 +37,6 @@ int main()
     };
 
     constexpr int playAreaWidth = 7;
-    constexpr int playAreaMinX = 0;
-    constexpr int playAreaMaxX = playAreaMinX + playAreaWidth - 1;
     // The "back" of the playArea is the "topmost" row;
     // the front, the bottommost.
     vector<string> playArea = { string(playAreaWidth, '-') };
@@ -79,7 +74,6 @@ int main()
 
             auto isShapePosValid = [&]()
             {
-                bool isValid = true;
                 for (int x = 0; x < shapeWidth; x++)
                 {
                     for (int y = 0; y < shapeHeight; y++)
@@ -94,7 +88,7 @@ int main()
                         {
                             return false;
                         }
-                        if (yInPlayAreaView >= playArea.size())
+                        if (yInPlayAreaView >= static_cast<int>(playArea.size()))
                             continue; // Fine - shape is too high up to touch anything.
                         if (shape[y][x] != '.' && playArea[yInPlayAreaView][xInPlayAreaView] != '.')
                         {
@@ -120,7 +114,7 @@ int main()
                     {
                         const int xInPlayArea = x + shapeLeftX;
                         const int yInPlayArea = shapeTopY - y;
-                        while (yInPlayArea >= playArea.size())
+                        while (yInPlayArea >= static_cast<int>(playArea.size()))
                             playArea.push_back(string(playAreaWidth, '.'));
                         if (shape[y][x] != '.')
                             playArea[yInPlayArea][xInPlayArea] = '#';
@@ -137,14 +131,16 @@ int main()
                     if (longestFall < distFell)
                     {
                         longestFall = distFell;
+                        // The lastOccurenceOfTopPattern we've been building is
+                        // invalid, as is potentialCycleAfterRocks which is
+                        // derived from it.  Reset them both.
                         lastOccurenceOfTopPattern.clear();
                         potentialCycleAfterRocks = -1;
-                        std::cout << "new longestFall: " << longestFall << std::endl;
                     }
                     assert(distFell <= longestFall);
                 }
 
-                if (potentialCycleAfterRocks == -1 && playArea.size() - 1 >= longestFall && longestFall > 0)
+                if ((potentialCycleAfterRocks == -1) && (static_cast<int>(playArea.size()) - 1 >= longestFall) && (longestFall > 0))
                 {
                     // Calculate a string representing the top longestFall rows of the current play area,
                     // and how many rocks ago we last saw it (if at all).
@@ -164,7 +160,6 @@ int main()
                         //    * this the number of rocks landed since we last saw this topPattern
                         // all to coincide i.e. find the lcm of these three values.
                         potentialCycleAfterRocks = std::lcm(shapes.size(), lcm(numRocksLandedSinceRepeat, jetBlastPatterns.size()));
-                        std::cout << "potentialCycleAfterRocks: " << potentialCycleAfterRocks << std::endl;
                     }
                     lastOccurenceOfTopPattern[topPattern] = numRocksLanded;
                 }
@@ -181,7 +176,7 @@ int main()
                             break;
                         const int64_t numRowsToCheck = heightAfterNumRocks[numRocksLanded] - heightAfterNumRocks[numRocksLanded - numRocksAgo];
 
-                        assert(playArea.size() >= numRowsToCheck);
+                        assert(static_cast<int>(playArea.size()) >= numRowsToCheck);
                         int recent = playArea.size() - 1;
                         int earlier = recent - numRowsToCheck;
                         bool cycleDetected = true;
