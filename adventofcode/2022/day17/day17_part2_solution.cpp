@@ -49,8 +49,7 @@ int main()
     int nextShapeIndex = 0;
 
     int numRocksLanded = 0;
-    int longestFallCheck = -1;
-    constexpr int longestFall = 42; // Empiricially derived.
+    int longestFall = 0;
     map<string, int> lastOccurenceOfTopPattern;
     std::map<int, int> heightAfterNumRocks;
     int potentialCycleAfterRocks = -1;
@@ -135,15 +134,17 @@ int main()
                     // This was the code used to create longestFall; we now use it
                     // to check that longestFall is correct.
                     const int distFell = (initialShapeTopY - shapeTopY);
-                    if (longestFallCheck < distFell)
+                    if (longestFall < distFell)
                     {
-                        longestFallCheck = distFell;
-                        std::cout << "new longestFallCheck: " << longestFallCheck << std::endl;
+                        longestFall = distFell;
+                        lastOccurenceOfTopPattern.clear();
+                        potentialCycleAfterRocks = -1;
+                        std::cout << "new longestFall: " << longestFall << std::endl;
                     }
                     assert(distFell <= longestFall);
                 }
 
-                if (potentialCycleAfterRocks == -1 && playArea.size() - 1 >= longestFall)
+                if (potentialCycleAfterRocks == -1 && playArea.size() - 1 >= longestFall && longestFall > 0)
                 {
                     // Calculate a string representing the top longestFall rows of the current play area,
                     // and how many rocks ago we last saw it (if at all).
@@ -163,6 +164,7 @@ int main()
                         //    * this the number of rocks landed since we last saw this topPattern
                         // all to coincide i.e. find the lcm of these three values.
                         potentialCycleAfterRocks = std::lcm(shapes.size(), lcm(numRocksLandedSinceRepeat, jetBlastPatterns.size()));
+                        std::cout << "potentialCycleAfterRocks: " << potentialCycleAfterRocks << std::endl;
                     }
                     lastOccurenceOfTopPattern[topPattern] = numRocksLanded;
                 }
