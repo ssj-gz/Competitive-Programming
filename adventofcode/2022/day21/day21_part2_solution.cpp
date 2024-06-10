@@ -4,9 +4,6 @@
 #include <limits>
 #include <cassert>
 
-#define _GLIBCXX_DEBUG       // Iterator safety; out-of-bounds access for Containers, etc.
-#pragma GCC optimize "trapv" // abort() on (signed) integer overflow.
-
 using namespace std;
 
 struct MonkeyYell
@@ -22,6 +19,9 @@ struct MonkeyYell
     char operation = '\0';
 };
 
+// Finds the yell for the named monkey and additionally, if this monkey depends (directly or indirectly)
+// on humn, finds the value of humn's yell that such that this monkey's operation results in desiredValue.
+// This value of humn's yell will be stored in yellInfoForMonkey["humn"].numberToYell.
 int64_t findYellForMonkey(const std::string& monkeyName, std::map<string, MonkeyYell>& yellInfoForMonkey, int64_t desiredValue, std::map<string, bool>& monkeyDependsOnHumn)
 {
     assert(yellInfoForMonkey.contains(monkeyName));
@@ -30,7 +30,7 @@ int64_t findYellForMonkey(const std::string& monkeyName, std::map<string, Monkey
     {
         if (monkeyName == "humn")
         {
-            std::cout << "Me! - desiredValue: " << desiredValue << std::endl;
+            // Yell the desiredValue, humn!
             yellInfoForMonkey[monkeyName].numberToYell = desiredValue;
         }
         assert(yellForMonkey.numberToYell != std::numeric_limits<int64_t>::max());
@@ -39,13 +39,12 @@ int64_t findYellForMonkey(const std::string& monkeyName, std::map<string, Monkey
     else
     {
         assert(yellForMonkey.yellType == MonkeyYell::Type::Operation);
-        //const int64_t yellForOp1Monkey = findYellForMonkey(yellForMonkey.monkeyOp1Name, yellInfoForMonkey, desiredValue, monkeyDependsOnHumn);
-        //const int64_t yellForOp2Monkey = findYellForMonkey(yellForMonkey.monkeyOp2Name, yellInfoForMonkey, desiredValue, monkeyDependsOnHumn);
-#if 1
         int64_t yellForOp1Monkey = 0;
         int64_t yellForOp2Monkey = 0;
-        assert(!(monkeyDependsOnHumn[yellForMonkey.monkeyOp1Name] && monkeyDependsOnHumn[yellForMonkey.monkeyOp2Name]));
 
+        // Calculate the result for those of monkeyOp1Name & monkeyOp2Name which don't depend on humn
+        // (at least one of them will not).
+        assert(!(monkeyDependsOnHumn[yellForMonkey.monkeyOp1Name] && monkeyDependsOnHumn[yellForMonkey.monkeyOp2Name]));
         if (!monkeyDependsOnHumn[yellForMonkey.monkeyOp1Name])
         {
             yellForOp1Monkey = findYellForMonkey(yellForMonkey.monkeyOp1Name, yellInfoForMonkey, desiredValue, monkeyDependsOnHumn);
@@ -57,6 +56,8 @@ int64_t findYellForMonkey(const std::string& monkeyName, std::map<string, Monkey
 
         if (monkeyDependsOnHumn[yellForMonkey.monkeyOp1Name])
         {
+            // Call findYellForMonkey for monkeyOp1, but with a desiredValueForOp1 specifically calculated
+            // to satisfy the desiredValue argument that was passed in.
             int64_t desiredValueForOp1;
             switch (yellForMonkey.operation)
             {
@@ -86,6 +87,8 @@ int64_t findYellForMonkey(const std::string& monkeyName, std::map<string, Monkey
         }
         else if (monkeyDependsOnHumn[yellForMonkey.monkeyOp2Name])
         {
+            // Call findYellForMonkey for monkeyOp2, but with a desiredValueForOp2 specifically calculated
+            // to satisfy the desiredValue argument that was passed in.
             int64_t desiredValueForOp2;
             switch (yellForMonkey.operation)
             {
@@ -115,9 +118,9 @@ int64_t findYellForMonkey(const std::string& monkeyName, std::map<string, Monkey
 
             yellForOp2Monkey = findYellForMonkey(yellForMonkey.monkeyOp2Name, yellInfoForMonkey, desiredValueForOp2, monkeyDependsOnHumn);
         }
-#endif
-        //std::cout << "yellForOp1Monkey: " << yellForMonkey.monkeyOp1Name << " = " << yellForOp1Monkey << std::endl;
-        //std::cout << "yellForOp2Monkey: " << yellForMonkey.monkeyOp2Name << " = " << yellForOp2Monkey << std::endl;
+        // We now have yellForOp1Monkey and yellForOp2Monkey; perform the operation.  
+        // If one of them depended on humn, then the result of the operation should be
+        // desiredValue.
         switch (yellForMonkey.operation)
         {
             case '+':
@@ -173,7 +176,6 @@ int main()
             monkeyYellInfo.monkeyOp1Name = monkeyYellOpMatch[2];
             monkeyYellInfo.monkeyOp2Name = monkeyYellOpMatch[4];
             monkeyYellInfo.operation = std::string(monkeyYellOpMatch[3])[0];
-            std::cout << "Op: name: " << monkeyYellInfo.monkeyName << " opname1: " << monkeyYellInfo.monkeyOp1Name << " - opname2: " << monkeyYellInfo.monkeyOp2Name << " - op: " << monkeyYellInfo.operation << std::endl;
         }
         else
         {
@@ -184,54 +186,18 @@ int main()
             monkeyYellInfo.yellType = MonkeyYell::Type::Number;
             monkeyYellInfo.monkeyName = monkeyYellNumberMatch[1];
             monkeyYellInfo.numberToYell = std::stoll(monkeyYellNumberMatch[2]);
-            std::cout << "Number: name: " << monkeyYellInfo.monkeyName << " - numberToYell: " << monkeyYellInfo.numberToYell << std::endl;
         }
         yellInfoForMonkey[monkeyYellInfo.monkeyName] = monkeyYellInfo;
     }
 
+    // Find the monkeys that depend (directly or indirectly) on humn.
     std::map<string, bool> monkeyDependsOnHumn;
     calcIfMonkeyDependsOnHumn("root", yellInfoForMonkey, monkeyDependsOnHumn);
-    for (const auto& [name, dependsOnHumn] : monkeyDependsOnHumn)
-    {
-        std::cout << "monkey: " << name << " dependsOnHumn? " << dependsOnHumn << std::endl;
-    }
 
     yellInfoForMonkey["root"].operation = '=';
     const int64_t rootYell = findYellForMonkey("root", yellInfoForMonkey, 1, monkeyDependsOnHumn);
     std::cout << "root yells: " << rootYell << std::endl;
+    assert(rootYell == 1);
 
-#if 0
-    int64_t previousRootYell = std::numeric_limits<int64_t>::min();
-    int64_t meYell = -1'000'000;
-    while (true)
-    {
-        std::cout << "meYell: " << meYell << std::endl;
-        assert(yellInfoForMonkey["humn"].yellType == MonkeyYell::Type::Number);
-        yellInfoForMonkey["humn"].numberToYell = meYell;
-        const int64_t rootYell = findYellForMonkey("root", yellInfoForMonkey);
-        std::cout << "root yells: " << rootYell << std::endl;
-        if (rootYell == 0)
-        {
-            std::cout << "Hooray!: " << meYell << std::endl;
-            break;
-        }
-        if (previousRootYell != std::numeric_limits<int64_t>::min())
-        {
-            if (0 <= rootYell && rootYell < previousRootYell)
-            {
-                meYell *= 2;
-            }
-            else
-            {
-                meYell /= 2;
-            }
-
-        }
-
-        previousRootYell = rootYell;
-    }
-#endif
-
-
-
+    std::cout << "The required value for humn to yell is: " << yellInfoForMonkey["humn"].numberToYell << std::endl;
 }
