@@ -93,7 +93,7 @@ ostream& operator<<(ostream& os, const ModNum& toPrint)
 template <typename Type>
 Type quickPower(Type initialValue, Type base, int64_t exponent)
 {
-    // Raise base to the exponent mod modulus using as few multiplications as 
+    // Raise base to the exponent mod modulus using as few multiplications as
     // we can e.g. base ^ 8 ==  (((base^2)^2)^2).
     Type result = initialValue;
     Type baseToPower = base; // As we iterate, goes through base, base^2, (base^2)^2, etc.
@@ -146,9 +146,9 @@ class Matrix2x2
             return m_a22;
         }
     private:
-        ModNum m_a11; 
-        ModNum m_a12; 
-        ModNum m_a21; 
+        ModNum m_a11;
+        ModNum m_a12;
+        ModNum m_a21;
         ModNum m_a22;
 };
 
@@ -217,19 +217,23 @@ int main()
         }
     }
 
-    // Basic algorithm: run the instructions *in reverse*, and for each instruction,
-    // see how the desiredPos (initially 2020) changes (hopefully clear from the code
-    // how it changes at each instruction).
+    // We turn the problem on its head: instead of applying the shuffle and seeing
+    // which card ends up in position 2020, we instead apply the *inverse* of the shuffle
+    // and track where the card in position 2020 ends up.  To apply the inverse of the shuffle,
+    // we go through the instructions in *reverse* order and apply the *inverse* of each instruction,
+    // and see how each inverted instruction changes desiredPos (initially equal to initialDesiredPos
+    // == 2020).  It's hopefully clear from the code how each inverted instruction changes desiredPos.
     //
     // This will allow us to easily compute the card that would eventually be at position 2020
     // *after a single shuffle*.
     //
-    // This is not all that helpful as the number of shuffles is huge.  However, we can also observe
-    // that desiredPos after the (reversed) shuffle can be expressed as:
+    // This is not all that helpful as the number of shuffles we are asked to apply is huge.
+    // However, we can also observe that desiredPos after the (inverse of the) shuffle can be
+    // expressed as:
     //
-    //      desiredPos = X * 2020 + Y 
+    //      desiredPos = X * 2020 + Y
     //
-    // (all modulo numCards, of course) where X and Y can be updated in-tandem with desiredPos; again, 
+    // (all modulo numCards, of course) where X and Y can be updated in-tandem with desiredPos; again,
     // it's hopefully clear from the code how to update X and Y for each instruction.
     //
     // How does this help? Well, let P = initialDesiredPos = 2020 and observe that:
@@ -239,8 +243,8 @@ int main()
     //
     // (The matrix on the left is called posSingleShuffleMatrix in the code, and the
     // matrix it is multiplied by is called initialPosMatrix.)
-    // 
-    // We see that the resulting matrix looks very similar to initialPosMatrix, except
+    //
+    // We see that the resulting matrix looks identical to initialPosMatrix, except
     // that the entry that was P is now X*P+Y i.e. the entry that was initialDesiredPos
     // is now desiredPos i.e. the result of the single shuffle.
     //
@@ -251,13 +255,13 @@ int main()
     // initialPosMatrix, the top-left entry in the result is the desiredPos after numShuffles
     // shuffles, which is what we want.
     //
-    // We can easily compute posSingleShuffleMatrix^numShuffles using quickPower 
+    // We can easily compute posSingleShuffleMatrix^numShuffles using quickPower
     // and so get the final result.
     const vector<Instruction> reversedInstructions(instructions.rbegin(), instructions.rend());
     const int64_t initialDesiredPos = 2020;
     ModNum desiredPos = initialDesiredPos; // We don't really need desiredPos; it's mainly used to check
-                                           // that X & Y are correct i.e. fulfil X * initialDesiredPos + Y
-                                           // == desiredPos.
+                                           // that X & Y are correct i.e. that they fulfil the
+                                           // invariant X * initialDesiredPos + Y == desiredPos.
     ModNum X(1);
     ModNum Y(0);
     {
@@ -267,6 +271,18 @@ int main()
             {
                 case Instruction::DealWithIncrement:
                     {
+                        // The DealWithIncrement operation creates a new deck D' from the original D where:
+                        //
+                        //   D'_i = (amount * D_{numCards - i}) % numCards
+                        //
+                        // The deck D' resulting from the *inverse* of DealWithIncrement would therefore be:
+                        //
+                        //   D'_i = (inverseAmount * D_{numCards - i}) % numCards
+                        //
+                        // where inverseAmount is the unique value such that (amount * inverseAmount) % numCards
+                        // is 1.
+                        //
+                        // We can easily calculate inverseAmount using Fermat's Little Theorem.
                         const ModNum inverseAmount = quickPower<ModNum>(1, instruction.amount, numCards - 2);
                         assert(inverseAmount * instruction.amount == 1);
                         desiredPos = desiredPos * inverseAmount;
@@ -275,11 +291,17 @@ int main()
                     }
                     break;
                 case Instruction::Cut:
+                    // The Cut shuffle is a rotation by amount, and the inverse of this is simply rotation by
+                    // -amount.
                     desiredPos += instruction.amount;
                     Y += instruction.amount;
                     break;
                 case Instruction::DealIntoNewDeck:
-                    desiredPos = numCards - 1 - desiredPos; // Equivalent to multiplying by "-1" (i.e. numCards - 1), then adding (numCards - 1).
+                    // The "DealIntoNewDeck" shuffle, which creates a new Deck which is just the original deck in
+                    // reverse order, is self-inverse.
+                    desiredPos = numCards - 1 - desiredPos;
+                    // The above calculation is equivalent to multiplying by "-1" (i.e. numCards - 1),
+                    // then adding (numCards - 1), which is what we do to X and Y:
                     X = X * (numCards - 1);
                     Y = Y * (numCards - 1) + (numCards - 1);
                     break;
@@ -290,9 +312,9 @@ int main()
         }
     }
 
-    const Matrix2x2 initialPosMatrix(initialDesiredPos, 0, 
+    const Matrix2x2 initialPosMatrix(initialDesiredPos, 0,
                                      1,                 0);
-    const Matrix2x2 posSingleShuffleMatrix(X, Y, 
+    const Matrix2x2 posSingleShuffleMatrix(X, Y,
                                            0, 1);
     const Matrix2x2 identityMatrix(1, 0,
                                    0, 1);
