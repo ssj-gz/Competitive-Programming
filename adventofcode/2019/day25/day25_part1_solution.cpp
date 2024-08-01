@@ -24,11 +24,11 @@ void inputAsciiToIntCode(IntCodeComputer& intCodeComputer, const std::string& in
         input.push_back(static_cast<int64_t>(letter));
     input.push_back(10);
     intCodeComputer.addInputs(input);
+    intCodeComputer.run();
 };
 
 vector<string> readAsciiOutput(IntCodeComputer& intCodeComputer)
 {
-    intCodeComputer.run();
     const auto output = intCodeComputer.takeOutput();
     vector<string> lines;
     string currentLine;
@@ -266,10 +266,10 @@ int main()
         // ... enter the Pressure-Sensitive Floor room with this combination of
         // Items ...
         inputAsciiToIntCode(intCodeComputer, toPressureSensitiveFloor.back());
-        printLines(readAsciiOutput(intCodeComputer)); // The solution will be in the final text printed
-                                                      // prior to termination.
         if (intCodeComputer.isTerminated())
         {
+            printLines(readAsciiOutput(intCodeComputer)); // The solution will be in the final text printed
+                                                          // prior to termination.
             std::cout << "IntCodeComputer Terminated; we're done :)" << std::endl;
             break;
         }
