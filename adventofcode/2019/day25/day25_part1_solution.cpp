@@ -49,6 +49,11 @@ vector<string> readAsciiOutput(IntCodeComputer& intCodeComputer)
     return lines;
 };
 
+void swallowOutput(IntCodeComputer& intCodeComputer)
+{
+    readAsciiOutput(intCodeComputer);
+}
+
 void printLines(const vector<string>& lines)
 {
     for (const auto& line : lines) cout << line << std::endl;
@@ -142,7 +147,7 @@ void explore(IntCodeComputer& intCodeComputer, set<string>& roomsSeen, const vec
         const string oppositeDir = oppositeDirection(directionFollowed);
         assert(std::find(roomInfo.directions.begin(), roomInfo.directions.end(), oppositeDir) != roomInfo.directions.end());
         inputAsciiToIntCode(intCodeComputer, oppositeDir);
-        readAsciiOutput(intCodeComputer); // Swallow output.
+        swallowOutput(intCodeComputer);
         return;
     }
 
@@ -157,7 +162,7 @@ void explore(IntCodeComputer& intCodeComputer, set<string>& roomsSeen, const vec
             continue;
         }
         inputAsciiToIntCode(intCodeComputer, "take " + item);
-        readAsciiOutput(intCodeComputer); // Swallow output.
+        swallowOutput(intCodeComputer);
 
     }
 
@@ -177,7 +182,7 @@ void explore(IntCodeComputer& intCodeComputer, set<string>& roomsSeen, const vec
     {
         // We've explored this room (and the rooms it leads to); go back the way we came.
         inputAsciiToIntCode(intCodeComputer, oppositeDirection(directionFollowed));
-        readAsciiOutput(intCodeComputer); // Swallow output.
+        swallowOutput(intCodeComputer);
     }
 }
 
@@ -228,7 +233,7 @@ int main()
     for (const auto& direction : toCheckpoint)
     {
         inputAsciiToIntCode(intCodeComputer, direction);
-        readAsciiOutput(intCodeComputer); // Swallow output.
+        swallowOutput(intCodeComputer);
     }
 
     set<string> allItems;
@@ -243,7 +248,7 @@ int main()
     for (const auto& item : allItems) 
     {
         inputAsciiToIntCode(intCodeComputer, "drop " + item);
-        readAsciiOutput(intCodeComputer); // Swallow output.
+        swallowOutput(intCodeComputer);
     }
 
     vector<set<string>> itemsCombinations;
@@ -255,7 +260,7 @@ int main()
         for (const auto item : combination)
         {
             inputAsciiToIntCode(intCodeComputer, "take " + item);
-            readAsciiOutput(intCodeComputer); // Swallow output.
+            swallowOutput(intCodeComputer);
         }
 
         // ... enter the Pressure-Sensitive Floor room with this combination of
@@ -273,7 +278,7 @@ int main()
         for (const auto item : combination)
         {
             inputAsciiToIntCode(intCodeComputer, "drop " + item);
-            readAsciiOutput(intCodeComputer); // Swallow output.
+            swallowOutput(intCodeComputer);
         }
     }
 }
