@@ -367,18 +367,16 @@ int main()
     const int startX = rawMapData.front().find('.');
 
     vector<vector<char>> map(width, vector<char>(height, ' '));
-    int numNonSpaces = 0;
     for (int y = 0; y < height; y++)
     {
         for (int x = 0; x < std::min<int>(width, rawMapData[y].size()); x++)
         {
             {
                 map[x][y] = rawMapData[y][x];
-                if (map[x][y] != ' ')
-                    numNonSpaces++;
             }
         }
     }
+    const int numNonSpaces = std::ranges::distance(map | std::ranges::views::join| std::ranges::views::filter([](const auto letter) { return letter != ' ';}));
     assert(numNonSpaces == 50 * 50 * 6 || numNonSpaces == 4 * 4 * 6);
     const bool isSample = (numNonSpaces == 4 * 4 * 6);
     const int faceSize = isSample ? 4 : 50;
