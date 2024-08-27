@@ -6,6 +6,7 @@
 #include <ranges>
 #include <algorithm>
 #include <limits>
+#include <iomanip>
 #include <cassert>
 
 using namespace std;
@@ -29,6 +30,12 @@ struct Coord3d
         int m_y = -1;
         int m_z = -1;
 };
+
+ostream& operator<<(ostream& os, const Coord3d& coord)
+{
+    os << "(" << coord.x() << ", " << coord.y() << ", " << coord.z() << ")";
+    return os;
+}
 
 Coord3d operator+(const Coord3d& lhs, const Coord3d& rhs)
 {
@@ -56,21 +63,15 @@ struct Face
        Face(const vector<vector<char>>& cubeMap, int tlX, int tlY, int size)
            : m_tlX{tlX},
              m_tlY{tlY},
-             m_size{size}
+             m_size{size},
+             m_cubeMap{&cubeMap}
        {
            m_topLeft = {tlX, tlY, 0};
            m_downFromTopLeft = {tlX, tlY + 1, 0};
            m_rightOfTopLeft = {tlX + 1, tlY, 0};
            m_outFromTopLeft = {tlX, tlY, 1};
-           auto cellCoords = this->cellCoords();
-           for (int x = tlX; x < tlX + size; x++)
-           {
-               for (int y = tlY; y < tlY + size; y++)
-               {
-                   assert(cubeMap[x][y] != ' ');
-                   m_cellContents[cellCoords[x - tlX][y - tlY]] = cubeMap[x][y];
-               }
-           }
+           assert(outFromTopLeft() - topLeft() == Coord3d(0, 0, 1));
+           updateCellContents();
        }
        void addNeighbour(Face* neighbour)
        {
@@ -126,10 +127,58 @@ struct Face
            return cellContentIter->second;
        }
 
+       void rotateAroundX()
+       {
+           std::cout << "rotateAroundX" << std::endl;
+           auto coords = { &m_topLeft, &m_rightOfTopLeft, &m_downFromTopLeft, &m_outFromTopLeft };
+           for (auto* coord : coords)
+           {
+               const Coord3d rotated = {coord->x(), -coord->z(), coord->y()};
+               *coord = rotated;
+           }
+           updateCellContents();
+       }
+       void rotateAroundY()
+       {
+           std::cout << "rotateAroundY" << std::endl;
+           auto coords = { &m_topLeft, &m_rightOfTopLeft, &m_downFromTopLeft, &m_outFromTopLeft };
+           for (auto* coord : coords)
+           {
+               const Coord3d rotated = {coord->z(), coord->y(), -coord->x()};
+               *coord = rotated;
+           }
+           updateCellContents();
+       }
+       void rotateAroundZ()
+       {
+           std::cout << "rotateAroundZ" << std::endl;
+           auto coords = { &m_topLeft, &m_rightOfTopLeft, &m_downFromTopLeft, &m_outFromTopLeft };
+           for (auto* coord : coords)
+           {
+               const Coord3d rotated = {-coord->y(), coord->x(), coord->z()};
+               *coord = rotated;
+           }
+           updateCellContents();
+       }
+       void translate(int dx, int dy, int dz)
+       {
+           std::cout << "translate" << std::endl;
+           auto coords = { &m_topLeft, &m_rightOfTopLeft, &m_downFromTopLeft, &m_outFromTopLeft };
+           for (auto* coord : coords)
+           {
+               const Coord3d translated = {coord->x() + dx, coord->y() + dy, coord->z() + dz};
+               *coord = translated;
+           }
+           updateCellContents();
+       }
+
+
     private:
        int m_tlX = -1;
        int m_tlY = -1;
        int m_size = -1;
+
+       const vector<vector<char>>* m_cubeMap = nullptr;
 
        Coord3d m_topLeft;
        Coord3d m_rightOfTopLeft;
@@ -140,9 +189,23 @@ struct Face
 
        std::map<Coord3d, char> m_cellContents;
 
+       void updateCellContents()
+       {
+           m_cellContents.clear();
+           auto cellCoords = this->cellCoords();
+           for (int x = m_tlX; x < m_tlX + m_size; x++)
+           {
+               for (int y = m_tlY; y < m_tlY + m_size; y++)
+               {
+                   assert((*m_cubeMap)[x][y] != ' ');
+                   m_cellContents[cellCoords[x - m_tlX][y - m_tlY]] = (*m_cubeMap)[x][y];
+               }
+           }
+       }
+
 };
 
-void printFaces(const deque<Face>& faces, const vector<vector<char>>& cubeMap, const int faceSize)
+void printFaces(const deque<Face*>& faces, const int faceSize)
 {
     std::map<Coord3d, char> charAtCoord;
     int maxX = std::numeric_limits<int>::min();
@@ -153,13 +216,13 @@ void printFaces(const deque<Face>& faces, const vector<vector<char>>& cubeMap, c
     int minZ = std::numeric_limits<int>::max();
     for (const auto& face : faces)
     {
-        const auto& faceCellCoords = face.cellCoords();
-        for (int x = face.tlX(); x < face.tlX() + faceSize; x++)
+        const auto& faceCellCoords = face->cellCoords();
+        for (int x = face->tlX(); x < face->tlX() + faceSize; x++)
         {
-            for (int y = face.tlY(); y < face.tlY() + faceSize; y++)
+            for (int y = face->tlY(); y < face->tlY() + faceSize; y++)
             {
-                const auto faceCellCoord = faceCellCoords[x - face.tlX()][y - face.tlY()];
-                charAtCoord[faceCellCoord] = face.cellContents(faceCellCoord);
+                const auto faceCellCoord = faceCellCoords[x - face->tlX()][y - face->tlY()];
+                charAtCoord[faceCellCoord] = face->cellContents(faceCellCoord);
                 minX = std::min(minX, faceCellCoord.x());
                 maxX = std::max(maxX, faceCellCoord.x());
                 minY = std::min(minY, faceCellCoord.y());
@@ -169,13 +232,14 @@ void printFaces(const deque<Face>& faces, const vector<vector<char>>& cubeMap, c
             }
         }
     }
-    std::cout << "maxZ: " << maxZ << " minZ: " << minZ << std::endl;
+    std::cout << "minX: " << minX << " maxX: " << maxX << std::endl;
     for (int z = maxZ; z >= minZ; z--)
     {
         std::cout << "z: " << z << std::endl;
         //for (int y = maxY; y >= minY; y--)
         for (int y = minY; y <= maxY; y++)
         {
+            std::cout << "y: "<< std::setfill(' ') << std::setw(3) << y;
             for (int x = minX; x <= maxX; x++)
             {
                 const auto coord = Coord3d{x, y, z};
@@ -191,6 +255,93 @@ void printFaces(const deque<Face>& faces, const vector<vector<char>>& cubeMap, c
             cout << std::endl;
         }
     }
+}
+
+void faceDescendents(Face* currentFace, Face* parentFace, vector<Face*>& destDescendents)
+{
+    destDescendents.push_back(currentFace);
+    for (auto* neighbour : currentFace->neighbours())
+    {
+        if (neighbour != parentFace)
+            faceDescendents(neighbour, currentFace, destDescendents);
+    }
+}
+vector<Face*> faceDescendents(Face* currentFace, Face* parentFace)
+{
+    vector<Face*> descendents;
+    faceDescendents(currentFace, parentFace, descendents);
+    return descendents;
+}
+
+void foldCube(Face* currentFace, Face* parentFace, const std::deque<Face*>& faces, const int faceSize)
+{
+    std::cout << "foldCube: " << currentFace << "  current arrangement: " << std::endl;
+    printFaces(faces, faceSize);
+
+    int numRotations = 0;
+    while ((currentFace->outFromTopLeft() - currentFace->topLeft() != Coord3d{0, 0, 1}) && numRotations < 4)
+    {
+        for (auto* face : faces)
+        {
+            face->rotateAroundX();
+        }
+        numRotations++;
+    }
+    numRotations = 0;
+    while ((currentFace->outFromTopLeft() - currentFace->topLeft() != Coord3d{0, 0, 1}) && numRotations < 4)
+    {
+        for (auto* face : faces)
+        {
+            face->rotateAroundY();
+        }
+        numRotations++;
+    }
+    assert((currentFace->outFromTopLeft() - currentFace->topLeft() == Coord3d{0, 0, 1}));
+    std::cout << " Oriented current face; current arrangement: " << std::endl;
+    printFaces(faces, faceSize);
+
+    for (auto* neighbour : currentFace->neighbours())
+    {
+        if (neighbour == parentFace)
+            continue;
+        while ((neighbour->topLeft() - currentFace->topLeft()) != Coord3d{faceSize,0,0})
+        {
+            std::cout << " top left differences: " << (neighbour->topLeft() - currentFace->topLeft()) << std::endl;
+            for (auto* face : faces)
+            {
+                face->rotateAroundZ();
+            }
+        }
+        const int minNeighbourX = std::ranges::min(neighbour->cellCoords() | std::ranges::views::join | std::ranges::views::transform([](const auto& coord) { return coord.x(); }));
+        std::cout << "minNeighbourX: " << minNeighbourX << std::endl;
+        for (auto* face : faces)
+        {
+            face->translate(-minNeighbourX, 0, 0);
+        }
+        std::cout << " sorted currentFace and neighbour: current arrangement: " << std::endl;
+
+        printFaces(faces, faceSize);
+
+        const auto neighbourAndDescendents = faceDescendents(neighbour, currentFace);
+        for (auto* descendent : neighbourAndDescendents)
+        {
+            descendent->rotateAroundY();
+            descendent->translate(0,0,-1);
+        }
+        std::cout << " rotated neighbour + descendents: current arrangement: " << std::endl;
+        printFaces(faces, faceSize);
+    }
+    // Recurse.
+    for (auto* neighbour : currentFace->neighbours())
+    {
+        if (neighbour != parentFace)
+            foldCube(neighbour, currentFace, faces, faceSize);
+    }
+}
+
+void foldCube(const std::deque<Face*>& faces, const int faceSize)
+{
+    foldCube(faces.front(), nullptr, faces, faceSize);
 }
 
 int main()
@@ -236,37 +387,39 @@ int main()
     string path;
     cin >> path;
 
-    deque<Face> faces;
+    deque<Face*> faces;
+
     for (int faceTLX = 0; faceTLX < width; faceTLX += faceSize)
     {
         for (int faceTLY = 0; faceTLY < height; faceTLY += faceSize)
         {
             if (map[faceTLX][faceTLY] != ' ')
             {
-                faces.push_back(Face(map, faceTLX, faceTLY, faceSize));
+                faces.push_back(new Face(map, faceTLX, faceTLY, faceSize));
             }
         }
     }
     assert(faces.size() == 6);
 
-    for (auto& face1 : faces)
+    for (auto* face1 : faces)
     {
-        for (auto& face2 : faces)
+        for (auto* face2 : faces)
         {
-            if (abs(face1.tlX() - face2.tlX()) + abs(face1.tlY() - face2.tlY()) == faceSize)
+            if (abs(face1->tlX() - face2->tlX()) + abs(face1->tlY() - face2->tlY()) == faceSize)
             {
-                face1.addNeighbour(&face2);
+                face1->addNeighbour(face2);
             }
         }
     }
     for (auto& face : faces)
     {
-        std::cout << "Face " << &face << " at: " << face.tlX() << ", " << face.tlY() << " has neighbours: " << std::endl;
-        for (const auto* neighbour : face.neighbours())
+        std::cout << "Face " << face << " at: " << face->tlX() << ", " << face->tlY() << " has neighbours: " << std::endl;
+        for (const auto* neighbour : face->neighbours())
             std::cout << " " << neighbour << " at: " << neighbour->tlX() << ", " << neighbour->tlY() << std::endl;
     }
 
-    printFaces(faces, map, faceSize);
+    printFaces(faces, faceSize);
+    foldCube(faces, faceSize);
 
     return 0; // TODO - remove this
 
