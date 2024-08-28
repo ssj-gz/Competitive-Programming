@@ -172,6 +172,11 @@ struct Face
            updateCellContents();
        }
 
+       char cellContents(int faceX, int faceY)
+       {
+           return cellContents(cellCoords()[faceX][faceY]);
+       }
+
 
     private:
        int m_tlX = -1;
@@ -365,6 +370,7 @@ int main()
     std::cout << "width: " << width << std::endl;
     const int height = rawMapData.size();
     const int startX = rawMapData.front().find('.');
+    const int startY = 0;
 
     vector<vector<char>> map(width, vector<char>(height, ' '));
     for (int y = 0; y < height; y++)
@@ -386,6 +392,7 @@ int main()
     cin >> path;
 
     deque<Face*> faces;
+    Face* startingFace = nullptr;
 
     for (int faceTLX = 0; faceTLX < width; faceTLX += faceSize)
     {
@@ -394,10 +401,16 @@ int main()
             if (map[faceTLX][faceTLY] != ' ')
             {
                 faces.push_back(new Face(map, faceTLX, faceTLY, faceSize));
+                if ((faceTLX <= startX) && (startX < faceTLX + faceSize) && (faceTLY <= startY) && (startY <= faceTLY + faceSize))
+                {
+                    assert(!startingFace);
+                    startingFace = faces.back();
+                }
             }
         }
     }
     assert(faces.size() == 6);
+    assert(startingFace);
 
     for (auto* face1 : faces)
     {
@@ -419,19 +432,23 @@ int main()
     printFaces(faces, faceSize);
     foldCube(faces, faceSize);
 
-    return 0; // TODO - remove this
+    //return 0; // TODO - remove this
 
 
     std::cout << "path: " << path << std::endl;
     std::cout << "startX: " << startX << std::endl;
-
-    istringstream pathStream(path);
-    int x = startX;
-    int y = 0;
+    std::cout << "startY: " << startY << std::endl;
+    Face* currentFace = startingFace;
+    int faceX = startX % faceSize;
+    int faceY = startY % faceSize;
     int direction = 0; // Facing right.
 
-    auto markPositionOnDisplayMap = [&pathDisplayMap, &x, &y, &direction]()
+    istringstream pathStream(path);
+
+    auto markPositionOnDisplayMap = [&pathDisplayMap, &faceX, &faceY, &currentFace, &direction]()
     {
+        const int x = currentFace->tlX() + faceX;
+        const int y = currentFace->tlY() + faceY;
         char directionDisplayChar = '\0';
         switch (direction)
         {
@@ -475,51 +492,103 @@ int main()
         std::cout << "Forward " << numToMove << std::endl;
         for (int step = 0; step < numToMove; step++)
         {
-            const int origX = x;
-            const int origY = y;
-            while (true)
+            std::cout << " step " << (step + 1) << " of " << numToMove << std::endl;
+            const int origFaceX = faceX;
+            const int origFaceY = faceY;
+            Face* origFace = currentFace;
+            int origDirection = direction;
+
+            switch (direction)
             {
-                switch (direction)
-                {
-                    case 0:
-                        x++;
-                        break;
-                    case 1:
-                        y++;
-                        break;
-                    case 2:
-                        x--;
-                        break;
-                    case 3:
-                        y--;
-                        break;
-                };
-                if (x < 0)
-                    x = width -1;
-                if (x >= width)
-                    x = 0;
-                if (y < 0)
-                    y = height - 1;
-                if (y >= height)
-                    y = 0;
-                if (map[x][y] != ' ')
+                case 0:
+                    faceX++;
                     break;
+                case 1:
+                    faceY++;
+                    break;
+                case 2:
+                    faceX--;
+                    break;
+                case 3:
+                    faceY--;
+                    break;
+            };
+
+            if (faceX < 0 || faceY < 0 || faceX >= faceSize || faceY >= faceSize)
+            {
+                std::cout << "Moved to new face.  Current face right vector: " << (currentFace->rightOfTopLeft() - currentFace->topLeft()) << " current face down vector: " << (currentFace->downFromTopLeft() - currentFace->topLeft()) << " current direction: " << direction << " current faceX: " << faceX << " current faceY: " << faceY << std::endl;
+                const auto coord3D = currentFace->topLeft() + faceX * (currentFace->rightOfTopLeft() - currentFace->topLeft()) + faceY * (currentFace->downFromTopLeft() - currentFace->topLeft());
+                std::cout << "coord3D: " << coord3D << std::endl;
+                int nextFaceX = -1;
+                int nextFaceY = -1;
+                int nextDirection = -1;
+                Face* nextFace = nullptr;
+                for (auto* nextFaceCandidate : faces)
+                {
+                    if (nextFaceCandidate == currentFace)
+                        continue;
+
+                    const auto nextFaceCandidateCoords = nextFaceCandidate->cellCoords();
+                    for (int x = 0; x < faceSize; x++)
+                    {
+                        for (int y = 0; y < faceSize; y++)
+                        {
+                            const auto nextFaceCoordDifference = nextFaceCandidateCoords[x][y] - coord3D;
+                            if (abs(nextFaceCoordDifference.x()) + abs(nextFaceCoordDifference.y()) + abs(nextFaceCoordDifference.z()) == 1)
+                            {
+                                std::cout << "nextFaceCoordDifference: " << nextFaceCoordDifference << std::endl;
+                                assert(nextFace == nullptr && nextFaceX == -1 && nextFaceY == -1);
+                                nextFace = nextFaceCandidate;
+                                nextFaceX = x;
+                                nextFaceY = y;
+                                const Coord3d nextFaceDirVectors[] = { 
+                                    nextFace->rightOfTopLeft() - nextFace->topLeft(),
+                                    nextFace->downFromTopLeft() - nextFace->topLeft(),
+                                    -1 * (nextFace->rightOfTopLeft() - nextFace->topLeft()),
+                                    -1 * (nextFace->downFromTopLeft() - nextFace->topLeft())};
+                                std::cout << "nextFaceDirVectors: " << std::endl;
+                                for (const auto blah : nextFaceDirVectors)
+                                {
+                                    std::cout << " " << blah << std::endl;
+                                }
+                                const auto nextFaceDirIter = std::find(std::begin(nextFaceDirVectors), std::end(nextFaceDirVectors), nextFaceCoordDifference);
+                                assert(nextFaceDirIter != std::end(nextFaceDirVectors));
+                                nextDirection = std::distance(std::begin(nextFaceDirVectors), nextFaceDirIter);
+                                assert(nextFaceDirVectors[nextDirection] == nextFaceCoordDifference);
+                                std::cout << "nextDirection: " << nextDirection << std::endl;
+                                std::cout << "nextFaceX: " << nextFaceX << std::endl;
+                                std::cout << "nextFaceY: " << nextFaceY << std::endl;
+                            }
+                        }
+                    }
+                }
+                assert(nextFace != nullptr && nextFaceX >= 0 && nextFaceX < faceSize && nextDirection >= 0 && nextDirection < 4);
+                currentFace = nextFace;
+                faceX = nextFaceX;
+                faceY = nextFaceY;
+                direction = nextDirection;
             }
-            assert(x >= 0 && x < width && y >= 0 && y < height);
+
+            const int x = currentFace->tlX() + faceX;
+            const int y = currentFace->tlY() + faceY;
+            assert(x >= 0 && x < width && y >=0 && y < height);
             if (map[x][y] == '#')
             {
-                x = origX;
-                y = origY;
+                std::cout << "Bounce; backtracking" << std::endl;
+                faceX = origFaceX;
+                faceY = origFaceY;
+                currentFace = origFace;
+                direction = origDirection;
             }
             else
             {
+                markPositionOnDisplayMap();
                 printDisplayMap();
                 std::cout << "Ended up at: " << x << ", " << y << " blah: " << map[x][y] << " width: " << width << " height: " << height << std::endl;
                 assert(map[x][y] == '.');
-                markPositionOnDisplayMap();
             }
         }
-        std::cout << "Now at: " << x << ", " << y << " facing: " << direction << std::endl;
+        //std::cout << "Now at: " << x << ", " << y << " facing: " << direction << std::endl;
         char turnDir = '\0';
         pathStream >> turnDir; 
         if (!turnDir)
@@ -530,7 +599,7 @@ int main()
             direction = (direction + 1) % 4;
         else
             direction = (4 + direction - 1) % 4;
-        std::cout << "Now at: " << x << ", " << y << " facing: " << direction << std::endl;
+        //std::cout << "Now at: " << x << ", " << y << " facing: " << direction << std::endl;
         markPositionOnDisplayMap();
     }
 
@@ -543,6 +612,9 @@ int main()
         std::cout << std::endl;
     }
 
+    const int x = currentFace->tlX() + faceX;
+    const int y = currentFace->tlY() + faceY;
+    std::cout << "Final x: " << x << " final y: " << y << " final direction: " << direction << std::endl;
     std::cout << "password: " << ((y + 1) * 1000) + ((x + 1) * 4) + direction << std::endl;
 
 
