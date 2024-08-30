@@ -3,6 +3,7 @@
 #include <deque>
 #include <vector>
 #include <regex>
+#include <numeric>
 
 #include <cassert>
 
@@ -47,43 +48,60 @@ int main()
             targetNodes.push_back(&node);
     }
     std::cout << "#currentNodes: " << currentNodes.size() << std::endl;
-    int numSteps = 0;
-    bool done = false;
-    while (!done)
+
+    int64_t result = 1;
+    for (auto* currentNode : currentNodes)
     {
-        if ((numSteps % 10'000) == 0)
-            std::cout << "numSteps: " << numSteps << std::endl;
-        for (const auto direction : directions)
+        std::cout << "starting node: " << currentNode->label << std::endl;
+        int numSteps = 0;
+        bool done = false;
+        struct State
         {
-            bool allReachedEnd = true;
-            for (auto* currentNode : currentNodes)
+            Node *node = nullptr;
+            int directionIndex = -1;
+            auto operator<=>(const State& other) const = default;
+        };
+        map<State, int> earliestStepToReach;
+        struct StartNodeInfo
+        {
+            int cycleLength = -1;
+            int preCycleLength = -1;
+            int posOfFinal = -1;
+        } startNodeInfo;
+        while (!done)
+        {
+            for (int directionIndex = 0; directionIndex < directions.size(); directionIndex++)
             {
-                assert(currentNode);
-                if (currentNode->label.back() != 'Z')
+                if (currentNode->label.back() == 'Z')
                 {
-                    allReachedEnd = false;
+                    std::cout << " reached final node: " << currentNode->label << " at step: " << numSteps << std::endl;
+                    startNodeInfo.posOfFinal = numSteps;
+                }
+                auto direction = directions[directionIndex];
+                State currentState = {currentNode, directionIndex};
+                if (!earliestStepToReach.contains(currentState))
+                {
+                    earliestStepToReach[currentState] = numSteps;
+                }
+                else
+                {
+                    std::cout << "Reached repetition of state at numSteps: " << numSteps << " first reached state at step: " << earliestStepToReach[currentState] << std::endl;
+                    startNodeInfo.preCycleLength = earliestStepToReach[currentState];
+                    startNodeInfo.cycleLength = numSteps - earliestStepToReach[currentState];
+                    assert(startNodeInfo.posOfFinal == startNodeInfo.cycleLength);
+                    result = std::lcm(result, startNodeInfo.cycleLength);
+                    done = true;
                     break;
                 }
-
-            }
-            if (allReachedEnd)
-            {
-                std::cout << "Done" << std::endl;
-                done = true;
-                break;
-
-            }
-            for (auto& currentNode : currentNodes)
-            {
                 if (direction == 'L')
                     currentNode = nodeByLabel[currentNode->leftLabel];
                 else if (direction == 'R')
                     currentNode = nodeByLabel[currentNode->rightLabel];
                 else
                     assert(false);
+                numSteps++;
             }
-            numSteps++;
         }
     }
-    std::cout << "numSteps: " << numSteps << std::endl;
+    std::cout << "result: " << result << std::endl;
 }
