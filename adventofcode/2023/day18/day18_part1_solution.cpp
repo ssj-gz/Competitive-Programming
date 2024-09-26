@@ -4,6 +4,8 @@
 #include <map>
 #include <set>
 #include <limits>
+#include <optional>
+#include <fstream>
 
 #include <cassert>
 
@@ -18,9 +20,10 @@ struct Coord
     auto operator<=>(const Coord& other) const = default;
 };
 
+enum Direction { None, Up, Left, Down, Right };
+
 struct DigSection
 {
-    enum Direction { Up, Left, Down, Right };
     Direction direction = Up;
     int64_t numToDig = -1; 
     string colourRGB;
@@ -39,16 +42,16 @@ int64_t lagoonSizeBruteForce(const vector<DigSection>& digPlan)
         {
             switch (digSection.direction)
             {
-                case DigSection::Up:
+                case Up:
                     y--;
                     break;
-                case DigSection::Right:
+                case Right:
                     x++;
                     break;
-                case DigSection::Down:
+                case Down:
                     y++;
                     break;
-                case DigSection::Left:
+                case Left:
                     x--;
                     break;
             }
@@ -139,6 +142,385 @@ int64_t lagoonSizeBruteForce(const vector<DigSection>& digPlan)
 }
 #endif
 
+struct Line;
+ostream& operator<<(ostream& os, const Line& line);
+struct Line
+{
+    Coord begin;
+    Coord end;
+    Direction direction; 
+
+    int64_t length() const
+    {
+        return (abs(end.x - begin.x) + abs(end.y - begin.y)) + 1;
+    }
+    int dx() const
+    {
+        switch (direction)
+        {
+            case Right:
+                return 1;
+            case Left:
+                return -1;
+        }
+        return 0;
+    }
+    int dy() const
+    {
+        switch (direction)
+        {
+            case Up:
+                return -1;
+            case Down:
+                return +1;
+        }
+        return 0;
+    }
+    std::optional<int64_t> rightmostXOfIntersection(const int64_t horizLineY) const
+    {
+        if (direction == Up || direction == Down)
+        {
+            if (horizLineY < std::min(begin.y, end.y))
+                return std::optional<int64_t>();
+            if (horizLineY > std::max(begin.y, end.y))
+                return std::optional<int64_t>();
+            assert(begin.x == end.x);
+            return begin.x;
+        }
+        else if (direction == Left || direction == Right)
+        {
+            assert(begin.y == end.y);
+            if (horizLineY != begin.y)
+            {
+                std::cout << "  " << *this << " does not intersect with horizLineY: " << horizLineY << std::endl;
+                return std::optional<int64_t>();
+            }
+            return std::max(begin.x, end.x);
+        }
+        //std::cout << "whoops line: (" << begin.x << ", " << begin.y << ") - (" << end.x << ", " << end.y << ")" << std::endl;
+        assert(false);
+        return std::optional<int64_t>();
+    }
+    private:
+    static int sgn(int i)
+    {
+        if (i < 0)
+            return -1;
+        else if (i == 0)
+            return 0;
+        else return +1;
+    }
+};
+ostream& operator<<(ostream& os, const Line& line)
+{
+    os << "line: (" << line.begin.x << ", " << line.begin.y << ") - (" << line.end.x << ", " << line.end.y << ")";
+    return os;
+}
+
+
+int64_t lagoonSizeOptimised(const vector<DigSection>& digPlan)
+{
+    int64_t x = 0;
+    int64_t y = 0;
+    vector<Line> digLines;
+    for (const auto& digSection : digPlan)
+    {
+        int dx = 0, dy = 0;
+        switch (digSection.direction)
+        {
+            case Up:
+                dy = -1;
+                break;
+            case Right:
+                dx = +1;
+                break;
+            case Down:
+                dy = +1;
+                break;
+            case Left:
+                dx = -1;
+                break;
+        }
+        x += dx;
+        y += dy;
+        Line digLine;
+        digLine.direction = digSection.direction;
+        digLine.begin = { x, y };
+        for (int64_t i = 0; i < digSection.numToDig - 1; i++)
+        {
+            x += dx;
+            y += dy;
+        }
+        digLine.end = { x, y };
+        digLines.push_back(digLine);
+        std::cout << "line: (" << digLine.begin.x << ", " << digLine.begin.y << ") - (" << digLine.end.x << ", " << digLine.end.y << ")" << std::endl;
+    }
+    int64_t lowestHorzLineY = std::numeric_limits<int64_t>::max();
+    Line lowestHorzLine;
+    for (const auto& line : digLines)
+    {
+        if (line.direction != Left && line.direction != Right)
+            continue;
+        assert(line.begin.y == line.end.y);
+        if (line.begin.y < lowestHorzLineY)
+        {
+            lowestHorzLineY = line.begin.y;
+            lowestHorzLine = line;
+        }
+    }
+    if (lowestHorzLine.direction == Right)
+    {
+        // Good; lines are in clockwise order.
+        std::cout << "Lines are in clockwise order" << std::endl;
+    }
+    else
+    {
+        // Need to reverse line order.
+        std::cout << "Lines were in *anti-*clockwise order; will reverse" << std::endl;
+        std::reverse(digLines.begin(), digLines.end());
+        for (auto& line : digLines)
+        {
+            std::swap(line.begin, line.end);
+            switch (line.direction)
+            {
+                case Up:
+                    line.direction = Down;
+                    break;
+                case Down:
+                    line.direction = Up;
+                    break;
+                case Left:
+                    line.direction = Right;
+                    break;
+                case Right:
+                    line.direction = Left;
+                    break;
+            }
+        }
+    }
+#ifdef BRUTE_FORCE
+    std::map<Coord, int> numAtCoord;
+
+    for (const auto& line : digLines)
+    {
+        int64_t x = line.begin.x;
+        int64_t y = line.begin.y;
+        const int dx = line.dx();
+        const int dy = line.dy();
+        for (int i = 0; i < line.length(); i++)
+        {
+            numAtCoord[{x, y}]++;
+            x += dx;
+            y += dy;
+        }
+    }
+
+    auto printMap = [&numAtCoord]()
+    {
+        int64_t minX = std::numeric_limits<int64_t>::max();
+        int64_t minY = std::numeric_limits<int64_t>::max();
+        int64_t maxX = std::numeric_limits<int64_t>::min();
+        int64_t maxY = std::numeric_limits<int64_t>::min();
+        for (const auto& [coord, colour] : numAtCoord)
+        {
+            minX = std::min(minX, coord.x);
+            minY = std::min(minY, coord.y);
+            maxX = std::max(maxX, coord.x);
+            maxY = std::max(maxY, coord.y);
+        }
+        const int64_t width = maxX - minX + 1;
+        const int64_t height = maxY - minY + 1;
+        assert(width > 0);
+        assert(height > 0);
+        vector<vector<char>> fillMap(width, vector<char>(height, '.'));
+        for (const auto& [coord, num] : numAtCoord)
+        {
+            const int64_t x = coord.x - minX;
+            const int64_t y = coord.y - minY;
+            assert(x >= 0 && x < width);
+            assert(y >= 0 && y < height);
+            if (num == 1)
+                fillMap[x][y] = '#';
+            else
+                fillMap[x][y] = num + '0';
+        }
+        for (int64_t y = 0; y < height; y++)
+        {
+            for (int64_t x = 0; x < width; x++)
+            {
+                cout << fillMap[x][y];
+            }
+            cout << endl;
+        }
+    };
+    std::cout << "Optimised map (before fill): " << std::endl;
+    printMap();
+#endif
+    vector<Line> horizFillLines;
+    Direction previousDirection = None;
+    for (const auto& line : digLines)
+    {
+        if (line.direction == Down)
+        {
+            assert(line.begin.x == line.end.x);
+            const int64_t lineX = line.begin.x;
+            for (int yInLine = line.begin.y; yInLine <= line.end.y; yInLine++)
+            {
+                std::cout << "Trying to find  nearestWallToleftX for line: " << line << " yInLine: " << yInLine << std::endl;
+                optional<int64_t> nearestWallToleftX;
+                for (const auto& otherLine : digLines)
+                {
+                    const auto wallToLeftX = otherLine.rightmostXOfIntersection(yInLine);
+                    std::cout << "    otherLine: " << otherLine << " wallToLeftX: " << (wallToLeftX.has_value() ? std::to_string(wallToLeftX.value()) : "NONE") << std::endl;
+                    if (!wallToLeftX.has_value() || wallToLeftX.value() >= lineX /*experimental:*/ || otherLine.direction == Left)
+                    {
+                        std::cout << " ignoring otherLine: " << otherLine << std::endl;
+                        continue;
+                    }
+                    if (!nearestWallToleftX.has_value() || (wallToLeftX.value() > nearestWallToleftX.value()))
+                        nearestWallToleftX = wallToLeftX;
+                }
+                std::cout << " lineX: " << lineX << " yInLine: " << yInLine << " nearestWallToleftX: " << (nearestWallToleftX.has_value() ? std::to_string(nearestWallToleftX.value()) : "NONE") << std::endl;
+                if (!nearestWallToleftX.has_value())
+                {
+                    std::cout << "  no nearestWallToleftX!" << std::endl;
+                }
+                else
+                {
+                    //assert(nearestWallToleftX.has_value());
+                    assert(nearestWallToleftX.value() < lineX);
+                    for (int64_t fillX = nearestWallToleftX.value() + 1; fillX < lineX; fillX++)
+                    {
+                        //std::cout << " filling: " << fillX << ", " << yInLine << std::endl;
+                        //assert(!numAtCoord.contains({fillX, yInLine}));
+                        numAtCoord[{fillX, yInLine}]++;
+                    }
+                    horizFillLines.push_back({{nearestWallToleftX.value() + 1, yInLine}, {lineX - 1, yInLine}});
+                }
+            }
+        }
+        else  if (false && (line.direction == Left/* && previousDirection == Down)*/))
+        {
+            std::cout << "Trying to find  nearestWallToleftX for horizontal line: " << line << std::endl;
+            optional<int64_t> nearestWallToleftX;
+            assert(line.end.x <= line.begin.x);
+            const int64_t lineLeftX = line.end.x;
+            assert(line.begin.y == line.end.y);
+            const int64_t lineY = line.begin.y;
+            for (const auto& otherLine : digLines)
+            {
+                const auto wallToLeftX = otherLine.rightmostXOfIntersection(lineY);
+                std::cout << "    otherLine: " << otherLine << " wallToLeftX: " << (wallToLeftX.has_value() ? std::to_string(wallToLeftX.value()) : "NONE") << std::endl;
+                if (!wallToLeftX.has_value() || wallToLeftX.value() >= lineLeftX || otherLine.direction == Up)
+                {
+                    std::cout << " ignoring otherLine: " << otherLine << std::endl;
+                    continue;
+                }
+                if (!nearestWallToleftX.has_value() || (wallToLeftX.value() > nearestWallToleftX.value()))
+                {
+                    std::cout << "  new best line: " << otherLine << " wallToLeftX: " << wallToLeftX.value();
+                    nearestWallToleftX = wallToLeftX;
+                }
+
+            }
+            if (!nearestWallToleftX.has_value())
+            {
+                std::cout << "   none found" << std::endl;
+                continue;
+            }
+            assert(nearestWallToleftX.has_value());
+            assert(nearestWallToleftX.value() < lineLeftX);
+            for (int64_t fillX = nearestWallToleftX.value() + 1; fillX < lineLeftX; fillX++)
+            {
+                //std::cout << " filling: " << fillX << ", " << yInLine << std::endl;
+                if (numAtCoord.contains({fillX, lineY}))
+                {
+                    std::cout << "Uh-oh - re-filling: " << "(" << fillX << ", " << lineY << ")" << " line: " << line << " nearestWallToleftX: " << nearestWallToleftX.value() << std::endl;
+                }
+                assert(!numAtCoord.contains({fillX, lineY}));
+                numAtCoord[{fillX, lineY}]++;
+            }
+            horizFillLines.push_back({{nearestWallToleftX.value() + 1, lineY}, {lineLeftX - 1, lineY}});
+
+        }
+        previousDirection = line.direction;
+    }
+    {
+        int64_t minX = std::numeric_limits<int64_t>::max();
+        int64_t minY = std::numeric_limits<int64_t>::max();
+        int64_t maxX = std::numeric_limits<int64_t>::min();
+        int64_t maxY = std::numeric_limits<int64_t>::min();
+        for (const auto& [coord, colour] : numAtCoord)
+        {
+            minX = std::min(minX, coord.x);
+            minY = std::min(minY, coord.y);
+            maxX = std::max(maxX, coord.x);
+            maxY = std::max(maxY, coord.y);
+        }
+        const int64_t width = maxX - minX + 1;
+        const int64_t height = maxY - minY + 1;
+        assert(width > 0);
+        assert(height > 0);
+        vector<vector<char>> fillMap(width, vector<char>(height, '.'));
+        for (const auto& line : digLines)
+        {
+            int64_t x = line.begin.x;
+            int64_t y = line.begin.y;
+            const int dx = line.dx();
+            const int dy = line.dy();
+            for (int i = 0; i < line.length(); i++)
+            {
+                fillMap[x - minX][y - minY] = '#';
+                x += dx;
+                y += dy;
+            }
+        }
+        for (const auto& line : horizFillLines)
+        {
+            for (int x = line.begin.x; x <= line.end.x; x++)
+            {
+                if (fillMap[x - minX][line.begin.y - minY] == '.')
+                    fillMap[x - minX][line.begin.y - minY] = 'O';
+                else
+                    fillMap[x - minX][line.begin.y - minY] = 'X';
+            }
+        }
+        std::cout << "optimised width: " << width << " height: " << height << std::endl;
+        ofstream out("gloop.rgb", std::ios::binary);
+        unsigned char rgbBlack[] = { 0, 0, 0 };
+        unsigned char rgbWhite[] = { 255, 255, 255 };
+        unsigned char rgbRed[] = { 255, 0, 0 };
+        unsigned char rgbGreen[] = { 0, 255, 0 };
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                if (fillMap[x][y] == '#')
+                {
+                    out.write(reinterpret_cast<char*>(rgbBlack), 3);
+                }
+                else if (fillMap[x][y] == 'O')
+                {
+                    out.write(reinterpret_cast<char*>(rgbGreen), 3);
+                }
+                else if (fillMap[x][y] == 'X')
+                {
+                    out.write(reinterpret_cast<char*>(rgbWhite), 3);
+                }
+                else
+                    out.write(reinterpret_cast<char*>(rgbRed), 3);
+
+            }
+        }
+        out.flush();
+        assert(out);
+        out.close();
+    }
+    std::cout << "Optimised map after fill:" << std::endl;
+    printMap();
+    return 0;
+}
+
 int main()
 {
     std::regex digPlanRegex(R"(^([URDL])\s*(\d+)\s*\((.*)\)\s*$)");
@@ -164,22 +546,27 @@ int main()
         switch (dirChar)
         {
             case 'U':
-                digSection.direction = DigSection::Up;
+                digSection.direction = Up;
                 break;
             case 'R':
-                digSection.direction = DigSection::Right;
+                digSection.direction = Right;
                 break;
             case 'D':
-                digSection.direction = DigSection::Down;
+                digSection.direction = Down;
                 break;
             case 'L':
-                digSection.direction = DigSection::Left;
+                digSection.direction = Left;
                 break;
         }
         digPlan.push_back(digSection);
     }
 
+    const int64_t resultOptimised = lagoonSizeOptimised(digPlan);
+#ifdef BRUTE_FORCE
     const int64_t resultBruteForce = lagoonSizeBruteForce(digPlan);
+    std::cout << "resultOptimised: " << resultOptimised << std::endl;
     std::cout << "resultBruteForce: " << resultBruteForce << std::endl;
+    assert(resultBruteForce == resultOptimised);
+#endif
 
 }
