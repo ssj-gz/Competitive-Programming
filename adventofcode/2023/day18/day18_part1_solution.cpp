@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <regex>
+#include <ranges>
 #include <map>
 #include <set>
 #include <limits>
@@ -149,6 +150,7 @@ struct Line
     Coord begin;
     Coord end;
     Direction direction; 
+    Line *next = nullptr;
 
     int64_t length() const
     {
@@ -298,6 +300,15 @@ int64_t lagoonSizeOptimised(const vector<DigSection>& digPlan)
             }
         }
     }
+    Line* previousLine = &(digLines.back());
+    for (auto& line : digLines | std::views::reverse)
+    {
+        // We're going through the lines backwards, so the "previous"
+        // is "next".
+        line.next = previousLine;
+        previousLine = &line;
+    }
+    digLines.back().next = &(digLines.front());
 #ifdef BRUTE_FORCE
     std::map<Coord, int> numAtCoord;
 
@@ -368,11 +379,12 @@ int64_t lagoonSizeOptimised(const vector<DigSection>& digPlan)
             {
                 std::cout << "Trying to find  nearestWallToleftX for line: " << line << " yInLine: " << yInLine << std::endl;
                 optional<int64_t> nearestWallToleftX;
+                int64_t blee = 0;
                 for (const auto& otherLine : digLines)
                 {
                     const auto wallToLeftX = otherLine.rightmostXOfIntersection(yInLine);
                     std::cout << "    otherLine: " << otherLine << " wallToLeftX: " << (wallToLeftX.has_value() ? std::to_string(wallToLeftX.value()) : "NONE") << std::endl;
-                    if (!wallToLeftX.has_value() || wallToLeftX.value() >= lineX /*experimental:*/ || otherLine.direction == Left)
+                    if (!wallToLeftX.has_value() || wallToLeftX.value() >= lineX)
                     {
                         std::cout << " ignoring otherLine: " << otherLine << std::endl;
                         continue;
@@ -381,26 +393,25 @@ int64_t lagoonSizeOptimised(const vector<DigSection>& digPlan)
                         nearestWallToleftX = wallToLeftX;
                 }
                 std::cout << " lineX: " << lineX << " yInLine: " << yInLine << " nearestWallToleftX: " << (nearestWallToleftX.has_value() ? std::to_string(nearestWallToleftX.value()) : "NONE") << std::endl;
-                if (!nearestWallToleftX.has_value())
+                assert(nearestWallToleftX.value() < lineX);
+                if (nearestWallToleftX.value() + 1 <= lineX - 1)
                 {
-                    std::cout << "  no nearestWallToleftX!" << std::endl;
-                }
-                else
-                {
-                    //assert(nearestWallToleftX.has_value());
-                    assert(nearestWallToleftX.value() < lineX);
                     for (int64_t fillX = nearestWallToleftX.value() + 1; fillX < lineX; fillX++)
                     {
                         //std::cout << " filling: " << fillX << ", " << yInLine << std::endl;
-                        //assert(!numAtCoord.contains({fillX, yInLine}));
+                        assert(!numAtCoord.contains({fillX, yInLine}));
                         numAtCoord[{fillX, yInLine}]++;
+                        blee++;
                     }
                     horizFillLines.push_back({{nearestWallToleftX.value() + 1, yInLine}, {lineX - 1, yInLine}});
+                    std::cout << "Added horizFillLine: " << horizFillLines.back() << " length: " << horizFillLines.back().length() << " blee: " << blee << std::endl;
                 }
+                //assert(horizFillLines.back().length() == blee);
             }
         }
-        else  if (false && (line.direction == Left/* && previousDirection == Down)*/))
+        else  if (line.direction == Left/* && previousDirection == Down)*/ && line.next->direction == Down)
         {
+            int64_t blee = 0;
             std::cout << "Trying to find  nearestWallToleftX for horizontal line: " << line << std::endl;
             optional<int64_t> nearestWallToleftX;
             assert(line.end.x <= line.begin.x);
@@ -411,7 +422,7 @@ int64_t lagoonSizeOptimised(const vector<DigSection>& digPlan)
             {
                 const auto wallToLeftX = otherLine.rightmostXOfIntersection(lineY);
                 std::cout << "    otherLine: " << otherLine << " wallToLeftX: " << (wallToLeftX.has_value() ? std::to_string(wallToLeftX.value()) : "NONE") << std::endl;
-                if (!wallToLeftX.has_value() || wallToLeftX.value() >= lineLeftX || otherLine.direction == Up)
+                if (!wallToLeftX.has_value() || wallToLeftX.value() >= lineLeftX)
                 {
                     std::cout << " ignoring otherLine: " << otherLine << std::endl;
                     continue;
@@ -433,14 +444,12 @@ int64_t lagoonSizeOptimised(const vector<DigSection>& digPlan)
             for (int64_t fillX = nearestWallToleftX.value() + 1; fillX < lineLeftX; fillX++)
             {
                 //std::cout << " filling: " << fillX << ", " << yInLine << std::endl;
-                if (numAtCoord.contains({fillX, lineY}))
-                {
-                    std::cout << "Uh-oh - re-filling: " << "(" << fillX << ", " << lineY << ")" << " line: " << line << " nearestWallToleftX: " << nearestWallToleftX.value() << std::endl;
-                }
                 assert(!numAtCoord.contains({fillX, lineY}));
                 numAtCoord[{fillX, lineY}]++;
+                blee++;
             }
             horizFillLines.push_back({{nearestWallToleftX.value() + 1, lineY}, {lineLeftX - 1, lineY}});
+            assert(horizFillLines.back().length() == blee);
 
         }
         previousDirection = line.direction;
@@ -505,6 +514,7 @@ int64_t lagoonSizeOptimised(const vector<DigSection>& digPlan)
                 }
                 else if (fillMap[x][y] == 'X')
                 {
+                    assert(false);
                     out.write(reinterpret_cast<char*>(rgbWhite), 3);
                 }
                 else
@@ -518,7 +528,12 @@ int64_t lagoonSizeOptimised(const vector<DigSection>& digPlan)
     }
     std::cout << "Optimised map after fill:" << std::endl;
     printMap();
-    return 0;
+    int64_t result = 0;
+    for (const auto& line : digLines)
+        result += line.length();
+    for (const auto& line : horizFillLines)
+        result += line.length();    
+    return result;
 }
 
 int main()
