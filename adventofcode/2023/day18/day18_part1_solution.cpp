@@ -27,8 +27,6 @@ struct DigSection
     string colourRGB;
 };
 
-struct Line;
-ostream& operator<<(ostream& os, const Line& line);
 struct Line
 {
     Coord begin;
