@@ -27,7 +27,6 @@ int main()
 
         DigSection digSection;
         digSection.numToDig = numToDig;
-        digSection.colourRGB;
         switch (dirChar)
         {
             case 'U':

@@ -24,7 +24,6 @@ struct DigSection
 {
     Direction direction = Up;
     int64_t numToDig = -1; 
-    std::string colourRGB;
 };
 
 struct Line
