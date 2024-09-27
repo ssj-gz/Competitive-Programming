@@ -309,6 +309,7 @@ int64_t lagoonSizeOptimised(const vector<DigSection>& digPlan)
         previousLine = &line;
     }
     digLines.back().next = &(digLines.front());
+    int64_t result = 0;
 #ifdef BRUTE_FORCE
     std::map<Coord, int> numAtCoord;
 
@@ -366,24 +367,41 @@ int64_t lagoonSizeOptimised(const vector<DigSection>& digPlan)
     };
     std::cout << "Optimised map (before fill): " << std::endl;
     printMap();
+
+    set<int64_t> yLineBreaks;
+    for (const auto& line : digLines)
+    {
+        const auto lineTopY = std::min(line.begin.y, line.end.y);
+        const auto lineBottomY = std::max(line.begin.y, line.end.y);
+        yLineBreaks.insert(lineTopY - 1);
+        yLineBreaks.insert(lineBottomY);
+    }
 #endif
     vector<Line> horizFillLines;
     Direction previousDirection = None;
     for (const auto& line : digLines)
     {
+        result += line.length();
         if (line.direction == Down)
         {
+            int64_t pixelsFilledToLeft = 0;
             assert(line.begin.x == line.end.x);
             const int64_t lineX = line.begin.x;
-            for (int yInLine = line.begin.y; yInLine <= line.end.y; yInLine++)
+            int64_t yLineSectionBegin = line.begin.y;
+            auto nextYLineBreakIter = yLineBreaks.begin();
+            while (yLineSectionBegin <= line.end.y)
             {
-                std::cout << "Trying to find  nearestWallToleftX for line: " << line << " yInLine: " << yInLine << std::endl;
+                while (*nextYLineBreakIter < yLineSectionBegin)
+                {
+                    nextYLineBreakIter++;
+                    assert(nextYLineBreakIter != yLineBreaks.end());
+                }
                 optional<int64_t> nearestWallToleftX;
-                int64_t blee = 0;
                 for (const auto& otherLine : digLines)
                 {
-                    const auto wallToLeftX = otherLine.rightmostXOfIntersection(yInLine);
+                    const auto wallToLeftX = otherLine.rightmostXOfIntersection(yLineSectionBegin);
                     std::cout << "    otherLine: " << otherLine << " wallToLeftX: " << (wallToLeftX.has_value() ? std::to_string(wallToLeftX.value()) : "NONE") << std::endl;
+                    assert(otherLine.rightmostXOfIntersection(*nextYLineBreakIter) == wallToLeftX);
                     if (!wallToLeftX.has_value() || wallToLeftX.value() >= lineX)
                     {
                         std::cout << " ignoring otherLine: " << otherLine << std::endl;
@@ -392,22 +410,55 @@ int64_t lagoonSizeOptimised(const vector<DigSection>& digPlan)
                     if (!nearestWallToleftX.has_value() || (wallToLeftX.value() > nearestWallToleftX.value()))
                         nearestWallToleftX = wallToLeftX;
                 }
-                std::cout << " lineX: " << lineX << " yInLine: " << yInLine << " nearestWallToleftX: " << (nearestWallToleftX.has_value() ? std::to_string(nearestWallToleftX.value()) : "NONE") << std::endl;
+                assert(nearestWallToleftX.has_value());
                 assert(nearestWallToleftX.value() < lineX);
                 if (nearestWallToleftX.value() + 1 <= lineX - 1)
                 {
-                    for (int64_t fillX = nearestWallToleftX.value() + 1; fillX < lineX; fillX++)
-                    {
-                        //std::cout << " filling: " << fillX << ", " << yInLine << std::endl;
-                        assert(!numAtCoord.contains({fillX, yInLine}));
-                        numAtCoord[{fillX, yInLine}]++;
-                        blee++;
-                    }
-                    horizFillLines.push_back({{nearestWallToleftX.value() + 1, yInLine}, {lineX - 1, yInLine}});
-                    std::cout << "Added horizFillLine: " << horizFillLines.back() << " length: " << horizFillLines.back().length() << " blee: " << blee << std::endl;
+                    const int64_t horizontalFillLineLength = lineX - (nearestWallToleftX.value() + 1);
+                    const int64_t pixelsFilledToLeftByLineSection = (*nextYLineBreakIter - yLineSectionBegin + 1) * horizontalFillLineLength;
+                    pixelsFilledToLeft += pixelsFilledToLeftByLineSection;
                 }
-                //assert(horizFillLines.back().length() == blee);
+                yLineSectionBegin = *nextYLineBreakIter + 1;
+
+                //std::cout << " lineX: " << lineX << " yInLine: " << yInLine << " nearestWallToleftX: " << (nearestWallToleftX.has_value() ? std::to_string(nearestWallToleftX.value()) : "NONE") << std::endl;
             }
+            int64_t dbgTotalPixelsFilled = 0;
+            {
+                for (int yInLine = line.begin.y; yInLine <= line.end.y; yInLine++)
+                {
+                    std::cout << "Trying to find  nearestWallToleftX for line: " << line << " yInLine: " << yInLine << std::endl;
+                    optional<int64_t> nearestWallToleftX;
+                    for (const auto& otherLine : digLines)
+                    {
+                        const auto wallToLeftX = otherLine.rightmostXOfIntersection(yInLine);
+                        std::cout << "    otherLine: " << otherLine << " wallToLeftX: " << (wallToLeftX.has_value() ? std::to_string(wallToLeftX.value()) : "NONE") << std::endl;
+                        if (!wallToLeftX.has_value() || wallToLeftX.value() >= lineX)
+                        {
+                            std::cout << " ignoring otherLine: " << otherLine << std::endl;
+                            continue;
+                        }
+                        if (!nearestWallToleftX.has_value() || (wallToLeftX.value() > nearestWallToleftX.value()))
+                            nearestWallToleftX = wallToLeftX;
+                    }
+                    std::cout << " lineX: " << lineX << " yInLine: " << yInLine << " nearestWallToleftX: " << (nearestWallToleftX.has_value() ? std::to_string(nearestWallToleftX.value()) : "NONE") << std::endl;
+                    assert(nearestWallToleftX.value() < lineX);
+                    if (nearestWallToleftX.value() + 1 <= lineX - 1)
+                    {
+                        for (int64_t fillX = nearestWallToleftX.value() + 1; fillX < lineX; fillX++)
+                        {
+                            //std::cout << " filling: " << fillX << ", " << yInLine << std::endl;
+                            assert(!numAtCoord.contains({fillX, yInLine}));
+                            numAtCoord[{fillX, yInLine}]++;
+                            dbgTotalPixelsFilled++;
+                        }
+                        horizFillLines.push_back({{nearestWallToleftX.value() + 1, yInLine}, {lineX - 1, yInLine}});
+                        //std::cout << "Added horizFillLine: " << horizFillLines.back() << " length: " << horizFillLines.back().length() << " blee: " << blee << std::endl;
+                    }
+                    //assert(horizFillLines.back().length() == blee);
+                }
+            }
+            assert(dbgTotalPixelsFilled == pixelsFilledToLeft);
+            result += pixelsFilledToLeft;
         }
         else  if (line.direction == Left/* && previousDirection == Down)*/ && line.next->direction == Down)
         {
@@ -441,6 +492,8 @@ int64_t lagoonSizeOptimised(const vector<DigSection>& digPlan)
             }
             assert(nearestWallToleftX.has_value());
             assert(nearestWallToleftX.value() < lineLeftX);
+            const int64_t horizontalFillLineLength = lineLeftX - (nearestWallToleftX.value() + 1);
+            result += horizontalFillLineLength;
             for (int64_t fillX = nearestWallToleftX.value() + 1; fillX < lineLeftX; fillX++)
             {
                 //std::cout << " filling: " << fillX << ", " << yInLine << std::endl;
@@ -528,11 +581,13 @@ int64_t lagoonSizeOptimised(const vector<DigSection>& digPlan)
     }
     std::cout << "Optimised map after fill:" << std::endl;
     printMap();
+#if 0
     int64_t result = 0;
     for (const auto& line : digLines)
         result += line.length();
     for (const auto& line : horizFillLines)
         result += line.length();    
+#endif
     return result;
 }
 
