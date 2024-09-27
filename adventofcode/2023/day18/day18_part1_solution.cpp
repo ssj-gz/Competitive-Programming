@@ -10,7 +10,7 @@
 
 #include <cassert>
 
-#define BRUTE_FORCE
+//#define BRUTE_FORCE
 
 using namespace std;
 
@@ -194,7 +194,7 @@ struct Line
             assert(begin.y == end.y);
             if (horizLineY != begin.y)
             {
-                std::cout << "  " << *this << " does not intersect with horizLineY: " << horizLineY << std::endl;
+                //std::cout << "  " << *this << " does not intersect with horizLineY: " << horizLineY << std::endl;
                 return std::optional<int64_t>();
             }
             return std::max(begin.x, end.x);
@@ -367,7 +367,9 @@ int64_t lagoonSizeOptimised(const vector<DigSection>& digPlan)
     };
     std::cout << "Optimised map (before fill): " << std::endl;
     printMap();
+    vector<Line> horizFillLines;
 
+#endif
     set<int64_t> yLineBreaks;
     for (const auto& line : digLines)
     {
@@ -376,8 +378,6 @@ int64_t lagoonSizeOptimised(const vector<DigSection>& digPlan)
         yLineBreaks.insert(lineTopY - 1);
         yLineBreaks.insert(lineBottomY);
     }
-#endif
-    vector<Line> horizFillLines;
     Direction previousDirection = None;
     for (const auto& line : digLines)
     {
@@ -400,11 +400,11 @@ int64_t lagoonSizeOptimised(const vector<DigSection>& digPlan)
                 for (const auto& otherLine : digLines)
                 {
                     const auto wallToLeftX = otherLine.rightmostXOfIntersection(yLineSectionBegin);
-                    std::cout << "    otherLine: " << otherLine << " wallToLeftX: " << (wallToLeftX.has_value() ? std::to_string(wallToLeftX.value()) : "NONE") << std::endl;
+                    //std::cout << "    otherLine: " << otherLine << " wallToLeftX: " << (wallToLeftX.has_value() ? std::to_string(wallToLeftX.value()) : "NONE") << std::endl;
                     assert(otherLine.rightmostXOfIntersection(*nextYLineBreakIter) == wallToLeftX);
                     if (!wallToLeftX.has_value() || wallToLeftX.value() >= lineX)
                     {
-                        std::cout << " ignoring otherLine: " << otherLine << std::endl;
+                        //std::cout << " ignoring otherLine: " << otherLine << std::endl;
                         continue;
                     }
                     if (!nearestWallToleftX.has_value() || (wallToLeftX.value() > nearestWallToleftX.value()))
@@ -422,6 +422,7 @@ int64_t lagoonSizeOptimised(const vector<DigSection>& digPlan)
 
                 //std::cout << " lineX: " << lineX << " yInLine: " << yInLine << " nearestWallToleftX: " << (nearestWallToleftX.has_value() ? std::to_string(nearestWallToleftX.value()) : "NONE") << std::endl;
             }
+#ifdef BRUTE_FORCE
             int64_t dbgTotalPixelsFilled = 0;
             {
                 for (int yInLine = line.begin.y; yInLine <= line.end.y; yInLine++)
@@ -431,10 +432,10 @@ int64_t lagoonSizeOptimised(const vector<DigSection>& digPlan)
                     for (const auto& otherLine : digLines)
                     {
                         const auto wallToLeftX = otherLine.rightmostXOfIntersection(yInLine);
-                        std::cout << "    otherLine: " << otherLine << " wallToLeftX: " << (wallToLeftX.has_value() ? std::to_string(wallToLeftX.value()) : "NONE") << std::endl;
+                        //std::cout << "    otherLine: " << otherLine << " wallToLeftX: " << (wallToLeftX.has_value() ? std::to_string(wallToLeftX.value()) : "NONE") << std::endl;
                         if (!wallToLeftX.has_value() || wallToLeftX.value() >= lineX)
                         {
-                            std::cout << " ignoring otherLine: " << otherLine << std::endl;
+                            //std::cout << " ignoring otherLine: " << otherLine << std::endl;
                             continue;
                         }
                         if (!nearestWallToleftX.has_value() || (wallToLeftX.value() > nearestWallToleftX.value()))
@@ -458,6 +459,7 @@ int64_t lagoonSizeOptimised(const vector<DigSection>& digPlan)
                 }
             }
             assert(dbgTotalPixelsFilled == pixelsFilledToLeft);
+#endif
             result += pixelsFilledToLeft;
         }
         else  if (line.direction == Left/* && previousDirection == Down)*/ && line.next->direction == Down)
@@ -472,15 +474,15 @@ int64_t lagoonSizeOptimised(const vector<DigSection>& digPlan)
             for (const auto& otherLine : digLines)
             {
                 const auto wallToLeftX = otherLine.rightmostXOfIntersection(lineY);
-                std::cout << "    otherLine: " << otherLine << " wallToLeftX: " << (wallToLeftX.has_value() ? std::to_string(wallToLeftX.value()) : "NONE") << std::endl;
+                //std::cout << "    otherLine: " << otherLine << " wallToLeftX: " << (wallToLeftX.has_value() ? std::to_string(wallToLeftX.value()) : "NONE") << std::endl;
                 if (!wallToLeftX.has_value() || wallToLeftX.value() >= lineLeftX)
                 {
-                    std::cout << " ignoring otherLine: " << otherLine << std::endl;
+                    //std::cout << " ignoring otherLine: " << otherLine << std::endl;
                     continue;
                 }
                 if (!nearestWallToleftX.has_value() || (wallToLeftX.value() > nearestWallToleftX.value()))
                 {
-                    std::cout << "  new best line: " << otherLine << " wallToLeftX: " << wallToLeftX.value();
+                    //std::cout << "  new best line: " << otherLine << " wallToLeftX: " << wallToLeftX.value();
                     nearestWallToleftX = wallToLeftX;
                 }
 
@@ -494,6 +496,7 @@ int64_t lagoonSizeOptimised(const vector<DigSection>& digPlan)
             assert(nearestWallToleftX.value() < lineLeftX);
             const int64_t horizontalFillLineLength = lineLeftX - (nearestWallToleftX.value() + 1);
             result += horizontalFillLineLength;
+#ifdef BRUTE_FORCE
             for (int64_t fillX = nearestWallToleftX.value() + 1; fillX < lineLeftX; fillX++)
             {
                 //std::cout << " filling: " << fillX << ", " << yInLine << std::endl;
@@ -503,10 +506,13 @@ int64_t lagoonSizeOptimised(const vector<DigSection>& digPlan)
             }
             horizFillLines.push_back({{nearestWallToleftX.value() + 1, lineY}, {lineLeftX - 1, lineY}});
             assert(horizFillLines.back().length() == blee);
+#endif
 
         }
         previousDirection = line.direction;
     }
+
+#ifdef BRUTE_FORCE
     {
         int64_t minX = std::numeric_limits<int64_t>::max();
         int64_t minY = std::numeric_limits<int64_t>::max();
@@ -581,6 +587,7 @@ int64_t lagoonSizeOptimised(const vector<DigSection>& digPlan)
     }
     std::cout << "Optimised map after fill:" << std::endl;
     printMap();
+#endif
 #if 0
     int64_t result = 0;
     for (const auto& line : digLines)
@@ -637,6 +644,8 @@ int main()
     std::cout << "resultOptimised: " << resultOptimised << std::endl;
     std::cout << "resultBruteForce: " << resultBruteForce << std::endl;
     assert(resultBruteForce == resultOptimised);
+#else
+    std::cout << "resultOptimised: " << resultOptimised << std::endl;
 #endif
 
 }
