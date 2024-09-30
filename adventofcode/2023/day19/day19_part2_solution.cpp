@@ -23,16 +23,13 @@ struct Rule
 
     string destWorkFlowNameForPart(const Part& part) const
     {
-        //std::cout << "destWorkFlowNameForPart" << std::endl;
         if (conditionType == None)
         {
-            //std::cout << " no condition - passes" << std::endl;
             return destWorkflowName;
         }
         else
         {
             const auto categoryValue = part.valueOfCategory.find(compareCategoryChar)->second;
-            //std::cout << " categoryValue: " << categoryValue << " conditionType:" << (conditionType == LessThan ? "LessThan" : "GreaterThan") << std::endl;
             if (conditionType == LessThan)
             {
                 if (categoryValue < compareValue)
@@ -52,21 +49,6 @@ struct Rule
     }
 };
 
-ostream& operator<<(ostream& os, const Rule& rule)
-{
-    if (rule.conditionType == Rule::None)
-    {
-        os << "[Rule: None]"; 
-    }
-    else
-    {
-        os << "[Rule: " << rule.compareCategoryChar << (rule.conditionType == Rule::LessThan ? "<" : ">") << " " << rule.compareValue << "]";
-    }
-
-    return os;
-}
-struct Range;
-ostream& operator<<(ostream& os, const Range& range);
 struct Range
 {
     int64_t begin = 0;
@@ -79,120 +61,74 @@ struct Range
     }
     Range refinedToPassRule(const Rule& rule) const
     {
-        std::cout << "refinedToPassRule: " << rule << " original begin: " << begin << " original end: " << end << std::endl;
-        auto compute = [&]()
+        Range result = *this;
+        if (rule.conditionType == Rule::None)
+            return result;
+        else if (rule.conditionType == Rule::LessThan)
         {
-            Range result = *this;
-            if (rule.conditionType == Rule::None)
+            if (rule.compareValue >= end)
                 return result;
-            else if (rule.conditionType == Rule::LessThan)
+            else if (rule.compareValue <= begin)
+                return Range({0, -1});
+            else 
             {
-                if (rule.compareValue >= end)
-                    return result;
-                else if (rule.compareValue <= begin)
-                    return Range({0, -1});
-                else 
-                {
-                    result.end = rule.compareValue - 1;
-                    return result;
-                }
+                result.end = rule.compareValue - 1;
+                return result;
             }
-            else if (rule.conditionType == Rule::GreaterThan)
-            {
-                if (rule.compareValue <= begin)
-                    return result;
-                else if (rule.compareValue >= end)
-                    return Range({0, -1});
-                else
-                {
-                    result.begin = rule.compareValue + 1;
-                    return result;
-                }
-            }
+        }
+        else if (rule.conditionType == Rule::GreaterThan)
+        {
+            if (rule.compareValue <= begin)
+                return result;
+            else if (rule.compareValue >= end)
+                return Range({0, -1});
             else
             {
-                assert(false);
+                result.begin = rule.compareValue + 1;
+                return result;
             }
-        };
-        auto result = compute();
-        std::cout << " refined result: " << result << std::endl;
+        }
+        else
         {
-            Part dummyPart;
-            for (int i = begin; i < result.begin; i++)
-            {
-                dummyPart.valueOfCategory[rule.compareCategoryChar] = i;
-                assert(rule.destWorkFlowNameForPart(dummyPart) == "");
-            }
-            for (int i = result.begin; i <= result.end; i++)
-            {
-                dummyPart.valueOfCategory[rule.compareCategoryChar] = i;
-                assert(rule.destWorkFlowNameForPart(dummyPart) != "");
-            }
-            for (int i = result.end + 1; i <= end; i++)
-            {
-                dummyPart.valueOfCategory[rule.compareCategoryChar] = i;
-                assert(rule.destWorkFlowNameForPart(dummyPart) == "");
-            }
+            assert(false);
         }
         return result;
     }
     Range refinedToFailRule(const Rule& rule) const
     {
-        auto compute = [&]()
+        Range result = *this;
+        if (rule.conditionType == Rule::None)
+            return Range({0, -1});
+        else if (rule.conditionType == Rule::LessThan)
         {
-            Range result = *this;
-            if (rule.conditionType == Rule::None)
+            if (begin >= rule.compareValue)
+                return result;
+            else if (end < Rule::LessThan)
                 return Range({0, -1});
-            else if (rule.conditionType == Rule::LessThan)
+            else 
             {
-                if (begin >= rule.compareValue)
-                    return result;
-                else if (end < Rule::LessThan)
-                    return Range({0, -1});
-                else 
-                {
-                    result.begin = rule.compareValue;
-                    return result;
-                }
-            }
-            else if (rule.conditionType == Rule::GreaterThan)
-            {
-                if (end <= Rule::GreaterThan)
-                    return result;
-                else if (begin > rule.compareValue)
-                    return Range({0, -1});
-                else
-                {
-                    result.end = rule.compareValue;
-                    return result;
-                }
-            }
-            else
-            {
-                assert(false);
-            }
-        };
-        auto result = compute();
-        {
-            Part dummyPart;
-            for (int i = begin; i < result.begin; i++)
-            {
-                dummyPart.valueOfCategory[rule.compareCategoryChar] = i;
-                assert(rule.destWorkFlowNameForPart(dummyPart) != "");
-            }
-            for (int i = result.begin; i <= result.end; i++)
-            {
-                dummyPart.valueOfCategory[rule.compareCategoryChar] = i;
-                assert(rule.destWorkFlowNameForPart(dummyPart) == "");
-            }
-            for (int i = result.end + 1; i <= end; i++)
-            {
-                dummyPart.valueOfCategory[rule.compareCategoryChar] = i;
-                assert(rule.destWorkFlowNameForPart(dummyPart) != "");
+                result.begin = rule.compareValue;
+                return result;
             }
         }
+        else if (rule.conditionType == Rule::GreaterThan)
+        {
+            if (end <= Rule::GreaterThan)
+                return result;
+            else if (begin > rule.compareValue)
+                return Range({0, -1});
+            else
+            {
+                result.end = rule.compareValue;
+                return result;
+            }
+        }
+        else
+        {
+            assert(false);
+        }
         return result;
-    }
+    };
 
     int64_t size() const
     {
@@ -203,22 +139,15 @@ struct Range
 
     auto operator<=>(const Range& other) const = default;
 };
-ostream& operator<<(ostream& os, const Range& range)
-{
-    os << "[Range: " << range.begin << "-" << range.end << "]";
-    return os;
-}
 
 struct CategoryRanges
 {
     map<char, Range> rangeForCategory;
     int64_t size() const
     {
-        //std::cout << "CategoryRanges::size" << std::endl;
         int64_t result = 1;
         for (const auto& [categoryChar, categoryRange] : rangeForCategory)
         {
-            //std::cout << " size of " << categoryChar << " : " << categoryRange.size() << std::endl;
             result *= categoryRange.size();
         }
         return result;
@@ -245,19 +174,16 @@ struct Workflow
 
 void findAcceptedCategoryRanges(const CategoryRanges& currentCategoryRanges, const Workflow& currentWorkflow, map<string, Workflow>& workflowForName, set<string>& visitedWorkflowNames, vector<CategoryRanges>& acceptedCategoryRanges)
 {
-    std::cout << "Thingy - currentWorkflow: " << currentWorkflow.name << " currentCategoryRanges.size: " << currentCategoryRanges.size() << std::endl;
     assert(currentWorkflow.name != "");
     if (currentCategoryRanges.size() == 0)
         return;
     if (currentWorkflow.name == "A")
     {
-        std::cout << "Whoo!" << currentCategoryRanges.size() << std::endl;
         acceptedCategoryRanges.push_back(currentCategoryRanges);
         return;
     }
     if (currentWorkflow.name == "R")
     {
-        std::cout << "Boo!" << std::endl;
         return;
     }
     if (visitedWorkflowNames.contains(currentWorkflow.name))
@@ -269,9 +195,12 @@ void findAcceptedCategoryRanges(const CategoryRanges& currentCategoryRanges, con
     for (const auto& rule : currentWorkflow.rules)
     {
         if (categoryRanges.size() == 0)
-            break;
-        // Attempt to pass this rule.
         {
+            // No Parts can fail all of the previous rules.
+            break;
+        }
+        {
+            // Attempt to pass this rule.
             CategoryRanges rangesToPassRule = categoryRanges;
             if (rule.conditionType != Rule::None)
             {
@@ -280,7 +209,7 @@ void findAcceptedCategoryRanges(const CategoryRanges& currentCategoryRanges, con
             Workflow& nextWorkflow = workflowForName[rule.destWorkflowName];
             findAcceptedCategoryRanges(rangesToPassRule, nextWorkflow, workflowForName, visitedWorkflowNames, acceptedCategoryRanges);
         }
-        // Fail this rule.
+        // Fail this rule (and so, pass on to the next).
         categoryRanges.rangeForCategory[rule.compareCategoryChar] = categoryRanges.rangeForCategory[rule.compareCategoryChar].refinedToFailRule(rule);
     }
 
