@@ -2,6 +2,7 @@
 #include <regex>
 #include <map>
 #include <ranges>
+#include <numeric>
 
 #include <cassert>
 
@@ -154,9 +155,9 @@ int main()
             }
             Module *targetModule = &(moduleForName[targetModuleName]);
             module->targetModules.push_back(targetModule);
+            targetModule->inputModules.push_back(module);
             if (targetModule->type == Module::Conjunction)
             {
-                targetModule->inputModules.push_back(module);
                 targetModule->lastPulseTypeFromInput[module] = Pulse::Low; 
             }
 
@@ -166,63 +167,65 @@ int main()
     // Button.
     moduleForName["button"] = {Module::Button, "button", { &(moduleForName["broadcaster"]) } };
 
+    // The solution exploits some special properties of my (and everybody else's?) puzzle input:
+    //  rx has only one input module, which is a conjunction
+    //  the input modules to this conjuction each fire a High pulse exactly once per "cycle", where
+    //  each input module has its own cycle length.
+    //
+    // Thus, rx will receive a low pulse only when each of the conjunction's input module is at the single
+    // High pulse of its cycle.  The first such occurrence is the LCM of all the cycle lengths.
+    //
+    // This could all be made a bit less "magical" and "manual", but that seems like overkill, frankly.
     Module* rx = &(moduleForName["rx"]);
+    assert(rx->inputModules.size() == 1);
+    Module *conjunctionInputToRx = rx->inputModules.front();
+    assert(conjunctionInputToRx->type == Module::Conjunction);
+    std::vector<Module*> conjunctionInputs = conjunctionInputToRx->inputModules;
 
-    int64_t highPulsesSent = 0;
-    int64_t lowPulsesSent = 0;
-    int buttonPresses = 1;
-    Module *qn = &(moduleForName["qn"]);
-    Module *qz = &(moduleForName["qz"]);
-    Module *cq = &(moduleForName["cq"]);
-    Module *jx = &(moduleForName["jx"]);
-    Module *tt = &(moduleForName["tt"]);
-    while (true)
+    std::map<Module*, int64_t> lastHighOutputPulse;
+    std::map<Module*, bool> isCycleComputed;
+    for (auto* conjunctionInput : conjunctionInputs)
     {
-        //std::cout << "buttonPresses:" << buttonPresses << std::endl;
+        lastHighOutputPulse[conjunctionInput] = -1;
+        isCycleComputed[conjunctionInput] = false;
+    }
+    int numCyclesToCompute = isCycleComputed.size();
+    int64_t result = 1;
+    int64_t buttonPresses = 1;
+
+    while (numCyclesToCompute != 0)
+    {
         deque<Pulse> unhandledPulses = { { &(moduleForName["button"]), Pulse::Low, &(moduleForName["broadcaster"]) } };
         while (!unhandledPulses.empty())
         {
-            //std::cout << "# unhandled pulses: " << unhandledPulses.size() << std::endl;
             const auto pulse = unhandledPulses.front();
-            (pulse.type == Pulse::Low ? lowPulsesSent : highPulsesSent)++;
-            if (pulse.receiver == rx && pulse.type == Pulse::Low)
-            {
-                std::cout << "woohoo: buttonPresses: " << buttonPresses << std::endl;
-                return 0;
-            }
-            //if (pulse.receiver == qn && pulse.sender == qz && pulse.type == Pulse::High)
-            //{
-            //  std::cout << "Got High pulse from qz at buttonPresses: " << buttonPresses << std::endl;
-            //}
-            //if (pulse.receiver == qn && pulse.sender == cq && pulse.type == Pulse::High)
-            //{
-            //  std::cout << "Got High pulse from cq at buttonPresses: " << buttonPresses << std::endl;
-            //}
-            //if (pulse.receiver == qn && pulse.sender == jx && pulse.type == Pulse::High)
-            //{
-            //  std::cout << "Got High pulse from jx at buttonPresses: " << buttonPresses << std::endl;
-            //}
-            if (pulse.receiver == qn && pulse.sender == tt && pulse.type == Pulse::High)
-            {
-              std::cout << "Got High pulse from tt at buttonPresses: " << buttonPresses << std::endl;
-            }
-            //if (pulse.receiver == qn && pulse.sender == jx && pulse.type == Pulse::Low)
-            //{
-            //  std::cout << "Got Low pulse from jx at buttonPresses: " << buttonPresses << std::endl;
-            //}
-            //std::cout << "Handling pulse: " << pulse << std::endl;
             unhandledPulses.pop_front();
+            if (pulse.receiver == conjunctionInputToRx)
+            {
+                if (!isCycleComputed[pulse.sender] && pulse.type == Pulse::High)
+                {
+                    if (lastHighOutputPulse[pulse.sender] != -1)
+                    {
+                        const int64_t cycleLength = buttonPresses - lastHighOutputPulse[pulse.sender];
+                        std::cout << "repeated High from: " << pulse.sender->name << " @buttonPresses:" << buttonPresses << " lastHighOutputPulse: " << lastHighOutputPulse[pulse.sender] << " cycleLength: " << cycleLength << std::endl;
+                        assert(buttonPresses == 2 * cycleLength);
+                        isCycleComputed[pulse.sender] = true;
+                        result = std::lcm(result, cycleLength);
+                        numCyclesToCompute--;
+                        if (numCyclesToCompute == 0)
+                            break;
+                    } else 
+                    {
+                        lastHighOutputPulse[pulse.sender] = buttonPresses;
+                    }
+                }
+            }
             const auto newPulses = pulse.receiver->pulsesEmittedAfterReceiving(pulse);
-            //std::cout << "Generated the following new pulses: " << std::endl;
-            //for (const auto& newPulse : newPulses)
-                //std::cout << " " << newPulse << std::endl;
             unhandledPulses.insert(unhandledPulses.end(), newPulses.begin(), newPulses.end());
         }
         buttonPresses++;
     }
-    std::cout << "high pulses sent: " << highPulsesSent << std::endl;
-    std::cout << "low pulses sent: " << lowPulsesSent << std::endl;
-    std::cout << "Result: " << (highPulsesSent * lowPulsesSent) << std::endl;
+    std::cout << "Result: " << result << std::endl;
 
     return 0;
 }
