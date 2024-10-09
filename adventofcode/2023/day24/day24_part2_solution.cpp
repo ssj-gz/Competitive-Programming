@@ -28,6 +28,44 @@ ostream& operator<<(ostream& os, const Hailstone& hailstone)
     return os;
 }
 
+using Rational = boost::rational<boost::multiprecision::cpp_int>;
+void gaussian(vector<vector<Rational>>& augmentedMatrix)
+{
+    std::cout << "gaussian" << std::endl;
+    const int numRows = augmentedMatrix.size();
+    const int numCols = augmentedMatrix.front().size();
+    for (int rowToKeep = 0; rowToKeep < numRows; rowToKeep++)
+    {
+        const int colToKeep = rowToKeep;
+        assert(augmentedMatrix[rowToKeep][colToKeep] != 0);
+        for (int row = 0; row < numRows; row++)
+        {
+            if (row == rowToKeep)
+                continue;
+            const auto rowToSubstractMultiplier = augmentedMatrix[row][colToKeep] / augmentedMatrix[rowToKeep][colToKeep];
+            for (int col = 0; col < numCols; col++)
+            {
+                augmentedMatrix[row][col] -= rowToSubstractMultiplier * augmentedMatrix[rowToKeep][col];
+            }
+        }
+        // Preceding columns are 0; make this one a "1" by dividing all columns through.
+        const auto makeOneDivisor = augmentedMatrix[rowToKeep][colToKeep];
+        for (int col = 0; col < numCols; col++)
+        {
+            augmentedMatrix[rowToKeep][col] /= makeOneDivisor;
+        }
+    }
+    std::cout << "gaussian complete: " << std::endl;
+    for (int row = 0; row < numRows; row++)
+    {
+        for (int col = 0; col < numCols; col++)
+        {
+            std::cout << augmentedMatrix[row][col] << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
 int main()
 {
     // 19, 13, 30 @ -2,  1, -2
@@ -64,7 +102,6 @@ int main()
             //    continue;
             //}
             //double collisionTime = (static_cast<double>(hailstone2.startY) - hailstone1.startY) / (hailstone1.velocityY - hailstone2.velocityY);
-            using Rational = boost::rational<boost::multiprecision::cpp_int>;
             const Rational Vx1 = hailstone1.velocityX;
             const Rational Vx2 = hailstone2.velocityX;
             const Rational Vy1 = hailstone1.velocityY;
@@ -259,6 +296,57 @@ int main()
         std::cout << "OK" << std::endl;
     }
     std::cout << "result: " << (hailstoneStartX + hailstoneStartY + hailstoneStartZ) << std::endl;
+
+    vector<vector<Rational>> augmentedMatrix(4, vector<Rational>(5));
+    for (int i = 1; i <= 4; i++)
+    {
+        const auto flibble = hailstoneVelocityY * (hailstones[0].startX - hailstones[i].startX) + hailstoneStartX * (hailstones[0].velocityY - hailstones[i].velocityY) + hailstones[i].startX * hailstones[i].velocityY - hailstones[0].startX * hailstones[0].velocityY;
+        const auto flobble = hailstoneVelocityX * (hailstones[0].startY - hailstones[i].startY)  + hailstoneStartY * (hailstones[0].velocityX - hailstones[i].velocityX) + hailstones[i].startY * hailstones[i].velocityX - hailstones[0].startY * hailstones[0].velocityX;
+        std::cout << "i: " << " flibble: " << flibble << " flobble: " << flobble << std::endl;
+        assert(flibble == flobble);
+        const auto A = (hailstones[0].velocityY - hailstones[i].velocityY);   // Coefficient of Px
+        const auto B = -(hailstones[0].velocityX - hailstones[i].velocityX);  // Coefficient of Py
+        const auto C = -(hailstones[0].startY - hailstones[i].startY);        // Coefficient of Vx
+        const auto D = (hailstones[0].startX - hailstones[i].startX);         // Coefficient of Vy
+        const auto E = (hailstones[i].startX * hailstones[i].velocityY - hailstones[0].startX * hailstones[0].velocityY) - (hailstones[i].startY * hailstones[i].velocityX - hailstones[0].startY * hailstones[0].velocityX);
+        assert(A * hailstoneStartX + B * hailstoneStartY + C * hailstoneVelocityX + D * hailstoneVelocityY + E == 0);
+        augmentedMatrix[i - 1][0] = A;
+        augmentedMatrix[i - 1][1] = B;
+        augmentedMatrix[i - 1][2] = C;
+        augmentedMatrix[i - 1][3] = D;
+        augmentedMatrix[i - 1][4] = -E;
+        //const auto flibble1 = D * hailstoneVelocityY + hailstoneStartX * A + 
+    }
+    std::cout << "Doing gaussian" << std::endl;
+    gaussian(augmentedMatrix);
+    {
+        const auto hailstoneStartXOpt = augmentedMatrix[0][4];
+        const auto hailstoneStartYOpt = augmentedMatrix[1][4];
+        const auto hailstoneVelocityXOpt = augmentedMatrix[2][4];
+        const auto hailstoneVelocityYOpt = augmentedMatrix[3][4];
+
+        const auto hailstone0CollisionTime = (hailstones[0].startX - hailstoneStartXOpt) / (hailstoneVelocityXOpt - hailstones[0].velocityX);
+        assert(hailstoneStartXOpt + hailstone0CollisionTime * hailstoneVelocityXOpt == hailstones[0].startX + hailstone0CollisionTime * hailstones[0].velocityX);
+        assert(hailstoneStartYOpt + hailstone0CollisionTime * hailstoneVelocityYOpt == hailstones[0].startY + hailstone0CollisionTime * hailstones[0].velocityY);
+        const auto hailstone0CollisionZ = hailstones[0].startZ + hailstone0CollisionTime * hailstones[0].velocityZ;
+        const auto hailstone1CollisionTime = (hailstones[1].startX - hailstoneStartXOpt) / (hailstoneVelocityXOpt - hailstones[1].velocityX);
+        assert(hailstoneStartXOpt + hailstone1CollisionTime * hailstoneVelocityXOpt == hailstones[1].startX + hailstone1CollisionTime * hailstones[1].velocityX);
+        assert(hailstoneStartYOpt + hailstone1CollisionTime * hailstoneVelocityYOpt == hailstones[1].startY + hailstone1CollisionTime * hailstones[1].velocityY);
+        const auto hailstone1CollisionZ = hailstones[1].startZ + hailstone1CollisionTime * hailstones[1].velocityZ;
+        const auto hailstoneVelocityZOpt = (hailstone1CollisionZ - hailstone0CollisionZ) / (hailstone1CollisionTime - hailstone0CollisionTime);
+        const auto hailstoneStartZOpt = hailstone0CollisionZ - hailstone0CollisionTime * hailstoneVelocityZOpt;
+
+        std::cout << "hailstoneStartXOpt: " << hailstoneStartXOpt << " hailstoneStartX: " << hailstoneStartX << std::endl;
+        std::cout << "hailstoneStartYOpt: " << hailstoneStartYOpt << " hailstoneStartY: " << hailstoneStartY << std::endl;
+        std::cout << "hailstoneStartZOpt: " << hailstoneStartZOpt << " hailstoneStartZ: " << hailstoneStartZ << std::endl;
+        std::cout << "hailstoneVelocityXOpt: " << hailstoneVelocityXOpt << " hailstoneVelocityX: " << hailstoneVelocityX << std::endl;
+        std::cout << "hailstoneVelocityYOpt: " << hailstoneVelocityYOpt << " hailstoneVelocityY: " << hailstoneVelocityY << std::endl;
+        std::cout << "hailstoneVelocityZOpt: " << hailstoneVelocityZOpt << " hailstoneVelocityZ: " << hailstoneVelocityZ << std::endl;
+        //const auto hailstoneStartZOpt = h
+        std::cout << "Result (non-hacky): " << boost::rational_cast<int64_t>(hailstoneStartXOpt + hailstoneStartYOpt + hailstoneStartZ) << std::endl;
+    }
+
+
 
     return 0;
 }
