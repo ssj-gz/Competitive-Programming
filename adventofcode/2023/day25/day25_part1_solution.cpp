@@ -44,7 +44,7 @@ void bridgeAux(Component* v, Component* parent, int& time, vector<Edge>& bridges
         }
         else
         {
-            parent = v; /* Hmmm. */
+            parent = v; /* Hmmm.  Looks dodgy, but seems to work. */
             bridgeAux(neighbour, parent, time, bridges); 
             v->low = min(v->low, neighbour->low);
             if (neighbour->low > v->disc)
@@ -59,7 +59,7 @@ void bridgeAux(Component* v, Component* parent, int& time, vector<Edge>& bridges
 
 std::optional<Edge> findSoleBridge(const vector<Component*>& allComponents)
 {
-    int numConnectedComponents = 0;
+    // This, and bridgeAux, adapted from https://www.geeksforgeeks.org/bridge-in-a-graph/.
     for (auto* component : allComponents)
     {
         component->visited = false;
@@ -149,24 +149,11 @@ int main()
         sort(component->neighbours.begin(), component->neighbours.end());
         component->neighbours.erase(std::unique(component->neighbours.begin(), component->neighbours.end()), component->neighbours.end());
     }
-    auto printGraph = [&allComponents]()
-    {
-        for (auto* component : allComponents)
-        {
-            std::cout << "Component " << component->name << " has neighbours: "<< std::endl;
-            for (const auto* neighbour : component->neighbours)
-            {
-                std::cout << " " << neighbour->name;
-            }
-            std::cout << std::endl;
-        }
-    };
 
-    int64_t result = -1;
-    auto findConnectedComponents = [&allComponents, &printGraph, &result]()
+    auto computeComponentSizeProduct = [&allComponents]()
     {
-        //std::cout << "findConnectedComponents; current graph: " << std::endl;
-        //printGraph();
+        // Should only be called when we know the graph has been split into
+        // exactly two components.
         for (auto* component : allComponents)
         {
             component->connectedComponentId = -1;
@@ -176,88 +163,56 @@ int main()
         {
             if (startComponent->connectedComponentId == -1)
             {
-                //std::cout << "Exploring " << startComponent->name << std::endl;
                 numComponents++;
                 startComponent->connectedComponentId = numComponents;
                 vector<Component*> toExplore = { startComponent };
                 while (!toExplore.empty())
                 {
-                    //std::cout << " #toExplore: " << toExplore.size() << std::endl;
                     vector<Component*> nextToExplore;
                     for (auto* component : toExplore)
                     {
-                    for (auto* neighbourComponent : component->neighbours)
-                    {
-                        if (neighbourComponent->connectedComponentId == -1)
+                        for (auto* neighbourComponent : component->neighbours)
                         {
-                            neighbourComponent->connectedComponentId = numComponents;
-                            nextToExplore.push_back(neighbourComponent);
+                            if (neighbourComponent->connectedComponentId == -1)
+                            {
+                                neighbourComponent->connectedComponentId = numComponents;
+                                nextToExplore.push_back(neighbourComponent);
+                            }
                         }
-                    }
                     }
 
                     toExplore = nextToExplore;
                 }
             }
         }
-#if 0
-        std::cout << "numComponents: " << numComponents << std::endl;
-        for (auto* component : allComponents)
-        {
-            std::cout << " component: " << component->name << " is in connected component id: " << component->connectedComponentId << std::endl;
-        }
-#endif
-        if (numComponents != 1)
-        {
-            assert(numComponents == 2);
-            const int component1Size = std::count_if(allComponents.begin(), allComponents.end(), [](auto* component) { return component->connectedComponentId == 1; });
-            const int component2Size = std::count_if(allComponents.begin(), allComponents.end(), [](auto* component) { return component->connectedComponentId == 2; });
-            assert(result == -1);
-            result = component1Size * component2Size;
-        }
+        assert(numComponents == 2);
+        const int component1Size = std::count_if(allComponents.begin(), allComponents.end(), [](auto* component) { return component->connectedComponentId == 1; });
+        const int component2Size = std::count_if(allComponents.begin(), allComponents.end(), [](auto* component) { return component->connectedComponentId == 2; });
+        return component1Size * component2Size;
     };
-
-    findConnectedComponents();
 
     int64_t combinationsRemaining = edges.size() * edges.size();
     for (auto edge1ToRemove = edges.begin(); edge1ToRemove != edges.end(); edge1ToRemove++)
     {
-        std::cout << " edge1ToRemove " << edge1ToRemove->component1->name << "," << edge1ToRemove->component2->name  << std::endl;
         removeEdge(*edge1ToRemove);
         for (auto edge2ToRemove = std::next(edge1ToRemove); edge2ToRemove != edges.end(); edge2ToRemove++)
         {
             removeEdge(*edge2ToRemove);
-            //std::cout << "Doing Tarjan with graph: " << std::endl;
-            //printGraph();
             const auto bridge = findSoleBridge(allComponents);
             if (bridge.has_value())
             {
                 removeEdge(bridge.value());
-                findConnectedComponents();
+                const auto result = computeComponentSizeProduct();
                 std::cout << "result: " << result << std::endl;
                 return 0;
             }
             combinationsRemaining--;
             if (combinationsRemaining % 1000 == 0)
                 cout << "combinationsRemaining: " << combinationsRemaining << std::endl;
-#if 0
-            for (auto edge3ToRemove = std::next(edge2ToRemove); edge3ToRemove != edges.end(); edge3ToRemove++)
-            {
-                removeEdge(*edge3ToRemove);
-                findConnectedComponents();
-                addEdge(*edge3ToRemove);
-                combinationsRemaining--;
-                if (combinationsRemaining % 1000 == 0)
-                    cout << "combinationsRemaining: " << combinationsRemaining << std::endl;
-
-            }
-
-#endif
             addEdge(*edge2ToRemove);
         }
         addEdge(*edge1ToRemove);
     }
-    std::cout << "result: " << result << std::endl;
 
     return 0;
 }
