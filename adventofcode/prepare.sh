@@ -27,6 +27,8 @@ echo -e "all: part1 part2\npart1: day${DAY}_part1_solution.cpp\n\tg++ -std=c++20
 read -r -d '' BLANK_CPP_TEMPLATE << EOM
 #include <iostream>
 
+#include <cassert>
+
 using namespace std;
 
 int main()
