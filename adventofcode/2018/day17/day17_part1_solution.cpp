@@ -96,6 +96,11 @@ int main()
             return areaContents[coord];
     };
 
+    auto canMoveTo = [&contents](const Coord& coord)
+    {
+        return contents(coord) == '.' || contents(coord) == '|';
+    };
+
     auto printArea = [&areaContents, &contents, minY, maxY]()
     {
         return;
@@ -129,15 +134,26 @@ int main()
     int numVisited = 0;
     auto markVisited = [&numVisited, &contents, &areaContents, minY, maxY](const Coord& coord)
     {
-        if (contents(coord) == '.' && coord.y >= minY && coord.y <= maxY)
-            numVisited++;
         if (contents(coord) == '.')
+        {
+            if (coord.y >= minY && coord.y <= maxY)
+                numVisited++;
             areaContents[coord] = '|';
+        }
+    };
+    int numRetained = 0;
+    auto markRetained = [&numRetained, &contents, &areaContents, minY, maxY](const Coord& coord)
+    {
+        if (contents(coord) != '~' )
+        {
+            if (coord.y >= minY && coord.y <= maxY)
+                numRetained++;
+            areaContents[coord] = '~';
+        }
     };
     while (true)
     {
         vector<WaterDroplet> toExplore = { {{500, 0}, Down} };
-        std::cout << "new drop" << std::endl;
         const int oldNumVisited = numVisited;
         while (!toExplore.empty())
         {
@@ -145,7 +161,6 @@ int main()
             for (auto& droplet : toExplore)
             {
                 markVisited(droplet.coord);
-                std::cout << "Beginning to move droplet at: " << droplet.coord << " direction: " << droplet.direction << std::endl;
                 printArea();
                 while (true)
                 {
@@ -163,97 +178,57 @@ int main()
                             break;
                     }
 
-                    std::cout << " trying to move to coord: " << newCoord << " contents: " << contents(newCoord) << std::endl;
                     if (newCoord.y > maxY)
                     {
-                        std::cout << "Fell off the bottom" << std::endl;
+                        // Fell off the bottom, into the abyss; ditch
+                        // this droplet.
                         break;
                     }
 
-                    if (contents(newCoord) == '~' || contents(newCoord) == '#')
+                    if (!canMoveTo(newCoord))
                     {
                         if (droplet.direction == Down)
                         {
-                            std::cout << " hit ground" << std::endl;
-                            bool isFreeToLeft = true;
+                            // Hit the ground - can we escape to the sides, or must we fill
+                            // from left to right?
+                            auto checkXDirection = [&canMoveTo, &dropletCoord = droplet.coord, &markVisited](const int dx)
                             {
-                                Coord toLeft = droplet.coord;
+                                Coord coordToCheck = dropletCoord;
                                 while (true)
                                 {
-                                    if (contents({toLeft.x, toLeft.y + 1}) == '.' || contents({toLeft.x, toLeft.y + 1}) == '|')
-                                        break;
-                                    if (contents(toLeft) == '.' || contents(toLeft) == '|')
+                                    if (canMoveTo({coordToCheck.x, coordToCheck.y + 1}))
+                                        return coordToCheck;
+                                    if (canMoveTo(coordToCheck))
                                     {
-                                        markVisited(toLeft);
-                                        toLeft.x--;
+                                        markVisited(coordToCheck);
+                                        coordToCheck.x += dx;
                                     }
                                     else
                                     {
-                                        isFreeToLeft = false;
-                                        break;
+                                        return coordToCheck;
                                     }
                                 }
-                            }
-                            bool isFreeToRight = true;
-                            {
-                                Coord toRight = droplet.coord;
-                                while (true)
-                                {
-                                    if (contents({toRight.x, toRight.y + 1}) == '.' || contents({toRight.x, toRight.y + 1}) == '|')
-                                        break;
-                                    if (contents(toRight) == '.' || contents(toRight) == '|')
-                                    {
-                                        markVisited(toRight);
-                                        toRight.x++;
-                                    }
-                                    else
-                                    {
-                                        isFreeToRight = false;
-                                        break;
-                                    }
-                                }
-                            }
-                            std::cout << " isFreeToLeft? " << isFreeToLeft << " isFreeToRight? " << isFreeToRight << std::endl;
+                            };
+                            const auto leftwardImportantCoord = checkXDirection(-1);
+                            const auto rightwardImportantCoord = checkXDirection(+1);
+                            const bool isFreeToLeft = canMoveTo(leftwardImportantCoord);
+                            const bool isFreeToRight = canMoveTo(rightwardImportantCoord);
                             if (!isFreeToRight && !isFreeToLeft)
                             {
                                 // Can't escape to the sides; mark to left and right with ~.
                                 // (these tiles have already been markVisited).
+                                assert(leftwardImportantCoord.y == droplet.coord.y && rightwardImportantCoord.y == droplet.coord.y);
+                                for (int x = leftwardImportantCoord.x + 1; x <= rightwardImportantCoord.x - 1; x++)
                                 {
-                                    Coord toLeft = droplet.coord;
-                                    while (true)
-                                    {
-                                        if (contents(toLeft) == '.' || contents(toLeft) == '|')
-                                        {
-                                            areaContents[toLeft] = '~';
-                                            toLeft.x--;
-                                        }
-                                        else
-                                        {
-                                            break;
-                                        }
-                                    }
+                                    markRetained({x, droplet.coord.y});
                                 }
-                                {
-                                    Coord toRight = droplet.coord;
-                                    toRight.x++;
-                                    while (true)
-                                    {
-                                        if (contents(toRight) == '.' || contents(toRight) == '|')
-                                        {
-                                            areaContents[toRight] = '~';
-                                            toRight.x++;
-                                        }
-                                        else
-                                        {
-                                            break;
-                                        }
-                                    }
-                                }
+
                                 break;
                             }
                             else if (isFreeToLeft && isFreeToRight)
                             {
                                 droplet.direction = Left;
+                                // Fork to the Right.
                                 nextToExplore.insert({droplet.coord, Right});
                             }
                             else if (isFreeToLeft)
@@ -271,19 +246,19 @@ int main()
                         }
                         else
                         {
-                            //assert(false);
-                            //areaContents[droplet.coord] = '~';
-                            std::cout << "Stopped at " << droplet.coord << std::endl;
+                            // Unusual situation where we could initially move horizontally
+                            // or vertically, but then our escape point overflowed before
+                            // we could move, and we got stuck.  Just ditch this
+                            // droplet.
                             break;
                         }
                     }
                     else
                     {
                         droplet.coord = newCoord;
-                        std::cout <<  " moved to " << droplet.coord << std::endl;
                         markVisited(newCoord);
-                        const auto underfoot = contents({droplet.coord.x, droplet.coord.y + 1});
-                        if (underfoot == '.' || underfoot == '|')
+                        // Start falling, if we can.
+                        if (canMoveTo({droplet.coord.x, droplet.coord.y + 1}))
                             droplet.direction = Down;
                     }
                 }
@@ -291,12 +266,12 @@ int main()
             }
             toExplore.assign(nextToExplore.begin(), nextToExplore.end());
         }
-        std::cout << "numVisited: " << numVisited << std::endl;
         if (oldNumVisited == numVisited)
         {
+            // No progress; abort the simulation.
             break;
         }
     }
-    std::cout << "numVisited: " << numVisited << std::endl;
+    std::cout << "numVisited: " << numVisited << " numRetained: " << numRetained << std::endl;
     return 0;
 }
