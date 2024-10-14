@@ -176,32 +176,35 @@ int main()
     }
     map<int, set<OpType>> possibilitiesForInstruction;
     for (const auto opCode : allops)
+    {
         possibilitiesForInstruction[static_cast<int>(opCode)] = set<OpType>(std::begin(allops), std::end(allops));
+    }
+    // Eliminate possibilities of opCode that would give incorrect results.
+    for (const auto& instructionSample : instructionSamples)
+    {
+        const int instructionOpCode = instructionSample.instruction[0];
+
+        for (const auto tryOpType : allops)
+        {
+            auto tryInstruction = instructionSample.instruction;
+            tryInstruction[0] = static_cast<int>(tryOpType);
+            if (instructionSample.expectedRegistersAfterInstruction != applyInstruction(tryInstruction, instructionSample.inputRegisters))
+            {
+                possibilitiesForInstruction[instructionOpCode].erase(tryOpType);
+            }
+        }
+    }
     bool deducedAll = false;
     while (!deducedAll)
     {
         std::cout << "Deduction round" << std::endl;
-
-        for (const auto& instructionSample : instructionSamples)
+        for (const auto instructionOpCode : allops)
         {
-            const int instructionOpCode = instructionSample.instruction[0];
-
-            for (const auto tryOpType : allops)
-            {
-                auto tryInstruction = instructionSample.instruction;
-                tryInstruction[0] = static_cast<int>(tryOpType);
-                if (instructionSample.expectedRegistersAfterInstruction != applyInstruction(tryInstruction, instructionSample.inputRegisters))
-                {
-                    possibilitiesForInstruction[instructionOpCode].erase(tryOpType);
-                    //std::cout << "Removing opType: " << tryOpType << " as a possibility for instructionOpCode: " << instructionOpCode << " # " << possibilitiesForInstruction[instructionOpCode].size() << " possibilities remaining" << std::endl;
-                }
-            }
-
             bool deducedOpTypeForCode = (possibilitiesForInstruction[instructionOpCode].size() == 1);
             if (deducedOpTypeForCode)
             {
                 const auto opType = *possibilitiesForInstruction[instructionOpCode].begin();
-                std::cout << " deduced opCode: " << instructionSample.instruction[0] << " is opType: " << opType << std::endl;
+                std::cout << " deduced opCode: " << instructionOpCode << " is opType: " << opType << std::endl;
                 for (auto& [otherInstructionOpCode, possibilities] : possibilitiesForInstruction)
                 {
                     if (otherInstructionOpCode == instructionOpCode)
@@ -232,8 +235,8 @@ int main()
 
             if (deducedAll)
                 break;
-        }
 
+        }
     }
 
     string programLine;
