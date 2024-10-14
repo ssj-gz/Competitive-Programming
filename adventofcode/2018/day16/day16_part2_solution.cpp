@@ -19,8 +19,6 @@ int main()
                     {
                         return character != ' ' && !(character >= '0' && character <= '9');
                     }), strippedLine.end());
-        std::cout << "line: " << line << std::endl;
-        std::cout << "strippedLine: " << strippedLine << std::endl;
         istringstream numbersIn(strippedLine);
         vector<int> fourNumbers(4);
         for (int i = 0; i < 4; i++)
@@ -179,7 +177,8 @@ int main()
     {
         possibilitiesForInstruction[static_cast<int>(opCode)] = set<OpType>(std::begin(allops), std::end(allops));
     }
-    // Eliminate possibilities of opCode that would give incorrect results.
+    // Eliminate possibilities of opType for the sample opCode that would give contradictory results 
+    // for any sample.
     for (const auto& instructionSample : instructionSamples)
     {
         const int instructionOpCode = instructionSample.instruction[0];
@@ -194,48 +193,29 @@ int main()
             }
         }
     }
+    // Incrementally Deduce the remaining opCode <->opType: each time we deduce the opType for an opCode, 
+    // remove that opType as a possibility for all other opCodes.
     bool deducedAll = false;
     while (!deducedAll)
     {
-        std::cout << "Deduction round" << std::endl;
+        deducedAll = true;
         for (const auto instructionOpCode : allops)
         {
-            bool deducedOpTypeForCode = (possibilitiesForInstruction[instructionOpCode].size() == 1);
-            if (deducedOpTypeForCode)
+            const bool haveDeducedOpTypeForCode = (possibilitiesForInstruction[instructionOpCode].size() == 1);
+            if (haveDeducedOpTypeForCode)
             {
                 const auto opType = *possibilitiesForInstruction[instructionOpCode].begin();
-                std::cout << " deduced opCode: " << instructionOpCode << " is opType: " << opType << std::endl;
                 for (auto& [otherInstructionOpCode, possibilities] : possibilitiesForInstruction)
                 {
                     if (otherInstructionOpCode == instructionOpCode)
                         continue;
-                    std::cout << " removing " << opType << " as a possibilty for otherInstructionOpCode: " << otherInstructionOpCode << " #possibilities before:" << possibilities.size() << std::endl;
                     possibilities.erase(opType);
-                    std::cout << " #possibilities after:" << possibilities.size() << std::endl;
                 }
             }
-            for (const auto& [instructionOpCode, possibleOpTypes] : possibilitiesForInstruction)
+            else
             {
-                std::cout << "instructionOpCode: " << instructionOpCode << " possible optypes: (" << possibleOpTypes.size() << "):";
-                for (const auto opType : possibleOpTypes)
-                {
-                    std::cout << opType << " ";
-                }
-                std::cout << std::endl;
+                deducedAll = false;
             }
-            deducedAll = true;
-            for (auto& [instructionOpCode_unused, possibilities] : possibilitiesForInstruction)
-            {
-                if (possibilities.size() != 1)
-                {
-                    std::cout << "Still not deduced: " << instructionOpCode_unused << std::endl;
-                    deducedAll = false;
-                }
-            }
-
-            if (deducedAll)
-                break;
-
         }
     }
 
@@ -249,8 +229,6 @@ int main()
         // Translate opCode.
         instruction[0] = *possibilitiesForInstruction[instruction[0]].begin();
         registers = applyInstruction(instruction, registers);
-        std::cout << "Applied instruction:" << instruction[0] << " " << instruction[1] << " " << instruction[2] << " " << instruction[3] <<  std::endl;
-        std::cout << "New registers      :" << registers[0] << " " << registers[1] << " " << registers[2] << " " << registers[3]  << std::endl;
     }
     std::cout << "register 0: " << registers[0] << std::endl;
     return 0;
