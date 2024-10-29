@@ -9,28 +9,115 @@
 
 using namespace std;
 
+struct Vec3D
+{
+    int64_t x = -1;
+    int64_t y = -1;
+    int64_t z = -1;
+};
+
+struct Nanobot
+{
+    int64_t x = -1;
+    int64_t y = -1;
+    int64_t z = -1;
+    int64_t radius = -1;
+    std::pair<int, int> oppositePairs[2] = {};
+    bool hasInRange(int x, int y, int z) const
+    {
+        return (abs(this->x - x) + abs(this->y - y) + abs(this->z - z) <= radius);
+    }
+    auto operator<=>(const Nanobot& other) const = default;
+
+};
+
+struct IntersectionRegion
+{
+    IntersectionRegion(const Nanobot& nanobot)
+    {
+        Vec3D planeBasisXY = {1, 1, 0};
+        Vec3D planeBasisWithZ = {1, 0, 1};
+        auto projectOntoXAxis = [&planeBasisXY, &planeBasisWithZ](const Vec3D& point)
+        {
+            const Vec3D XYProjection = { point.x - (point.z / planeBasisWithZ.z) * planeBasisWithZ.x, point.y - (point.z / planeBasisWithZ.z) * planeBasisWithZ.y, point.z - (point.z / planeBasisWithZ.z) * planeBasisWithZ.z};
+            assert(XYProjection.z == 0);
+            Vec3D XAxisProjection = { XYProjection.x - (XYProjection.y / planeBasisXY.y) * planeBasisXY.x, XYProjection.y - (XYProjection.y / planeBasisXY.y) * planeBasisXY.y,  XYProjection.z - (XYProjection.y / planeBasisXY.y) * planeBasisXY.z };
+            assert(XAxisProjection.y == 0 && XAxisProjection.z == 0);
+            return XAxisProjection.x;
+        };
+        for (int pairNum = 0; pairNum < numPairs; pairNum++)
+        {
+            const Vec3D top = {nanobot.x, nanobot.y, nanobot.z + nanobot.radius };
+            minMaxPairs[pairNum].first = projectOntoXAxis(top);
+
+            const Vec3D bottom = {nanobot.x, nanobot.y, nanobot.z - nanobot.radius };
+            minMaxPairs[pairNum].second = projectOntoXAxis(bottom);
+
+            //std::cout << " pairNum: " << pairNum << " minMaxPairs[pairNum].first: " << minMaxPairs[pairNum].first << " minMaxPairs[pairNum].second: " << minMaxPairs[pairNum].second << std::endl;
+
+            if (pairNum % 4 == 0 || pairNum % 4 == 3)
+                assert(minMaxPairs[pairNum].first <= minMaxPairs[pairNum].second);
+            else
+            {
+                assert(minMaxPairs[pairNum].first >= minMaxPairs[pairNum].second);
+                swap(minMaxPairs[pairNum].first, minMaxPairs[pairNum].second);
+            }
+           
+            // Rotate bases 90 degrees.
+            planeBasisXY = {planeBasisXY.y, -planeBasisXY.x, planeBasisXY.z};
+            planeBasisWithZ = {planeBasisWithZ.y, -planeBasisWithZ.x, planeBasisWithZ.z};
+        }
+
+    }
+    IntersectionRegion() = default;
+    bool containsPoint(int x, int y, int z) const
+    {
+        Vec3D planeBasisXY = {1, 1, 0};
+        Vec3D planeBasisWithZ = {1, 0, 1};
+        auto projectOntoXAxis = [&planeBasisXY, &planeBasisWithZ](const Vec3D& point)
+        {
+            const Vec3D XYProjection = { point.x - (point.z / planeBasisWithZ.z) * planeBasisWithZ.x, point.y - (point.z / planeBasisWithZ.z) * planeBasisWithZ.y, point.z - (point.z / planeBasisWithZ.z) * planeBasisWithZ.z};
+            assert(XYProjection.z == 0);
+            Vec3D XAxisProjection = { XYProjection.x - (XYProjection.y / planeBasisXY.y) * planeBasisXY.x, XYProjection.y - (XYProjection.y / planeBasisXY.y) * planeBasisXY.y,  XYProjection.z - (XYProjection.y / planeBasisXY.y) * planeBasisXY.z };
+            assert(XAxisProjection.y == 0 && XAxisProjection.z == 0);
+            return XAxisProjection.x;
+        };
+        for (int pairNum = 0; pairNum < numPairs; pairNum++)
+        {
+            const int projectedX = projectOntoXAxis({x, y, z});
+            if (projectedX < minMaxPairs[pairNum].first || projectedX > minMaxPairs[pairNum].second)
+                return false;
+
+            // Rotate bases 90 degrees.
+            planeBasisXY = {planeBasisXY.y, -planeBasisXY.x, planeBasisXY.z};
+            planeBasisWithZ = {planeBasisWithZ.y, -planeBasisWithZ.x, planeBasisWithZ.z};
+        }
+        return true;
+    }
+    IntersectionRegion intersectedWith(const IntersectionRegion& otherRegion) const
+    {
+        IntersectionRegion result;
+        Vec3D planeBasisXY = {1, 1, 0};
+        Vec3D planeBasisWithZ = {1, 0, 1};
+        for (int pairNum = 0; pairNum < numPairs; pairNum++)
+        {
+            result.minMaxPairs[pairNum].first = std::max(minMaxPairs[pairNum].first, otherRegion.minMaxPairs[pairNum].first);
+            result.minMaxPairs[pairNum].second = std::min(minMaxPairs[pairNum].second, otherRegion.minMaxPairs[pairNum].second);
+
+
+            // Rotate bases 90 degrees.
+            planeBasisXY = {planeBasisXY.y, -planeBasisXY.x, planeBasisXY.z};
+            planeBasisWithZ = {planeBasisWithZ.y, -planeBasisWithZ.x, planeBasisWithZ.z};
+        }
+
+        return result;
+    }
+    static constexpr int numPairs = 4;
+    std::pair<int, int> minMaxPairs[numPairs] = {};
+};
+
 int main()
 {
-    struct Vec3D
-    {
-        int64_t x = -1;
-        int64_t y = -1;
-        int64_t z = -1;
-    };
-    struct Nanobot
-    {
-        int64_t x = -1;
-        int64_t y = -1;
-        int64_t z = -1;
-        int64_t radius = -1;
-        std::pair<int, int> oppositePairs[2] = {};
-        bool hasInRange(int x, int y) const
-        {
-            return (abs(this->x - x) + abs(this->y - y) <= radius);
-        }
-        auto operator<=>(const Nanobot& other) const = default;
-
-    };
     vector<Nanobot> nanobots;
     string nanobotDescription;
     while (getline(cin, nanobotDescription))
@@ -46,12 +133,21 @@ int main()
         nanobots.push_back(nanobot);
     }
 
+#if 0
     const int width = 200;
     const int height = 100;
+    const int depth = 100;
+#else
+    const int width = 50;
+    const int height = 50;
+    const int depth = 50;
+#endif
     const int minX = -width / 2;
     const int maxX = width / 2 - 1;
     const int minY = -height / 2;
     const int maxY = height / 2 - 1;
+    const int minZ = -depth / 2;
+    const int maxZ = depth / 2 - 1;
     std::cout << "minX: " << minX << " maxX: " << maxX << " minY: " << minY << " maxY: " << maxY << std::endl;
 
     {
@@ -59,8 +155,8 @@ int main()
         gettimeofday(&time,NULL);
         srand(static_cast<unsigned int>((time.tv_sec * 1000) + (time.tv_usec / 1000)));
 
-        vector<vector<char>> grid(width, vector<char>(height, ' '));
-        const int numBots = 2;
+        //vector<vector<vector<char>>> grid(width, vectorvector<char>(height, vector<char>(depth, ' '));
+        const int numBots = 3;
         vector<Nanobot> nanobots;
         for (int i = 0; i < numBots; i++)
         {
@@ -68,13 +164,15 @@ int main()
             {
                 const int x = minX + rand() % width;
                 const int y = minY + rand() % height;
-                const int radius = (rand() % std::min(width, height)) + 1;
-                if (x - radius < minX || x + radius > maxX || y - radius < minY || y + radius > maxY)
+                const int z = minZ + rand() % depth;
+                const int radius = (rand() % std::min(depth, std::min(width, height))) + 1;
+                if (x - radius < minX || x + radius > maxX || y - radius < minY || y + radius > maxY || z - radius < minZ || z + radius > maxZ)
                 {
                     //std::cout << "Nope: " << x << ", " << y << " R: " << radius << std::endl;
                     continue;
                 }
-                nanobots.push_back({x, y, 0, radius});
+                nanobots.push_back({x, y, z, radius});
+                IntersectionRegion blah(nanobots.back());
                 break;
             }
         }
@@ -82,6 +180,7 @@ int main()
 
         for (auto& bot : nanobots)
         {
+#if 0
             Vec3D xyDiag = {1, 1, 0};
             auto xIntersectForPoint = [&xyDiag](const int x, const int y)
             {
@@ -110,9 +209,23 @@ int main()
                 assert(bot.oppositePairs[pairNum].first <= bot.oppositePairs[pairNum].second);
                 xyDiag = {xyDiag.y, -xyDiag.x, 0};
             }
+#endif
+            for (int z = maxZ; z >= minZ; z--)
+            {
+                for (int y = maxY; y >= minY; y--)
+                {
+                    for (int x = minX; x <= maxX; x++)
+                    {
+                        assert(bot.hasInRange(x, y, z) == IntersectionRegion(bot).containsPoint(x, y, z));
+                        //if (bot.hasInRange(x, y, z))
+                            //std::cout << "Ooh - intersection!" << "x: " << x << " y: " << y << " z: " << z << std::endl;
+                    }
+                }
+            }
 
         }
 
+#if 0
         const int intersectionPair0Min = std::max(nanobots[0].oppositePairs[0].first, nanobots[1].oppositePairs[0].first);
         const int intersectionPair0Max = std::min(nanobots[0].oppositePairs[0].second, nanobots[1].oppositePairs[0].second);
         const int intersectionPair1Min = std::max(nanobots[0].oppositePairs[1].first, nanobots[1].oppositePairs[1].first);
@@ -128,38 +241,39 @@ int main()
         {
             std::cout << "Intersection!" << std::endl;
         }
-        vector<std::pair<int, int>> intersectionPoints;
-        for (int y = maxY; y >= minY; y--)
+#endif
+        int maxNumBotsContaining = 0;
+        const auto threeBotsIntersection = IntersectionRegion(nanobots[0]).intersectedWith(nanobots[1]).intersectedWith(nanobots[2]);
+        for (int z = maxZ; z >= minZ; z--)
         {
-            for (int x = minX; x <= maxX; x++)
+            for (int y = maxY; y >= minY; y--)
             {
-                int numPairsSatisfied = 0;
-                for (int botIndex = 0; botIndex < numBots; botIndex++)
+                for (int x = minX; x <= maxX; x++)
                 {
-                    const auto& bot = nanobots[botIndex];
-                    Vec3D xyDiag = {1, 1, 0};
-                    auto xIntersectForPoint = [&xyDiag](const int x, const int y)
+                    int numBotsContaining = 0;
+                    int dbgNumBotsContaining = 0;
+                    for (const auto& bot : nanobots)
                     {
-                        return x - y / xyDiag.y;
-                    };
-                    for (int pairNum = 0; pairNum < 2; pairNum++)
-                    {
-                        const int xIntersect = xIntersectForPoint(x, y);
-                        if (xIntersect>= bot.oppositePairs[pairNum].first && xIntersect<= bot.oppositePairs[pairNum].second)
-                            numPairsSatisfied+=1;
-
-                        xyDiag = {xyDiag.y, -xyDiag.x, 0};
+                        if (bot.hasInRange(x, y, z))
+                            dbgNumBotsContaining++;
+                        if (IntersectionRegion(bot).containsPoint(x, y, z))
+                            numBotsContaining++;
                     }
-                }
-                assert(numPairsSatisfied <= 4);
-                if (numPairsSatisfied == 4)
-                {
-                    intersectionPoints.push_back({x, y});
+                    assert(numBotsContaining == dbgNumBotsContaining);
+                    maxNumBotsContaining = std::max(maxNumBotsContaining, numBotsContaining);
+                    if (numBotsContaining == 3)
+                    {
+                        assert(threeBotsIntersection.containsPoint(x, y, z));
+                    }
+                    else
+                        assert(!threeBotsIntersection.containsPoint(x, y, z));
+
                 }
             }
-            std::cout << std::endl;
         }
+        std::cout << "maxNumBotsContaining: " << maxNumBotsContaining << std::endl;
 
+#if 0
         assert(nanobots.size() == 2);
         bool debugIntersection = false;
         vector<std::pair<int, int>> dbgIntersectionPoints;
@@ -167,27 +281,6 @@ int main()
         {
             for (int x = minX; x <= maxX; x++)
             {
-                char letter = ' ';
-                for (int botIndex = 0; botIndex < numBots; botIndex++)
-                {
-                    const auto& bot = nanobots[botIndex];
-                    if (bot.hasInRange(x, y))
-                    {
-                        if (botIndex == 0)
-                            letter = 'A';
-                        else if (botIndex == 1)
-                        {
-                            if (letter == ' ')
-                                letter = 'B';
-                            else
-                            {
-                                letter = 'C';
-                                debugIntersection = true;
-                                dbgIntersectionPoints.push_back({x, y});
-                            }
-                        }
-                    }
-                }
                 std::cout << letter;
             }
             std::cout << std::endl;
@@ -195,6 +288,7 @@ int main()
         std::cout << "intersection: " << intersection << " debugIntersection: " << debugIntersection << " #intersectionPoints: " << intersectionPoints.size() << " #dbgIntersectionPoints: " << dbgIntersectionPoints.size() << std::endl;
         assert(intersection == debugIntersection);
         assert(intersectionPoints == dbgIntersectionPoints);
+#endif
     }
 
 
