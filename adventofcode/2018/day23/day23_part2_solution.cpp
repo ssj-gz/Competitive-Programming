@@ -97,24 +97,60 @@ struct IntersectionRegion
     IntersectionRegion intersectedWith(const IntersectionRegion& otherRegion) const
     {
         IntersectionRegion result;
-        Vec3D planeBasisXY = {1, 1, 0};
-        Vec3D planeBasisWithZ = {1, 0, 1};
         for (int pairNum = 0; pairNum < numPairs; pairNum++)
         {
             result.minMaxPairs[pairNum].first = std::max(minMaxPairs[pairNum].first, otherRegion.minMaxPairs[pairNum].first);
             result.minMaxPairs[pairNum].second = std::min(minMaxPairs[pairNum].second, otherRegion.minMaxPairs[pairNum].second);
-
-
-            // Rotate bases 90 degrees.
-            planeBasisXY = {planeBasisXY.y, -planeBasisXY.x, planeBasisXY.z};
-            planeBasisWithZ = {planeBasisWithZ.y, -planeBasisWithZ.x, planeBasisWithZ.z};
         }
 
         return result;
     }
+    bool isEmpty() const
+    {
+        for (int pairNum = 0; pairNum < numPairs; pairNum++)
+        {
+            if (minMaxPairs[pairNum].first > minMaxPairs[pairNum].second)
+                return true;
+        }
+        return false;
+    }
+    void printTo(ostream& os) const
+    {
+        for (int pairNum = 0; pairNum < numPairs; pairNum++)
+        {
+            os << "pairNum: " << pairNum << ": " << minMaxPairs[pairNum].first << " - " << minMaxPairs[pairNum].second << std::endl;
+        }
+    }
     static constexpr int numPairs = 4;
     std::pair<int, int> minMaxPairs[numPairs] = {};
 };
+
+void blah(const IntersectionRegion& currentIntersection, std::vector<Nanobot>::iterator nextBot, const std::vector<Nanobot>& nanobots, int numBotsInIntersection, int& maxNumBotsInIntersection)
+{
+    if (numBotsInIntersection > maxNumBotsInIntersection)
+    {
+        maxNumBotsInIntersection = numBotsInIntersection;
+        std::cout << "new maxNumBotsInIntersection: " << maxNumBotsInIntersection << std::endl;
+        currentIntersection.printTo(cout);
+    }
+    const auto numBotsRemaining = nanobots.end() - nextBot;
+    if (numBotsInIntersection + numBotsRemaining < maxNumBotsInIntersection)
+    {
+        //std::cout << "skipping: numBotsRemaining: " << numBotsRemaining << " numBotsInIntersection: " << numBotsInIntersection << std::endl;
+        return;
+    }
+    while (nextBot != nanobots.end())
+    {
+        IntersectionRegion newIntersection = currentIntersection.intersectedWith(*nextBot);
+        if (!newIntersection.isEmpty())
+        {
+            // Recurse, using this bot.
+            blah(newIntersection, std::next(nextBot), nanobots, numBotsInIntersection + 1, maxNumBotsInIntersection);
+        }
+        nextBot++;
+    }
+
+}
 
 int main()
 {
@@ -131,6 +167,20 @@ int main()
         nanobot.z = std::stoll(nanobotMatch[3]);
         nanobot.radius = std::stoll(nanobotMatch[4]);
         nanobots.push_back(nanobot);
+    }
+
+    for (int bot1Index = 0; bot1Index < static_cast<int>(nanobots.size()); bot1Index++)
+    {
+        const auto& bot1 = nanobots[bot1Index];
+        for (int bot2Index = bot1Index + 1; bot2Index < static_cast<int>(nanobots.size()); bot2Index++)
+        {
+            const auto& bot2 = nanobots[bot2Index];
+            if (!IntersectionRegion(bot1).intersectedWith(bot2).isEmpty())
+            {
+                //std::cout << "Bots " << bot1Index << " and " << bot2Index << " intersect glarp" << std::endl;
+            }
+
+        }
     }
 
 #if 0
@@ -289,6 +339,14 @@ int main()
         assert(intersection == debugIntersection);
         assert(intersectionPoints == dbgIntersectionPoints);
 #endif
+    }
+
+    int maxNumBotsInIntersection = 0;
+    for (auto botIter = nanobots.begin(); botIter != nanobots.end(); botIter++)
+    {
+        std::cout << "Another bot" << std::endl;
+        IntersectionRegion botRegion = IntersectionRegion(*botIter);
+        blah(botRegion, std::next(botIter), nanobots, 1, maxNumBotsInIntersection);
     }
 
 
