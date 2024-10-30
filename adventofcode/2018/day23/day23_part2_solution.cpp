@@ -1,6 +1,7 @@
 #include <iostream>
 #include <regex>
 #include <optional>
+#include <set>
 
 #include <cassert>
 
@@ -152,6 +153,58 @@ void blah(const IntersectionRegion& currentIntersection, std::vector<Nanobot>::i
 
 }
 
+void blah2(const vector<const Nanobot*>& bots, int pairNum, int& highest, IntersectionRegion& highestIntersectionRegion)
+{
+    if (pairNum == IntersectionRegion::numPairs)
+    {
+        if (bots.size() > highest)
+        {
+            highest = bots.size();
+            std::cout << "New highest: " << highest << std::endl;
+            highestIntersectionRegion = IntersectionRegion(*bots.front());
+            for (const auto* bot : bots)
+            {
+                highestIntersectionRegion = highestIntersectionRegion.intersectedWith(IntersectionRegion(*bot));
+            }
+            highestIntersectionRegion.printTo(cout); 
+        }
+        return;
+    }
+    set<int> events;
+    for (const auto* bot : bots)
+    {
+        const auto region = IntersectionRegion(*bot);
+        events.insert(region.minMaxPairs[pairNum].first);
+        events.insert(region.minMaxPairs[pairNum].second + 1);
+    }
+    vector<vector<const Nanobot*>> botsInInterval;
+    for (const int event : events)
+    {
+        botsInInterval.push_back({});
+        for (const auto* bot : bots)
+        {
+            const auto region = IntersectionRegion(*bot);
+            if (region.minMaxPairs[pairNum].first <= event && region.minMaxPairs[pairNum].second >= event)
+            {
+                botsInInterval.back().push_back(bot);
+                
+            }
+        }
+    }
+    std::sort(botsInInterval.begin(), botsInInterval.end(), [](const auto& lhsBots, const auto& rhsBots)
+            { return rhsBots.size() < lhsBots.size();});
+    for (const auto& botList : botsInInterval)
+    {
+        if (botList.size() > highest)
+            blah2(botList, pairNum + 1, highest, highestIntersectionRegion);
+        else
+        {
+            std::cout << "Pruning botList of size: " << botList.size() << " @pairNum: " << pairNum << std::endl;
+            return;
+        }
+    }
+}
+
 int main()
 {
     vector<Nanobot> nanobots;
@@ -228,6 +281,7 @@ int main()
         }
 
 
+
         for (auto& bot : nanobots)
         {
 #if 0
@@ -268,7 +322,7 @@ int main()
                     {
                         assert(bot.hasInRange(x, y, z) == IntersectionRegion(bot).containsPoint(x, y, z));
                         //if (bot.hasInRange(x, y, z))
-                            //std::cout << "Ooh - intersection!" << "x: " << x << " y: " << y << " z: " << z << std::endl;
+                        //std::cout << "Ooh - intersection!" << "x: " << x << " y: " << y << " z: " << z << std::endl;
                     }
                 }
             }
@@ -340,7 +394,35 @@ int main()
         assert(intersectionPoints == dbgIntersectionPoints);
 #endif
     }
+#if 0
+    set<int> events;
+    for (const auto& nanobot : nanobots)
+    {
+        const auto region = IntersectionRegion(nanobot);
+        events.insert(region.minMaxPairs[0].first);
+        events.insert(region.minMaxPairs[0].second + 1);
+    }
+    int maxBlah = 0;
+    for (const int event : events)
+    {
+        int blah = 0;
+        for (const auto& nanobot : nanobots)
+        {
+            const auto region = IntersectionRegion(nanobot);
+            if (region.minMaxPairs[0].first <= event && region.minMaxPairs[0].second >= event)
+            {
+                blah++;
+            }
+        }
+        //if (blah >= 980)
+            std::cout << "event: " << event << " blah: " << blah << std::endl;
+        maxBlah = std::max(maxBlah, blah);
+    }
+    std::cout << "maxBlah: " << maxBlah << std::endl;
+#endif
 
+
+#if 0
     int maxNumBotsInIntersection = 0;
     for (auto botIter = nanobots.begin(); botIter != nanobots.end(); botIter++)
     {
@@ -348,6 +430,41 @@ int main()
         IntersectionRegion botRegion = IntersectionRegion(*botIter);
         blah(botRegion, std::next(botIter), nanobots, 1, maxNumBotsInIntersection);
     }
+#endif
+
+    vector<const Nanobot*> bots;
+    for (const auto& bot : nanobots)
+        bots.push_back(&bot);
+    int highest = 0;
+    IntersectionRegion highestIntersectionRegion;
+    blah2(bots, 0, highest, highestIntersectionRegion);
+
+    int radius = 1;
+    while (IntersectionRegion({0, 0, 0, radius}).intersectedWith(highestIntersectionRegion).isEmpty())
+    {
+        radius *= 2;
+    }
+    std::cout << "Initial radius: " << radius << std::endl;
+    int highRadius = radius;
+    int lowRadius = 0;
+    while (highRadius != lowRadius)
+    {
+        const int medRadius = lowRadius + (highRadius - lowRadius) / 2;
+        if (IntersectionRegion({0, 0, 0, medRadius}).intersectedWith(highestIntersectionRegion).isEmpty())
+        {
+            lowRadius = medRadius + 1;
+        }
+        else
+        {
+            highRadius = medRadius;
+        }
+        std::cout << "medRadius: " << medRadius << " lowRadius: " << lowRadius << " highRadius: " << highRadius << std::endl;
+    }
+    const int result = highRadius;
+    assert(IntersectionRegion({0, 0, 0, result - 1}).intersectedWith(highestIntersectionRegion).isEmpty());
+    assert(!IntersectionRegion({0, 0, 0, result}).intersectedWith(highestIntersectionRegion).isEmpty());
+
+    std::cout << "result: " << result << std::endl;
 
 
     return 0;
