@@ -55,7 +55,6 @@ class Program
         }
         bool execUntilBlocked()
         {
-            std::cout << "Program: " << m_id << " execUntilBlocked" << std::endl; 
             bool completedAnyInstructions = false;
             while (true)
             {
@@ -64,12 +63,10 @@ class Program
                     return completedAnyInstructions;
                 }
                 const auto& instruction = m_instructions[m_instructionPointer];
-                std::cout << " program: " << m_id << " executing instruction at " << m_instructionPointer << std::endl;
                 switch (instruction.type)
                 {
                     case Instruction::Send:
                         m_otherProgram->addIncomingMessage(instruction.getArgValue(0, m_registerValue));
-                        std::cout << " program: " << m_id << " sending message " << instruction.getArgValue(0, m_registerValue) << std::endl;
                         m_numMessagesSent++;
                         break;
                     case Instruction::Set:
@@ -93,12 +90,10 @@ class Program
                     case Instruction::Receive:
                         if (m_incomingMessages.empty())
                         {
-                            std::cout << " program: " << m_id << " blocking trying to read message" <<  std::endl;
                             return completedAnyInstructions;
                         }
                         else
                         {
-                            std::cout << " program: " << m_id << " received message " << m_incomingMessages.front() << " into register: " << instruction.getArgRegister(0) << std::endl;
                             m_registerValue[instruction.getArgRegister(0)] = m_incomingMessages.front();
                             m_incomingMessages.erase(m_incomingMessages.begin());
                         }
@@ -116,13 +111,6 @@ class Program
                 }
                 m_instructionPointer++;
                 completedAnyInstructions = true;
-#if 1
-                std::cout << " program: " << m_id << " new values of registers: " << std::endl;
-                for (const auto& [regName, value] : m_registerValue)
-                {
-                    std::cout << "  " << regName << ": " << value << std::endl; 
-                }
-#endif
             }
         }
         int64_t numMessagesSent() const
@@ -131,7 +119,6 @@ class Program
         }
         void addIncomingMessage(int64_t message)
         {
-            //std::cout << "program: " << m_id << " addIncomingMessage: " << message << std::endl;
             m_incomingMessages.push_back(message);
         }
     private:
@@ -151,7 +138,6 @@ int main()
     string instructionLine;
     while (getline(cin, instructionLine))
     {
-        std::cout << "instructionLine: " << instructionLine << std::endl;
         Instruction instruction;
         istringstream instructionStream(instructionLine);
         string instructionType;
@@ -162,14 +148,12 @@ int main()
             instructionStream >> peekChar;
             if (peekChar >= 'a' && peekChar <= 'z')
             {
-                //std::cout << "reading *register* arg: " << peekChar << std::endl;
                 instruction.argReg[argNum] = peekChar;
             }
             else
             {
                 instructionStream.putback(peekChar);
                 instructionStream >> instruction.argVal[argNum];
-                //std::cout << "reading *integer* arg: " << instruction.argVal[argNum] << std::endl;
             }
         };
         if (instructionType == "snd")
