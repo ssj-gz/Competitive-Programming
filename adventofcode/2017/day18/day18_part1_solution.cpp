@@ -90,7 +90,7 @@ int main()
         else if (instructionType == "jgz")
         {
             instruction.type = Instruction::Jump;
-            instructionStream >> instruction.argReg[0];
+            readRegOrValArg(0);
             readRegOrValArg(1);
         }
         else
