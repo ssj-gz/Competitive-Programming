@@ -240,7 +240,6 @@ int main()
     for (int count = 1; count <= 18; count++)
     {
         std::cout << "Beginning iteration: " << count << std::endl;
-        printGrid();
         const int size = gridSize();
         std::cout << "size: "<< size << std::endl;
         if ((size % 2) == 0)
@@ -258,7 +257,6 @@ int main()
 
     }
     std::cout << "final config: " << std::endl;
-    printGrid();
 
     int numOn = 0;
     for (const auto [coord, isOn] : grid)
