@@ -19,30 +19,9 @@ struct Item
 
 struct State
 {
-    //enum ElevatorStatus { Charging, Ready };
-    //ElevatorStatus elevatorStatus;
     int elevatorFloor = -1;
     static constexpr int numFloors = 4;
     set<Item> floorContent[numFloors] = {};
-    //set<Item> itemsInElevator = {};
-
-#if 0
-    void unloadElevator()
-    {
-        for (const auto& itemInElevator : itemsInElevator)
-            floorContent[elevatorFloor].insert(itemInElevator);
-        itemsInElevator.clear();
-    }
-#endif
-
-#if 0
-    void loadItemIntoElevator(const Item& item)
-    {
-        assert(floorContent[elevatorFloor].contains(item));
-        itemsInElevator.insert(item);
-        floorContent[elevatorFloor].erase(item);
-    }
-#endif
 
     void normalise()
     {
@@ -69,58 +48,15 @@ struct State
         }
         normalisedRep.push_back({-1, elevatorFloor});
         std::sort(normalisedRep.begin(), normalisedRep.end());
-        //std::cout << "Normalised size: " << normalisedRep.size() << std::endl;
     }
-#if 1
     auto operator<=>(const State& other) const
     {
         assert(!normalisedRep.empty() && !other.normalisedRep.empty());
         return normalisedRep <=> other.normalisedRep;
     }
-#else
-    auto operator<=>(const State& other) const = default;
-#endif
     vector<std::pair<int, int>> normalisedRep;
 };
 
-ostream& operator<<(ostream& os, const State& state)
-{
-    for (int floor = State::numFloors - 1; floor >= 0; floor--)
-    {
-        os << "F" << (floor + 1) << " ";
-        if (state.elevatorFloor == floor)
-        {
-            os << "E";
-#if 0
-            if (state.elevatorStatus == State::Ready)
-                os << "_";
-            else
-                os << "!";
-            os << "[";
-            for (const auto& item : state.itemsInElevator)
-            {
-                os << static_cast<char>(std::toupper(item.material.front()));
-                os << ((item.type == Item::Microchip) ? 'M' : 'G') << " ";
-            }
-            os << "]";
-#endif
-
-        }
-        else
-        {
-            os << "  ";
-        }
-
-        os << " ";
-        for (const auto& item : state.floorContent[floor])
-        {
-            os << static_cast<char>(std::toupper(item.material.front()));
-            os << ((item.type == Item::Microchip) ? 'M' : 'G') << " ";
-        }
-        os << std::endl;
-    }
-    return os;
-}
 
 int main()
 {
@@ -176,7 +112,6 @@ int main()
 
     std::cout << "description: " << description << std::endl;
     State initialState;
-    //initialState.elevatorStatus = State::Ready;
     initialState.elevatorFloor = 0;
     initialState.floorContent[0] = extractItemsFromDescription(descriptionMatch[1]);
     initialState.floorContent[1] = extractItemsFromDescription(descriptionMatch[2]);
@@ -194,17 +129,11 @@ int main()
     }
     std::cout << "numItems: " << numItems << std::endl;
 
-    std::cout << "initialState: " << std::endl;
-    std::cout << initialState << std::endl;
-
     map<int, set<State>> statesAtStep;
     map<State, int> earliestStepForState;
     initialState.normalise();
     statesAtStep[0].insert(initialState);
     earliestStepForState[initialState] = 0;
-    map< vector<std::pair<int, int>>, vector<State> > normalisedStates;
-    int blah = std::numeric_limits<int>::max();
-    int64_t totalBalancedStates = 0;
     for (auto& [step, states] : statesAtStep)
     {
         std::cout << "step: " << step << " #states: " << states.size() << std::endl;
@@ -212,66 +141,17 @@ int main()
         {
             const auto state = *states.begin();
             states.erase(states.begin());
-            if (state.floorContent[3].size() == numItems)
+            if (static_cast<int>(state.floorContent[3].size()) == numItems)
             {
-                std::cout << "Woohoo - " <<  step << std::endl;
+                std::cout << "Found the answer - takes " <<  step << " to move all objects to the top floor" << std::endl;
                 return 0;
             }
-#if 0
-            //if (state.elevatorFloor == 3)
-            {
-
-                bool eachFloorBalanced = true;
-                for (const auto& floor : state.floorContent)
-                {
-                    const int numGenerators = std::count_if(floor.begin(), floor.end(), [](const auto& item) { return item.type == Item::Generator; });
-                    const int numChips = std::count_if(floor.begin(), floor.end(), [](const auto& item) { return item.type == Item::Microchip; });
-                    if (numGenerators != numChips)
-                    {
-                        eachFloorBalanced = false;
-                        break;
-                    }
-                }
-                if (eachFloorBalanced)
-                {
-                    totalBalancedStates++;
-                    if (totalBalancedStates % 1000 == 0)
-                        std::cout << "totalStates: " << earliestStepForState.size() << " totalBalancedStates: " << totalBalancedStates << std::endl;
-                }
-
-#if 0
-                if (eachFloorBalanced)
-                {
-                    std::cout << "floor balanced at step: " << step << " state: " << std::endl;
-                    std::cout << state << std::endl;
-                    int stepAtCompletion = step;
-                    for (int floor = 0; floor < State::numFloors; floor++)
-                    {
-                        stepAtCompletion += (state.elevatorFloor - floor) * 2 * (state.floorContent[floor].size() / 2);
-                    }
-                    if (stepAtCompletion < blah)
-                    {
-                        blah = stepAtCompletion;;
-                        std::cout << "Should be able to do it in " << blah << std::endl;
-                        //continue;
-                    }
-                }
-#endif
-
-            }
-#endif
 
 
-            auto addSuccessorState = [&statesAtStep, &step, &earliestStepForState, &normalisedStates](const State& successorStateOrig, int successorStep)
+            auto addSuccessorState = [&statesAtStep, &step, &earliestStepForState](const State& successorStateOrig, int successorStep)
             {
                 State successorState = successorStateOrig;
                 successorState.normalise();
-                if (!normalisedStates.contains(successorState.normalisedRep))
-                {
-                    std::cout << "New normalised state: " << std::endl << successorState << std::endl;
-                }
-                normalisedStates[successorState.normalisedRep].push_back(successorStateOrig);;
-                //successorState.normalisedRep.clear();
                 assert(successorStep >= step);
                 if (earliestStepForState.contains(successorState))
                 {
@@ -280,41 +160,20 @@ int main()
                         const auto previousEarliestStep = earliestStepForState[successorState];
                         statesAtStep[previousEarliestStep].erase(successorState);
 
-                        //std::cout << " added successor state: " << successorState << std::endl;
                         earliestStepForState[successorState] = successorStep;
                         statesAtStep[earliestStepForState[successorState]].insert(successorState);
                     }
                 }
                 else
                 {
-                    //std::cout << " added successor state: " << successorState << std::endl;
                     earliestStepForState[successorState] = successorStep;
                     statesAtStep[earliestStepForState[successorState]].insert(successorState);
                 }
-                std::cout << "# states: " << earliestStepForState.size() << " # normalisedStates: " << normalisedStates.size() << std::endl;
-#if 0
-                if (earliestStepForState.size() % 1'000 == 0)
-                {
-                    for (const auto& [normalisedRep, statesOrig] : normalisedStates)
-                    {
-                        auto states = statesOrig;
-                        sort(states.begin(), states.end());
-                        states.erase(std::unique(states.begin(), states.end()), states.end());
-                        std::cout << "The following have the same normalisation" << std::endl;
-                        for (const auto& state: states)
-                        {
-                            std::cout << " " << state << std::endl;
-                        }
-                    }
-                }
-#endif
-                 
             };
 
             auto causesIrradiation = [](const State& origState)
             {
                 auto state = origState;
-                //state.unloadElevator();
                 const auto& allItemsAtFloor = state.floorContent[state.elevatorFloor];
 
                 set<Item> unprotectedChips;
@@ -326,13 +185,10 @@ int main()
                 if (!unprotectedChips.empty() && std::find_if(allItemsAtFloor.begin(), allItemsAtFloor.end(), [](const auto& item) { return item.type == Item::Generator; }) != allItemsAtFloor.end())
                 {
                     // Each of these chips will be irradiated by any of the generators in allItemsAtFloor.
-                    //std::cout << "The state: " << state << "causes irradiation" << std::endl;
                     return true;
                 }
-                //std::cout << "The state: " << state << "*does not cause* irradiation" << std::endl;
                 return false;
             };
-            //assert(item.itemsInElevator.empty());
 
             for (int elevatorDirection : { -1, +1 })
             {
