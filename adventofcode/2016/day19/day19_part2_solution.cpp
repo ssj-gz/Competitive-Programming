@@ -29,44 +29,21 @@ int main()
 
     };
 
-    cout << "numElves: " << numElves << std::endl;
+
     auto elfIter = elves.begin();
     auto oppositeElfIter = elfIter;
     for (int i = 0; i < elves.size() / 2; i++)
     {
         advanceIter(oppositeElfIter);
     }
-    std::cout << " at begin - elfIter: " << elfIter->id << " oppositeElfIter id: " << oppositeElfIter->id << std::endl;
+
     while (elves.size() != 1)
     {
-        //std::cout << "# elves: " << elves.size() << std::endl;
-#if 0
-        for (const auto x : elves)
-            std::cout << x.id << " ";
-        std::cout << std::endl;
-        std::cout << " current: " << elfIter->id << std::endl;
-        auto debugOppositeElfIter = elfIter;
-        for (int i = 0; i < elves.size() / 2; i++)
-        {
-            advanceIter(debugOppositeElfIter);
-            std::cout <<  "  advanced debugOppositeElfIter; now " << debugOppositeElfIter->id << std::endl;
-        }
-        std::cout << "   debugOppositeElfIter id: " << debugOppositeElfIter->id << std::endl;
-        std::cout << "   oppositeElfIter id: " << oppositeElfIter->id << std::endl;
-        assert(debugOppositeElfIter == oppositeElfIter);
-        assert(elfIter != oppositeElfIter);
-#endif
         elfIter->numPresents += oppositeElfIter->numPresents;
-        //std::cout << "   elft " << elfIter->id << " stealing from elf: " << oppositeElfIter->id << std::endl;
         oppositeElfIter = elves.erase(oppositeElfIter);
         if (oppositeElfIter == elves.end())
         {
             oppositeElfIter = elves.begin();
-            //std::cout << "    after deletion, before increment: reset oppositeElfIter to " <<  oppositeElfIter->id << std::endl;
-        }
-        else
-        {
-            //std::cout << "    after deletion, before increment: set oppositeElfIter to " <<  oppositeElfIter->id << std::endl;
         }
 
         advanceIter(elfIter);
