@@ -69,117 +69,8 @@ struct State
         }
         return false;
     }
-#if 0
-    void normalise()
-    {
-        discard();
-        for (int x = 0; x <= maxX; x++)
-        {
-            for (int y = 0; y <= maxY; y++)
-            {
-                const auto& node = nodeAt({x, y});
-                if (node.used > 0)
-                    node.used = 1;
-            }
-        }
-
-    }
-#endif
     auto operator<=>(const State& other) const = default;
 };
-
-map<std::tuple<int64_t, Coord, State>, vector<State>> blee;
-
-#if 0
-std::vector<State> makeSpace(const Coord& toMakeSpace, const int64_t spaceRequired, set<Coord>& processing, const State& state, string indent = "")
-{
-    const auto& node = state.nodeAt(toMakeSpace);
-    assert(!state.canDiscard());
-    //std::cout << indent << "request to make " << spaceRequired << " space at " << toMakeSpace.x << ", " << toMakeSpace.y << " used: " << node.used << " avail: " << node.avail << std::endl;
-    //indent += " ";
-    if (processing.contains(toMakeSpace))
-    {
-        //std::cout << indent << "already in progress; aborting" << std::endl;
-        return vector<State>();
-    }
-    if (blee.contains({spaceRequired, toMakeSpace, state}))
-    {
-        //std::cout << indent << "already done; returning cached value" << std::endl;
-
-        return blee[{spaceRequired, toMakeSpace, state}];
-    }
-    vector<State> returnValue;
-    const auto amountOfDataToMove = node.used;
-    if (node.avail + amountOfDataToMove < spaceRequired)
-    {
-        //std::cout << indent << "can't be done" << std::endl;
-        return vector<State>();
-    }
-    processing.insert(toMakeSpace);
-    for (const auto& [dx, dy] : std::initializer_list<std::pair<int, int>>{ {-1, 0},
-            {+1, 0},
-            {0, -1},
-            {0, +1}
-            })
-    {
-        const Coord neighbourCoord = {toMakeSpace.x + dx, toMakeSpace.y + dy};
-        if ( neighbourCoord.x  < 0 || neighbourCoord.x > maxX || neighbourCoord.y < 0 || neighbourCoord.y > maxY)
-            continue;
-        if (processing.contains(neighbourCoord))
-            continue;
-        const auto spaceAvailableAtNeighbour = state.nodeAt(neighbourCoord).avail;
-        if (spaceAvailableAtNeighbour >= spaceRequired)
-        {
-            State nextState = state;
-            assert(!nextState.canDiscard());
-            auto& from = nextState.nodeAt(toMakeSpace);
-            auto& to = nextState.nodeAt(neighbourCoord);
-
-            assert(from.used == amountOfDataToMove);
-            assert(to.avail >= amountOfDataToMove);
-
-            to.avail -= amountOfDataToMove;
-            to.used += amountOfDataToMove;
-
-            from.avail += amountOfDataToMove;
-            from.used = 0;
-
-            nextState.discard();
-            returnValue.push_back(nextState);
-        }
-        else
-        {
-            const auto& blahs = makeSpace(neighbourCoord, amountOfDataToMove, processing, state, indent + " ");
-            for (const auto& blah : blahs)
-            {
-                State nextState = blah;
-                assert(!nextState.canDiscard());
-                auto& from = nextState.nodeAt(toMakeSpace);
-                auto& to = nextState.nodeAt(neighbourCoord);
-
-                //std::cout << indent << "from.used: " << from.used << " toMakeSpace.used: " << node.used << " amountOfDataToMove:  " << amountOfDataToMove << std::endl;
-                assert(to.avail >= from.used);
-
-                to.avail -= amountOfDataToMove;
-                to.used += amountOfDataToMove;
-
-                from.avail += amountOfDataToMove;
-                from.used = 0;
-
-                nextState.discard();
-                returnValue.push_back(nextState);
-            }
-        }
-        
-    }
-    processing.erase(toMakeSpace);
-    if (returnValue.size() > 0)
-        std::cout << indent << "request to make " << spaceRequired << " space at: " << toMakeSpace.x << ", " << toMakeSpace.y << " yielded: " << returnValue.size() << " possibilities" << std::endl;
-    blee[{spaceRequired, toMakeSpace, state}] = returnValue;
-    return returnValue;
-}
-#endif
-
 
 int main()
 {
@@ -216,7 +107,6 @@ int main()
         maxX = std::max(maxX, node.coord.x);
         maxY = std::max(maxY, node.coord.y);
     }
-    std::cout << "totalUsed: " << totalUsed << " totalSize: " << totalSize << "slack: " << (totalSize - totalUsed) << std::endl;
     std::cout << "maxXForY0: " << maxXForY0 << std::endl;
     vector<vector<Node>> initialNodeGrid(maxX + 1, vector<Node>(maxY + 1));
     for (auto& node : nodes)
@@ -229,25 +119,9 @@ int main()
     {
         for (int y = 0; y <= maxY; y++)
         {
-            auto& cell = initialNodeGrid[x][y];
-            bool canNeverMoveToNeighbour = true;
-            for (const auto& [dx, dy] : std::initializer_list<std::pair<int, int>>{ {-1, 0},
-                    {+1, 0},
-                    {0, -1},
-                    {0, +1}
-                    })
-            {
-                const int neighbourX = x + dx;
-                const int neighbourY = y + dy;
-                if (neighbourX < 0 || neighbourX > maxX || neighbourY < 0 || neighbourY > maxY)
-                    continue;
-                if (cell.used <= initialNodeGrid[neighbourX][neighbourY].size)
-                {
-                    canNeverMoveToNeighbour = false;
-                }
-            }
+             auto& cell = initialNodeGrid[x][y];
 
-            canNeverMoveToNeighbour = cell.used >= 490;
+            const bool canNeverMoveToNeighbour = cell.used >= 490; // TODO - don't hardcode this!
             if (canNeverMoveToNeighbour)
             {
                 cell.used = 2;
