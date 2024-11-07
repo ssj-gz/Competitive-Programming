@@ -60,15 +60,6 @@ struct State
                 overrideIter++;
         }
     }
-    bool canDiscard() const
-    {
-        for (const auto& [coord, node] : nodeGridOverride)
-        {
-            if (node == (*initialNodeGrid)[coord.x][coord.y])
-                return true;
-        }
-        return false;
-    }
     auto operator<=>(const State& other) const = default;
 };
 
@@ -113,6 +104,7 @@ int main()
     {
         initialNodeGrid[node.coord.x][node.coord.y] = node;
     }
+    // Back up pre-normalised initialNodeGrid for verifying the result at the end.
     const auto initialNodeGridBak = initialNodeGrid;
 
     for (int x = 0; x <= maxX; x++)
@@ -138,14 +130,13 @@ int main()
     }
 
     State initialState = { &initialNodeGrid, {maxXForY0, 0} };
-    //initialState.normalise();
-#if 1
     vector<State> toExplore = { initialState };
     set<State> seen = { initialState };
 
     set<Coord> active;
     int numSteps = 0;
     std::optional<State> finalState;
+    int result = -1;
     map<State, State> predecessorOfState;
     while (!toExplore.empty() && !finalState.has_value())
     {
@@ -155,66 +146,19 @@ int main()
         {
             if (state.targetDataCoord == Coord{0, 0})
             {
-                std::cout << "woo!" << std::endl;
+                assert(result == -1);
+                result = numSteps;
                 finalState = state;
                 break;
             }
 
-            auto calcActive = [](const auto& state)
-            {
-                set<Coord> active;
-                for (int x = 0; x <= maxX; x++)
-                {
-                    for (int y = 0; y <= maxY; y++)
-                    {
-                        const auto& node = state.nodeAt({x, y});
-                        const auto amountOfDataToMove = node.used;
-                        for (const auto& [dx, dy] : std::initializer_list<std::pair<int, int>>{ {-1, 0},
-                                {+1, 0},
-                                {0, -1},
-                                {0, +1}
-                                })
-                        {
-                            const int neighbourX = x + dx;
-                            const int neighbourY = y + dy;
-                            if (neighbourX < 0 || neighbourX > maxX || neighbourY < 0 || neighbourY > maxY)
-                                continue;
-                            const auto& neighbourNode = state.nodeAt({neighbourX, neighbourY});
-                            if (amountOfDataToMove <= neighbourNode.avail)
-                                active.insert({x, y});
-                        }
-                    }
-                }
-                return active;
-
-            };
-            auto calcFree = [](const auto& state)
-            {
-                int free = 0;
-                for (int x = 0; x <= maxX; x++)
-                {
-                    for (int y = 0; y <= maxY; y++)
-                    {
-                        const auto& node = state.nodeAt({x, y});
-                        if (node.used == 0)
-                            free++;
-                    }
-                }
-                return free;
-
-            };
-
-            //std::cout << "num active: "<< calcActive(state).size() << std::endl;
-            //std::cout << "num free: "<< calcFree(state) << std::endl;
-            assert(calcFree(state) == 1);
-            //const int origMobility = calcMobility(state);
-            //std::cout << "origMobility: " << origMobility << std::endl;
             for (int x = 0; x <= maxX; x++)
             {
                 for (int y = 0; y <= maxY; y++)
                 {
                     const auto& node = state.nodeAt({x, y});
                     const auto amountOfDataToMove = node.used;
+                    const bool movesFromTarget = (x == state.targetDataCoord.x && y == state.targetDataCoord.y);
                     for (const auto& [dx, dy] : std::initializer_list<std::pair<int, int>>{ {-1, 0},
                             {+1, 0},
                             {0, -1},
@@ -228,12 +172,6 @@ int main()
                         const auto& neighbourNode = state.nodeAt({neighbourX, neighbourY});
                         if (amountOfDataToMove <= neighbourNode.avail)
                         {
-                            bool movesFromTarget = (x == state.targetDataCoord.x && y == state.targetDataCoord.y);
-                            if (movesFromTarget)
-                            {
-                                //std::cout << "moving from target: " << state.targetDataCoord.x << ", " << state.targetDataCoord.y << " to " << neighbourX << ", " << neighbourY << std::endl;
-                                //active.clear();
-                            }
                             State nextState = state;
                             auto& from = nextState.nodeAt({x, y});
                             auto& to = nextState.nodeAt({neighbourX, neighbourY});
@@ -251,25 +189,9 @@ int main()
                                 nextState.targetDataCoord = { neighbourX, neighbourY };
                             }
 
-                            nextState.discard();
-
-#if 0
-                            bool hasNew = false;
-                            for (const auto& blah : calcActive(nextState))
-                            {
-                                if (!active.contains(blah))
-                                {
-                                    hasNew = true;
-                                    active.insert(blah);
-                                    //std::cout << "New active: " << blah.x << ", "  << blah.y << std::endl;
-                                }
-                            }
-                            //if (!hasNew && !movesFromTarget)
-                                //continue;
-#endif
-
-
-                            //nextState.normalise();
+                            // Remove and redundant COW-ness; without this, logically-equivalent
+                            // states might not compare equal, and the state-space will explode.
+                            nextState.discard(); 
                             if (!seen.contains(nextState))
                             {
                                 seen.insert(nextState);
@@ -284,7 +206,10 @@ int main()
         toExplore = nextToExplore;
         numSteps++;
     }
-#endif
+    assert(result != -1);
+
+    // Verify that the sequence of moves obtained using the normalised
+    // initialNodeGrid still works with the un-normalised initialNodeGrid.
     assert(finalState.has_value());
     State currentState = finalState.value();
     vector<std::pair<Coord, Coord>> moves;
@@ -343,13 +268,8 @@ int main()
         nodeGrid[fromX][fromY].avail += amountOfDataToMove;
     }
 
+    std::cout << "Takes " << result << " steps to obtain the target data" << std::endl;
+
     
-#if 0
-    const Coord coordToClear = { maxXForY0, 0 };
-    set<Coord> processing = { };
-    makeSpace(coordToClear, initialNodeGrid[coordToClear.x][coordToClear.y].used, processing, initialState);
-#endif
-
-
     return 0;
 }
