@@ -21,8 +21,6 @@ echo "DAY: ${DAY}"
 INPUT_URL="https://adventofcode.com/${YEAR}/day/${DAY}/input"
 curl -b "session=${AOC_SESSION_COOKIE}" > "day${DAY}_input.txt" "${INPUT_URL}"
 touch "day${DAY}_sample_input.txt"
-touch "day${DAY}_part1_solution.cpp"
-touch "day${DAY}_part2_solution.cpp"
 echo -e "all: part1 part2\npart1: day${DAY}_part1_solution.cpp\n\tg++ -std=c++20 -g3 -O3 -Wall -Wextra day${DAY}_part1_solution.cpp -o part1\npart2: day${DAY}_part2_solution.cpp\n\tg++ -std=c++20 -g3 -O3 -Wall -Wextra day${DAY}_part2_solution.cpp -o part2\n" > Makefile
 read -r -d '' BLANK_CPP_TEMPLATE << EOM
 #include <iostream>
@@ -36,8 +34,13 @@ int main()
     return 0;
 }
 EOM
-echo "${BLANK_CPP_TEMPLATE}" > day${DAY}_part1_solution.cpp
-echo "${BLANK_CPP_TEMPLATE}" > day${DAY}_part2_solution.cpp
+
+for PART in 1 2; do
+    SOLUTION_FILENAME="day${DAY}_part${PART}_solution.cpp"
+    if [ ! -f "${SOLUTION_FILENAME}" ]; then
+        echo "${BLANK_CPP_TEMPLATE}" > "${SOLUTION_FILENAME}"
+    fi
+done
 
 
 
