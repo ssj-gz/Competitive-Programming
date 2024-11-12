@@ -10,52 +10,22 @@
 
 using namespace std;
 
-bool findAllWaysToMakeSum(const int requiredSum, vector<int>::iterator nextPackageIter, const vector<int>& packagesWeights, int sumSoFar, vector<int>& chosenSoFar, vector<vector<int>>& destSets)
+bool canChooseTwoGroupsWithSum(const int groupsRequiredSum, vector<int>::iterator nextPackageIter, const vector<int>& packagesWeights, int group2SumSoFar, int group3SumSoFar)
 {
-    if (sumSoFar == requiredSum)
-    {
-        destSets.push_back(chosenSoFar);
-        return true;
-    }
-
-    if (nextPackageIter == packagesWeights.end())
-        return false;
-
-    bool result = findAllWaysToMakeSum(requiredSum, std::next(nextPackageIter), packagesWeights, sumSoFar, chosenSoFar, destSets);
-
-    chosenSoFar.push_back(*nextPackageIter);
-    result = findAllWaysToMakeSum(requiredSum, std::next(nextPackageIter), packagesWeights, sumSoFar + *nextPackageIter, chosenSoFar, destSets) || result;
-    chosenSoFar.pop_back();
-
-    return result;
-}
-
-bool canMakeSum(const int requiredSum, vector<int>::iterator nextPackageIter, const vector<int>& packagesWeights, int sumSoFar)
-{
-    if (sumSoFar == requiredSum)
+    // Try to get (simultaneously) Group 2 to add up to groupsRequiredSum, and Group 3 to also add up to groupsRequiredSum.
+    // Each package can be added to precisely one of the following:
+    //  * Group 2
+    //  * Group 3
+    //  * Neither group
+    if (group2SumSoFar == groupsRequiredSum && group3SumSoFar == groupsRequiredSum)
         return true;
 
     if (nextPackageIter == packagesWeights.end())
         return false;
 
-    const bool result = canMakeSum(requiredSum, std::next(nextPackageIter), packagesWeights, sumSoFar) ||
-        canMakeSum(requiredSum, std::next(nextPackageIter), packagesWeights, sumSoFar + *nextPackageIter);
-
-    return result;
-
-} 
-
-bool canMakeSums(const int group1RequiredSum, const int group2RequiredSum, vector<int>::iterator nextPackageIter, const vector<int>& packagesWeights, int group1SumSoFar, int group2SumSoFar)
-{
-    if (group1SumSoFar == group1RequiredSum && group2SumSoFar == group2RequiredSum)
-        return true;
-
-    if (nextPackageIter == packagesWeights.end())
-        return false;
-
-    const bool result = canMakeSums(group1RequiredSum, group2RequiredSum, std::next(nextPackageIter), packagesWeights, group1SumSoFar, group2SumSoFar) ||
-        canMakeSums(group1RequiredSum, group2RequiredSum, std::next(nextPackageIter), packagesWeights, group1SumSoFar + *nextPackageIter, group2SumSoFar) ||
-        canMakeSums(group1RequiredSum, group2RequiredSum, std::next(nextPackageIter), packagesWeights, group1SumSoFar, group2SumSoFar +*nextPackageIter);
+    const bool result = canChooseTwoGroupsWithSum(groupsRequiredSum, std::next(nextPackageIter), packagesWeights, group2SumSoFar, group3SumSoFar) ||
+        canChooseTwoGroupsWithSum(groupsRequiredSum, std::next(nextPackageIter), packagesWeights, group2SumSoFar + *nextPackageIter, group3SumSoFar) ||
+        canChooseTwoGroupsWithSum(groupsRequiredSum, std::next(nextPackageIter), packagesWeights, group2SumSoFar, group3SumSoFar +*nextPackageIter);
 
     return result;
 
@@ -80,23 +50,18 @@ int main()
         vector<int> groupChoiceIndices;
         for (int i = 0; i < firstGroupSize; i++)
             groupChoiceIndices.push_back(i);
-        std::cout << "firstGroupSize: " <<firstGroupSize << std::endl;
         while (true)
         {
-            //for (int i = 0; i < firstGroupSize; i++)
-                //std::cout << " firstGroupSize: " << firstGroupSize << " i : " << i << " groupChoiceIndices[i]: " << groupChoiceIndices[i] << std::endl;
-
-            // We have our first group choice.
+            // We have our first group choice; is it valid?
             int64_t weightOfGroup = 0;
             for (int i = 0; i < firstGroupSize; i++)
             {
-                //std::cout << " chosen: " << groupChoiceIndices[i] << std::endl;
                 weightOfGroup += packageWeights[groupChoiceIndices[i]];
             }
-            //std::cout << " weightOfGroup: " << weightOfGroup << std::endl;
             if ((totalPackagesWeight % weightOfGroup == 0) && totalPackagesWeight / weightOfGroup == 4)
             {
-                // Could be valid.  Let's check!
+                // Passes the initial weight checks, but can we split the other 3 groups so that they
+                // too each weig weightOfGroup?
                 vector<int> remainingPackageWeights;
                 int choiceIndex = 0;
                 for (int packageIndex = 0; packageIndex < numPackages; packageIndex++)
@@ -107,22 +72,13 @@ int main()
                         choiceIndex++;
                 }
                 assert(static_cast<int>(remainingPackageWeights.size()) == numPackages - firstGroupSize);
-                //if (canMakeSum(weightOfGroup, remainingPackageWeights.begin(), remainingPackageWeights, 0))
-                if (canMakeSums(weightOfGroup, weightOfGroup, remainingPackageWeights.begin(), remainingPackageWeights, 0, 0))
+                if (canChooseTwoGroupsWithSum(weightOfGroup, remainingPackageWeights.begin(), remainingPackageWeights, 0, 0))
                 {
-                    std::cout << " woo-hoo: can make required first, second and third groups with firstGroupSize: " << firstGroupSize << std::endl;
+                    std::cout << " woo-hoo: can make required first, second and third groups (and so, fourth) with firstGroupSize: " << firstGroupSize << std::endl;
 
-#if 0
-                    vector<int> chosenSoFar;
-                    vector<vector<int>> destSets;
-                    findAllWaysToMakeSum(weightOfGroup, remainingPackageWeights.begin(), remainingPackageWeights, 0, chosenSoFar, destSets);
-
-                    std::cout << "  num ways: " << destSets.size() << std::endl;
-#endif
                     int64_t entanglement = 1;
                     for (int i = 0; i < firstGroupSize; i++)
                     {
-                        ///std::cout << " chosen: " << groupChoiceIndices[i] << std::endl;
                         entanglement *= packageWeights[groupChoiceIndices[i]];
                     }
                     if (entanglement < minEntanglement)
@@ -134,7 +90,7 @@ int main()
                 }
             }
 
-            // Choose next group, keeping the chosen indices as low as possible.
+            // Choose next candidate first group, keeping the chosen indices as low as possible.
             int choiceIndex = 0;
             while((choiceIndex + 1 < firstGroupSize && groupChoiceIndices[choiceIndex + 1] == groupChoiceIndices[choiceIndex] + 1) && choiceIndex != firstGroupSize - 1)
             {
@@ -144,18 +100,16 @@ int main()
             groupChoiceIndices[choiceIndex]++;
             if (groupChoiceIndices[choiceIndex] == numPackages)
             {
+                // No remaining choices of size firstGroupSize possible.
                 break;
             }
         }
-
-
 
         firstGroupSize++;
         if (firstGroupSize > numPackages)
             break;
     }
     std::cout << "result: " << minEntanglement << std::endl;
-
 
     return 0;
 }
